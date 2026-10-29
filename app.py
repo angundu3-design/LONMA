@@ -5,10 +5,9 @@ from datetime import datetime
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "lonma-complete-api-2024"
+app.secret_key = "lonma-final-complete-2024"
 DB = "lonma.db"
 
-# ===== DATABASE =====
 def get_db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -41,7 +40,7 @@ def require_api_key(f):
         if request.method == 'OPTIONS': return '', 200
         key = request.headers.get("X-API-KEY") or request.args.get("api_key") or request.headers.get("Authorization")
         if key and key.startswith("Bearer "): key = key.replace("Bearer ","")
-        if not key: return jsonify({"error": "API key required. Header: X-API-KEY"}), 401
+        if not key: return jsonify({"error": "API key required. Use X-API-KEY"}), 401
         conn = get_db()
         user = conn.execute("SELECT * FROM users WHERE api_key=?", (key,)).fetchone()
         conn.close()
@@ -49,29 +48,27 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated
 
-# ===== API DOCS =====
+# API DOCS
 @app.route("/api")
 def api_docs():
     return jsonify({
         "status": "LONMA API LIVE",
         "url": "https://lonma-orbit-24qw.onrender.com",
+        "tester": "https://lonma-orbit-24qw.onrender.com/tester",
         "master_api_key": "lonma_api_key_12345",
         "endpoints": {
-            "GET /api/health": "Health check - no auth",
-            "GET /api/members": "Get ALL members - needs X-API-KEY",
-            "GET /api/members/1": "Get single member",
-            "POST /api/register": "Body: {name,email,password,phone,membership}",
-            "POST /api/login": "Body: {email,password} returns api_key",
-            "PUT /api/members/1": "Body: {name,email,phone,role,status}",
-            "DELETE /api/members/1": "Delete member",
-            "GET /api/stats": "Stats counts",
-            "GET /api/export": "Download all as JSON"
-        },
-        "example_curl": "curl -H 'X-API-KEY: lonma_api_key_12345' https://lonma-orbit-24qw.onrender.com/api/members"
+            "GET /api/health": "Health check",
+            "GET /api/members": "Get ALL members",
+            "POST /api/register": "Register",
+            "POST /api/login": "Login",
+            "PUT /api/members/<id>": "Update",
+            "DELETE /api/members/<id>": "Delete",
+            "GET /api/stats": "Stats"
+        }
     })
 
 @app.route("/api/health")
-def api_health(): return jsonify({"status":"ok","service":"LONMA","version":"3.0","live":True})
+def api_health(): return jsonify({"status":"ok","service":"LONMA","version":"4.0 FINAL"})
 
 @app.route("/api/members", methods=["GET","OPTIONS"])
 @require_api_key
@@ -117,7 +114,7 @@ def api_login():
     conn.close()
     if not u or not check_password_hash(u["password"], data.get("password","")):
         return jsonify({"error":"Invalid credentials"}), 401
-    return jsonify({"message":"Login success","member":{"id":u["id"],"name":u["name"],"email":u["email"],"phone":u["phone"],"role":u["role"],"membership":u["membership"],"api_key":u["api_key"]}})
+    return jsonify({"message":"Login success","member":{"id":u["id"],"name":u["name"],"email":u["email"],"phone":u["phone"],"role":u["role"],"api_key":u["api_key"]}})
 
 @app.route("/api/members/<int:id>", methods=["PUT","OPTIONS"])
 @require_api_key
@@ -153,21 +150,15 @@ def api_stats():
     conn.close()
     return jsonify({"total_members":total,"admins":admins,"members":total-admins})
 
-@app.route("/api/export", methods=["GET","OPTIONS"])
-@require_api_key
-def api_export():
-    conn = get_db(); users = conn.execute("SELECT id,name,email,phone,role,membership,join_date,status FROM users").fetchall(); conn.close()
-    return jsonify({"total":len(users),"members":[dict(u) for u in users]})
-
-# ===== WEB UI =====
-BASE = """<style>body{font-family:Arial;background:#f0f2f5;padding:10px}.card{background:white;padding:15px;border-radius:12px;box-shadow:0 2px 8px #ccc;max-width:1100px;margin:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #ddd;padding:7px}th{background:#007bff;color:white}.btn{padding:5px 10px;border:none;border-radius:5px;color:white;text-decoration:none;font-size:11px;margin:1px;display:inline-block}.btn-blue{background:#007bff}.btn-red{background:#dc3545}.btn-green{background:#28a745}.nav a{margin-right:12px;text-decoration:none;color:#007bff;font-weight:bold}code{background:#eee;padding:2px 5px;border-radius:3px}</style>
-<div class="card"><div class="nav"><a href="/">Home</a><a href="/admin">Admin Dashboard</a><a href="/api">API Docs</a><a href="/export_csv">Export CSV</a><a href="/logout">Logout</a></div><hr>{{CONTENT}}</div>"""
+# WEB UI
+BASE = """<style>body{font-family:Arial;background:#f0f2f5;padding:10px}.card{background:white;padding:15px;border-radius:12px;box-shadow:0 2px 8px #ccc;max-width:1100px;margin:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #ddd;padding:7px}th{background:#007bff;color:white}.btn{padding:6px 12px;border:none;border-radius:5px;color:white;text-decoration:none;font-size:12px;margin:2px;display:inline-block}.btn-blue{background:#007bff}.btn-red{background:#dc3545}.btn-green{background:#28a745}.nav a{margin-right:12px;text-decoration:none;color:#007bff;font-weight:bold}code{background:#eee;padding:2px 5px;border-radius:3px}</style>
+<div class="card"><div class="nav"><a href="/">Home</a><a href="/admin">Admin</a><a href="/api">API Docs</a><a href="/tester">API Tester</a><a href="/export_csv">Export CSV</a><a href="/logout">Logout</a></div><hr>{{CONTENT}}</div>"""
 
 @app.route("/")
 def home():
     if "user_id" not in session: return redirect("/login")
     conn=get_db(); user=conn.execute("SELECT * FROM users WHERE id=?",(session["user_id"],)).fetchone(); conn.close()
-    return render_template_string(BASE.replace("{{CONTENT}}", f"<h2>Welcome {user['name']}!</h2><p>Email: {user['email']}<br>Role: {user['role']}<br>API Key: <code>{user['api_key']}</code></p><p>API URL: <code>https://lonma-orbit-24qw.onrender.com/api/members</code><br>Use header: <code>X-API-KEY: {user['api_key']}</code></p><p><a href='/api' class='btn btn-blue'>View API Docs</a> <a href='/admin' class='btn btn-green'>Admin Dashboard</a></p>"))
+    return render_template_string(BASE.replace("{{CONTENT}}", f"<h2>Welcome {user['name']}!</h2><p>Email: {user['email']}<br>Role: {user['role']}<br>API Key: <code>{user['api_key']}</code></p><p><a href='/tester' class='btn btn-blue'>🚀 Open API Tester</a> <a href='/api' class='btn btn-green'>API Docs</a> <a href='/admin' class='btn btn-blue'>Admin Dashboard</a></p><p>API URL: <code>https://lonma-orbit-24qw.onrender.com/api/members</code></p>"))
 
 @app.route("/admin")
 def admin():
@@ -175,8 +166,8 @@ def admin():
     conn=get_db(); cur=conn.execute("SELECT * FROM users WHERE id=?",(session["user_id"],)).fetchone()
     if cur["role"]!="Admin": conn.close(); return render_template_string(BASE.replace("{{CONTENT}}", "<h3 style='color:red'>Admin only. Login admin@lonma.com / admin123</h3>"))
     users=conn.execute("SELECT * FROM users ORDER BY id DESC").fetchall(); total=len(users); conn.close()
-    rows="".join([f"<tr><td>{u['id']}</td><td>{u['name']}</td><td>{u['email']}</td><td>{u['phone'] or '-'}</td><td>{u['role']}</td><td>{u['membership']}</td><td><code>{u['api_key'][:20]}...</code></td><td><a class='btn btn-green' href='/make_admin/{u['id']}'>Make Admin</a><a class='btn btn-red' href='/delete/{u['id']}'>Delete</a></td></tr>" for u in users])
-    content=f"<h2>📊 Admin - All Data ({total} members)</h2><p>Master API Key: <code>{cur['api_key']}</code><br>API Endpoint: <code>https://lonma-orbit-24qw.onrender.com/api/members</code></p><div style='overflow-x:auto'><table><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Member Type</th><th>API Key</th><th>Actions</th></tr>{rows}</table></div><br><a href='/export_csv' class='btn btn-blue'>Download CSV</a> <a href='/api/members?api_key={cur['api_key']}' class='btn btn-green' target='_blank'>Test API JSON</a>"
+    rows="".join([f"<tr><td>{u['id']}</td><td>{u['name']}</td><td>{u['email']}</td><td>{u['phone'] or '-'}</td><td>{u['role']}</td><td>{u['membership']}</td><td><code>{u['api_key'][:18]}...</code></td><td><a class='btn btn-green' href='/make_admin/{u['id']}'>Admin</a><a class='btn btn-red' href='/delete/{u['id']}'>Del</a></td></tr>" for u in users])
+    content=f"<h2>Admin - All Data ({total})</h2><p>Master API Key: <code>{cur['api_key']}</code></p><div style='overflow-x:auto'><table><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Type</th><th>API Key</th><th>Actions</th></tr>{rows}</table></div><br><a href='/export_csv' class='btn btn-blue'>Download CSV</a> <a href='/tester' class='btn btn-green'>API Tester</a> <a href='/api/members?api_key={cur['api_key']}' class='btn btn-blue' target='_blank'>Test JSON</a>"
     return render_template_string(BASE.replace("{{CONTENT}}", content))
 
 @app.route("/make_admin/<int:id>")
@@ -202,8 +193,114 @@ def register():
         try:
             conn=get_db(); api_key=f"lonma_{secrets.token_hex(16)}"; conn.execute("INSERT INTO users (name,email,password,role,phone,membership,join_date,status,api_key) VALUES (?,?,?,?,?,?,?,?,?)",(request.form["name"],request.form["email"],generate_password_hash(request.form["password"]),"Member",request.form["phone"],request.form["membership"],datetime.now().strftime("%Y-%m-%d %H:%M"),"Active",api_key)); conn.commit(); conn.close(); return redirect("/login")
         except Exception as e: return f"Error {e} <a href='/register'>Try again</a>"
-    return render_template_string(BASE.replace("{{CONTENT}}", "<h3>Register</h3><form method='post'><input name='name' placeholder='Full Name' required><br><input name='email' placeholder='Email' required><br><input name='phone' placeholder='Phone' required><br><select name='membership'><option>Standard</option><option>Premium</option><option>Lifetime</option></select><br><input name='password' type='password' placeholder='Password' required><br><button class='btn btn-blue'>Register</button></form>"))
+    return render_template_string(BASE.replace("{{CONTENT}}", "<h3>Register</h3><form method='post'><input name='name' placeholder='Full Name' required style='width:90%;padding:8px'><br><input name='email' placeholder='Email' required style='width:90%;padding:8px'><br><input name='phone' placeholder='Phone' required style='width:90%;padding:8px'><br><select name='membership' style='width:90%;padding:8px'><option>Standard</option><option>Premium</option><option>Lifetime</option></select><br><input name='password' type='password' placeholder='Password' required style='width:90%;padding:8px'><br><button class='btn btn-blue'>Register</button></form>"))
 @app.route("/logout")
 def logout(): session.clear(); return redirect("/login")
+
+# API TESTER PAGE FOR OTHER TEAMS
+@app.route("/tester")
+def api_tester():
+    html = """<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LONMA API Tester</title>
+<style>
+body{font-family:Arial;background:#0f172a;color:white;padding:15px}
+.card{background:#1e293b;padding:20px;border-radius:15px;max-width:850px;margin:15px auto;box-shadow:0 4px 15px #000}
+h2{color:#38bdf8} h3{color:#7dd3fc;margin-top:25px}
+input,select{width:95%;padding:10px;margin:6px 0;border-radius:8px;border:none;background:#334155;color:white}
+button{background:#38bdf8;color:#000;padding:10px 18px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px}
+button:hover{background:#0ea5e9}
+pre{background:#020617;padding:12px;border-radius:8px;overflow:auto;max-height:320px;color:#22c55e;font-size:12px;border:1px solid #334155}
+.keybox{background:#020617;padding:12px;border-radius:8px;border:1px solid #38bdf8;margin:10px 0}
+a{color:#38bdf8}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>🚀 LONMA API Tester - For Other Teams</h2>
+<div class="keybox">
+<b>Live URL:</b> https://lonma-orbit-24qw.onrender.com<br>
+<b>Master API Key:</b> <code id="key">lonma_api_key_12345</code>
+<button onclick="copyKey()">Copy Key</button><br>
+<b>Quick Links:</b> <a href="/api" target="_blank">API Docs</a> | <a href="/admin" target="_blank">Admin</a> | <a href="/api/members?api_key=lonma_api_key_12345" target="_blank">View JSON</a>
+</div>
+
+<h3>1️⃣ GET ALL MEMBERS (Complete Data)</h3>
+<button onclick="getAll()">▶️ GET /api/members</button>
+<pre id="out1">Click to fetch all data...</pre>
+
+<h3>2️⃣ REGISTER New Member</h3>
+<input id="r_name" placeholder="Full Name - e.g John Doe">
+<input id="r_email" placeholder="Email - e.g john@lonma.com">
+<input id="r_phone" placeholder="Phone - e.g 0712345678">
+<input id="r_pass" placeholder="Password" type="password">
+<select id="r_mem"><option>Standard</option><option>Premium</option><option>Lifetime</option></select>
+<button onclick="register()">▶️ POST /api/register</button>
+<pre id="out2"></pre>
+
+<h3>3️⃣ LOGIN</h3>
+<input id="l_email" placeholder="Email" value="admin@lonma.com">
+<input id="l_pass" placeholder="Password" value="admin123" type="password">
+<button onclick="login()">▶️ POST /api/login</button>
+<pre id="out3"></pre>
+
+<h3>4️⃣ STATS</h3>
+<button onclick="stats()">▶️ GET /api/stats</button>
+<pre id="out4"></pre>
+
+<h3>5️⃣ DELETE Member</h3>
+<input id="del_id" placeholder="Member ID to delete - e.g 2" type="number">
+<button onclick="delMember()" style="background:#ef4444;color:white">▶️ DELETE /api/members/ID</button>
+<pre id="out5"></pre>
+</div>
+
+<script>
+const BASE = "https://lonma-orbit-24qw.onrender.com";
+const API_KEY = "lonma_api_key_12345";
+function copyKey(){navigator.clipboard.writeText(API_KEY); alert("API Key Copied: "+API_KEY);}
+async function getAll(){
+ document.getElementById('out1').innerText = "Loading...";
+ const res = await fetch(BASE+"/api/members", {headers:{"X-API-KEY":API_KEY}});
+ const data = await res.json();
+ document.getElementById('out1').innerText = JSON.stringify(data, null, 2);
+}
+async function register(){
+ const body = {name: document.getElementById('r_name').value,email: document.getElementById('r_email').value,phone: document.getElementById('r_phone').value,password: document.getElementById('r_pass').value,membership: document.getElementById('r_mem').value};
+ if(!body.name || !body.email || !body.password) return alert("Fill name, email, password");
+ document.getElementById('out2').innerText = "Registering...";
+ const res = await fetch(BASE+"/api/register", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+ const data = await res.json();
+ document.getElementById('out2').innerText = JSON.stringify(data, null, 2);
+ if(res.ok) getAll();
+}
+async function login(){
+ const body = {email: document.getElementById('l_email').value, password: document.getElementById('l_pass').value};
+ document.getElementById('out3').innerText = "Logging in...";
+ const res = await fetch(BASE+"/api/login", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+ const data = await res.json();
+ document.getElementById('out3').innerText = JSON.stringify(data, null, 2);
+}
+async function stats(){
+ document.getElementById('out4').innerText = "Loading...";
+ const res = await fetch(BASE+"/api/stats", {headers:{"X-API-KEY":API_KEY}});
+ const data = await res.json();
+ document.getElementById('out4').innerText = JSON.stringify(data, null, 2);
+}
+async function delMember(){
+ const id = document.getElementById('del_id').value;
+ if(!id) return alert("Enter ID");
+ if(!confirm("Delete member "+id+"?")) return;
+ document.getElementById('out5').innerText = "Deleting...";
+ const res = await fetch(BASE+"/api/members/"+id, {method:"DELETE", headers:{"X-API-KEY":API_KEY}});
+ const data = await res.json();
+ document.getElementById('out5').innerText = JSON.stringify(data, null, 2);
+ if(res.ok) getAll();
+}
+</script>
+</body>
+</html>"""
+    return html
 
 if __name__=="__main__": app.run(host="0.0.0.0", port=int(os.environ.get("PORT",10000)))
