@@ -1,1 +1,64 @@
+# LONMA Membership System - Complete API
 
+Live URL: https://lonma-orbit-24qw.onrender.com
+
+## Admin Login
+- Email: admin@lonma.com
+- Password: admin123
+
+## API Key
+Master Key: lonma_api_key_12345
+Header: X-API-KEY: lonma_api_key_12345
+
+## API Endpoints
+
+### Health (No Auth)
+GET /api/health
+
+### Docs
+GET /api
+
+### Get All Members
+GET /api/members
+Headers: X-API-KEY: lonma_api_key_12345
+
+### Register
+POST /api/register
+Body JSON:
+{
+  "name": "John Doe",
+  "email": "john@test.com",
+  "password": "123456",
+  "phone": "0712345678",
+  "membership": "Premium"
+}
+
+### Login
+POST /api/login
+Body: {"email":"admin@lonma.com","password":"admin123"}
+
+### Update
+PUT /api/members/1
+Headers: X-API-KEY + Content-Type: application/json
+Body: {"role":"Admin","phone":"0700000000"}
+
+### Delete
+DELETE /api/members/1
+Headers: X-API-KEY
+
+### Stats
+GET /api/stats
+Headers: X-API-KEY
+
+## Frontend Example
+```html
+<script>
+async function getMembers() {
+  const res = await fetch("https://lonma-orbit-24qw.onrender.com/api/members", {
+    headers: { "X-API-KEY": "lonma_api_key_12345" }
+  });
+  const data = await res.json();
+  console.log(data.members);
+}
+getMembers();
+</script>
