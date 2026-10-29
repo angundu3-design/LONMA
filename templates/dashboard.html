@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; }
+        .admin-badge { background: #dc3545; color: white; padding: 5px 10px; border-radius: 5px; }
+        .member-badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome, {{ user.username }}!</h1>
+    <p>Email: {{ user.email }}</p>
+    <p>Role: 
+        {% if user.is_admin %}
+            <span class="admin-badge">Admin</span>
+        {% else %}
+            <span class="member-badge">Member</span>
+        {% endif %}
+    </p>
+    {% if user.is_admin %}
+        <a href="{{ url_for('admin') }}">Go to Admin Panel</a><br>
+    {% endif %}
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

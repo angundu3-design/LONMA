@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel</h1>
+    <p>Logged in as Admin: {{ user.username }}</p>
+    <h2>Registered Members</h2>
+    {% if members %}
+        <table>
+            <tr><th>ID</th><th>Username</th><th>Email</th></tr>
+            {% for member in members %}
+                <tr>
+                    <td>{{ member.id }}</td>
+                    <td>{{ member.username }}</td>
+                    <td>{{ member.email }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No members registered yet.</p>
+    {% endif %}
+    <br>
+    <a href="{{ url_for('index') }}">Back to Dashboard</a> | 
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

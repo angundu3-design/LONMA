@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Membership System</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 5px; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Membership System</h1>
+    <p>Members can create their own accounts. Admin has full control.</p>
+    <a href="{{ url_for('register') }}" class="btn">Create Member Account</a>
+    <a href="{{ url_for('login') }}" class="btn">Login</a>
+</body>
+</html>
