@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, redirect
 import sqlite3, os, secrets
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -50,6 +50,8 @@ CSS = """
 .row{padding:14px 20px;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;font-size:15px}
 .row b{font-weight:700}
 .btn{height:38px;padding:0 16px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;color:#111827;display:inline-flex;align-items:center}
+table{width:100%;border-collapse:collapse}th{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;text-align:left}td{padding:12px 14px;font-size:13px;border-bottom:1px solid #f3f4f6}
+.input{width:100%;height:38px;padding:0 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px}label{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px;display:block}
 </style>
 """
 
@@ -58,7 +60,7 @@ def home():
     html = """<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>LONMA</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """</head><body>
 <div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>WELFARE<br>MANAGEMENT<br>SYSTEM</span></div></div><div class='nav'><a href='/' class='active'>Overview</a><a href='/members'>Members</a><a href='/register'>Register</a></div></div>
 <div class='page'>
-<div class='card'><div class='card-pad'><div class='label'>Total Members</div><div class='value' id='total'>1</div></div></div>
+<div class='card'><div class='card-pad'><div class='label'>Total Members</div><div class='value' id='total'>0</div></div></div>
 <div class='card'><div class='card-pad'><div class='label'>Projects</div><div class='value'>12</div></div></div>
 <div class='card'><div class='card-pad'><div class='label'>Status</div><div class='value green'>Active</div></div></div>
 <div class='card'><div style='padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f3f4f6'><div><div style='font-weight:700;font-size:16px'>Project Distribution</div><div style='font-size:13px;color:#6b7280'>Members per project</div></div><a href='/members' class='btn'>View All</a></div><div id='breakdown'></div></div>
@@ -79,20 +81,54 @@ load();
 
 @app.route("/members")
 def members_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """<style>table{width:100%;border-collapse:collapse}th{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;text-align:left}td{padding:12px 14px;font-size:13px;border-bottom:1px solid #f3f4f6}.input{width:100%;height:38px;padding:0 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px}</style></head><body>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """</head><body>
 <div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>WELFARE<br>MANAGEMENT<br>SYSTEM</span></div></div><div class='nav'><a href='/'>Overview</a><a href='/members' class='active'>Members</a><a href='/register'>Register</a></div></div>
 <div class='page'><div class='card'><div style='padding:10px;border-bottom:1px solid #e5e7eb'><input class='input' id='q' placeholder='Search...' oninput='fil()'></div><div style='overflow:auto'><table id='tbl'></table></div></div></div>
-<script>let all=[];async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}function render(l){let h='<tr><th>Staff No</th><th>Name</th><th>Project</th></tr>';l.forEach(m=>{h+='<tr><td>'+m.staff_no+'</td><td>'+m.full_names+'</td><td>'+m.project+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}function fil(){let qq=document.getElementById('q').value.toLowerCase();render(all.filter(m=>(m.full_names+m.staff_no+m.project).toLowerCase().includes(qq)));}load();</script>
+<script>let all=[];async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}function render(l){let h='<tr><th>Staff No</th><th>Name</th><th>Project</th></tr>';if(l.length==0){h+='<tr><td colspan=3 style="padding:30px;text-align:center;color:#6b7280">No members yet</td></tr>';}else{l.forEach(m=>{h+='<tr><td>'+m.staff_no+'</td><td>'+m.full_names+'</td><td>'+m.project+'</td></tr>';});}document.getElementById('tbl').innerHTML=h;}function fil(){let qq=document.getElementById('q').value.toLowerCase();render(all.filter(m=>(m.full_names+m.staff_no+m.project).toLowerCase().includes(qq)));}load();</script>
 </body></html>"""
     return render_template_string(html)
 
 @app.route("/register")
 def register_page():
     opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """<style>.input{width:100%;height:38px;padding:0 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px}label{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px;display:block}</style></head><body>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """</head><body>
 <div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>WELFARE<br>MANAGEMENT<br>SYSTEM</span></div></div><div class='nav'><a href='/'>Overview</a><a href='/members'>Members</a><a href='/register' class='active'>Register</a></div></div>
 <div class='page' style='max-width:500px'><div class='card'><div style='padding:16px 20px;border-bottom:1px solid #e5e7eb'><b>Register Member</b></div><div style='padding:18px'><div><label>Staff No</label><input class='input' id='staff_no'></div><div style='margin-top:10px'><label>Project</label><select class='input' id='project'>""" + opts + """</select></div><div style='margin-top:10px'><label>Full Names</label><input class='input' id='full_names'></div><div style='margin-top:10px'><label>Email</label><input class='input' id='email'></div><div style='margin-top:10px'><label>Password</label><input class='input' id='password' type='password'></div><button class='btn' style='width:100%;margin-top:16px;background:#111827;color:#fff;justify-content:center' onclick='doReg()'>Create</button><p id='msg' style='font-size:12px;margin-top:10px;text-align:center'></p></div></div></div>
 <script>async function doReg(){let d={staff_no:document.getElementById('staff_no').value,project:document.getElementById('project').value,full_names:document.getElementById('full_names').value,email:document.getElementById('email').value,password:document.getElementById('password').value};let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});let j=await r.json();let m=document.getElementById('msg');m.textContent=j.error||j.message;m.style.color=r.ok?'#16a34a':'#dc2626';}</script>
+</body></html>"""
+    return render_template_string(html)
+
+@app.route("/admin")
+def admin_login_page():
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """</head><body>
+<div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Admin Only</span></div></div></div>
+<div class='page' style='max-width:400px'><div class='card'><div style='padding:16px 20px;border-bottom:1px solid #e5e7eb'><b>Admin Login - Private</b></div><div style='padding:20px'><label>Email</label><input class='input' id='email' value='admin@lonma.com'><div style='margin-top:10px'><label>Password</label><input class='input' id='pass' type='password' value='admin123'></div><button class='btn' style='width:100%;margin-top:16px;background:#111827;color:#fff;justify-content:center' onclick='login()'>Login</button><p id='msg' style='font-size:12px;margin-top:10px;text-align:center;color:#dc2626'></p></div></div></div>
+<script>async function login(){let e=document.getElementById('email').value;let p=document.getElementById('pass').value;let r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});let j=await r.json();if(r.ok){location.href='/admin/dashboard?key='+j.key;}else{document.getElementById('msg').textContent=j.error;}}</script>
+</body></html>"""
+    return render_template_string(html)
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    key = request.args.get("key")
+    if key != ADMIN_KEY:
+        return redirect("/admin")
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin Dashboard</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """</head><body>
+<div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Admin - Full Control</span></div></div><div class='nav'><a href='/admin/dashboard?key=""" + ADMIN_KEY + """' class='active'>Dashboard</a><a href='/admin/register?key=""" + ADMIN_KEY + """'>Register</a><a href='/'>Overview</a></div></div>
+<div class='page' style='max-width:700px'><div style='display:flex;justify-content:space-between;margin-bottom:12px'><b>Admin Panel - Delete Allowed</b><a href='/admin/register?key=""" + ADMIN_KEY + """' class='btn' style='background:#111827;color:#fff'>+ Register</a></div><div class='card'><div style='overflow:auto'><table id='tbl'></table></div></div></div>
+<script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='<tr><th>Staff</th><th>Name</th><th>Project</th><th>Email</th><th>Action</th></tr>';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let badge=prot?'<span style="font-size:9px;background:#111827;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px">PROTECTED</span>':'';let btn=prot?'<span style="color:#9ca3af;font-size:11px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;font-weight:700;border:1px solid #fee2e2;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer">Delete</button>';h+='<tr><td>'+m.staff_no+' '+badge+'</td><td>'+m.full_names+'</td><td>'+m.project+'</td><td>'+m.email+'</td><td>'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
+</body></html>"""
+    return render_template_string(html)
+
+@app.route("/admin/register")
+def admin_register_page():
+    key = request.args.get("key")
+    if key != ADMIN_KEY:
+        return redirect("/admin")
+    opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin Register</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>""" + CSS + """</head><body>
+<div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Admin</span></div></div><div class='nav'><a href='/admin/dashboard?key=""" + ADMIN_KEY + """' class='active'>Dashboard</a></div></div>
+<div class='page' style='max-width:500px'><div class='card'><div style='padding:16px 20px;border-bottom:1px solid #e5e7eb'><b>Register - Admin</b></div><div style='padding:18px'><div><label>Staff No</label><input class='input' id='staff_no'></div><div style='margin-top:10px'><label>Project</label><select class='input' id='project'>""" + opts + """</select></div><div style='margin-top:10px'><label>Full Names</label><input class='input' id='full_names'></div><div style='margin-top:10px'><label>Email</label><input class='input' id='email'></div><div style='margin-top:10px'><label>Password</label><input class='input' id='password' type='password'></div><button class='btn' style='width:100%;margin-top:16px;background:#111827;color:#fff;justify-content:center' onclick='doReg()'>Create</button><p id='msg' style='font-size:12px;margin-top:10px;text-align:center'></p></div></div></div>
+<script>async function doReg(){let d={staff_no:document.getElementById('staff_no').value,project:document.getElementById('project').value,full_names:document.getElementById('full_names').value,email:document.getElementById('email').value,password:document.getElementById('password').value};let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});let j=await r.json();let m=document.getElementById('msg');m.textContent=j.error||j.message;m.style.color=r.ok?'#16a34a':'#dc2626';if(r.ok)setTimeout(()=>location.href='/admin/dashboard?key=""" + ADMIN_KEY + """',700);}</script>
 </body></html>"""
     return render_template_string(html)
 
@@ -100,10 +136,10 @@ def register_page():
 def api_stats():
     conn = get_db()
     try:
-        total = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        total = conn.execute("SELECT COUNT(*) FROM users WHERE email != ?", (ADMIN_EMAIL,)).fetchone()[0]
         breakdown = {}
         for p in PROJECTS:
-            breakdown[p] = conn.execute("SELECT COUNT(*) FROM users WHERE project=?", (p,)).fetchone()[0]
+            breakdown[p] = conn.execute("SELECT COUNT(*) FROM users WHERE project=? AND email != ?", (p, ADMIN_EMAIL)).fetchone()[0]
         return jsonify({"total_members": total, "projects_breakdown": breakdown})
     finally:
         conn.close()
@@ -112,8 +148,29 @@ def api_stats():
 def api_members():
     conn = get_db()
     try:
-        rows = conn.execute("SELECT staff_no,full_names,project FROM users ORDER BY id DESC").fetchall()
+        rows = conn.execute("SELECT staff_no,full_names,project FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
         return jsonify({"members": [dict(r) for r in rows]})
+    finally:
+        conn.close()
+
+@app.route("/api/members_admin")
+def api_members_admin():
+    conn = get_db()
+    try:
+        rows = conn.execute("SELECT id,staff_no,full_names,project,email FROM users ORDER BY id DESC").fetchall()
+        return jsonify({"members": [dict(r) for r in rows]})
+    finally:
+        conn.close()
+
+@app.route("/api/admin/login", methods=["POST"])
+def api_admin_login():
+    data = request.get_json(silent=True)
+    conn = get_db()
+    try:
+        user = conn.execute("SELECT password,api_key FROM users WHERE email=?", (data.get("email"),)).fetchone()
+        if not user or not check_password_hash(user["password"], data.get("password","")):
+            return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"key": user["api_key"]})
     finally:
         conn.close()
 
@@ -127,13 +184,31 @@ def api_register():
     conn = get_db()
     try:
         if conn.execute("SELECT id FROM users WHERE email=?", (data["email"],)).fetchone():
-            return jsonify({"error": "Email already exists"}), 400
+            return jsonify({"error": "Email already exists - use new email"}), 400
         api_key = "lonma_" + secrets.token_hex(16)
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key) VALUES (?,?,?,?,?,?)", (data.get("staff_no","HQ/001"), data.get("full_names",""), data.get("project","HQ"), data["email"], generate_password_hash(data["password"]), api_key))
         conn.commit()
         return jsonify({"message": "Created"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route("/api/members/<int:member_id>", methods=["DELETE","OPTIONS"])
+def api_delete(member_id):
+    if request.method == "OPTIONS":
+        return "", 200
+    key = request.args.get("key")
+    if key != ADMIN_KEY:
+        return jsonify({"error": "Admin key required"}), 401
+    conn = get_db()
+    try:
+        u = conn.execute("SELECT email FROM users WHERE id=?", (member_id,)).fetchone()
+        if not u or u["email"]==ADMIN_EMAIL:
+            return jsonify({"error": "Cannot delete Protected Admin"}), 403
+        conn.execute("DELETE FROM users WHERE id=?", (member_id,))
+        conn.commit()
+        return jsonify({"message": "Deleted"})
     finally:
         conn.close()
 
