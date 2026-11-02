@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template_string, redirect
-import sqlite3, os, secrets
+import sqlite3, os, secrets, base64
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -20,8 +20,8 @@ def get_db():
 
 def init_db():
     conn = get_db()
-    conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, staff_no TEXT, full_names TEXT, project TEXT, email TEXT UNIQUE, password TEXT, role TEXT, phone TEXT, api_key TEXT, is_protected INTEGER DEFAULT 0, month_joined TEXT, father_id TEXT, mother_id TEXT, guardian_id TEXT, spouse_id TEXT, kid1 TEXT, kid2 TEXT, kid3 TEXT, kid4 TEXT, kid5 TEXT)')
-    for col in ["month_joined","father_id","mother_id","guardian_id","spouse_id","kid1","kid2","kid3","kid4","kid5"]:
+    conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, staff_no TEXT, full_names TEXT, project TEXT, email TEXT UNIQUE, password TEXT, role TEXT, phone TEXT, api_key TEXT, is_protected INTEGER DEFAULT 0, month_joined TEXT, father_id TEXT, mother_id TEXT, guardian_id TEXT, spouse_id TEXT, kid1 TEXT, kid2 TEXT, kid3 TEXT, kid4 TEXT, kid5 TEXT, photo TEXT)')
+    for col in ["month_joined","father_id","mother_id","guardian_id","spouse_id","kid1","kid2","kid3","kid4","kid5","photo"]:
         try: conn.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
         except: pass
     if not conn.execute("SELECT id FROM users WHERE email=?", (ADMIN_EMAIL,)).fetchone():
@@ -47,8 +47,7 @@ BASE = """
 .brand-icon{width:36px;height:36px;background:#fff;color:#1565c0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800}
 .brand-name{font-weight:800;font-size:14px;line-height:1.1}.brand-name span{font-size:10px;font-weight:600;display:block;opacity:.9}
 .header-icons{display:flex;gap:12px}.h-icon{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}
-.overlay.show{display:block}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}.overlay.show{display:block}
 .sidebar{position:fixed;top:0;left:0;width:300px;height:100%;background:#fff;z-index:50;transform:translateX(-100%);transition:transform .3s ease;overflow:hidden;display:flex;flex-direction:column;border-radius:0 20px 20px 0;box-shadow:4px 0 24px rgba(0,0,0,.15)}
 .sidebar.open{transform:translateX(0)}
 .sidebar-top{background:#1e88e5;color:#fff;padding:24px 20px 18px 20px}
@@ -81,6 +80,10 @@ BASE = """
 .stat{background:#fff;border-radius:16px;padding:18px;border:1px solid #e2e8f0}
 .stat-l{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px}
 .stat-v{font-size:26px;font-weight:800;margin-top:4px}
+.photo-box{width:110px;height:110px;border-radius:50%;border:3px dashed #cbd5e1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f8fafc;cursor:pointer;position:relative}
+.photo-box img{width:100%;height:100%;object-fit:cover}
+.photo-box.has-photo{border-style:solid;border-color:#1e88e5}
+.photo-upload-text{font-size:11px;color:#64748b;font-weight:600;text-align:center}
 @media(max-width:600px){.stat-grid{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
 </style>
 <div class="app-header">
@@ -129,15 +132,24 @@ load();
 
 @app.route("/members")
 def members_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Members</div><div class='card-sub'>All welfare members</div></div><div style='padding:12px'><input class='input' id='q' placeholder='Search...' oninput='fil()'></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Project</th></tr></thead><tbody id='tbl'></tbody></table></div></div></div>
-<script>let all=[];async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}function render(l){let h='';if(l.length==0){h='<tr><td colspan=3 style="padding:30px;text-align:center;color:#64748b">No members</td></tr>';}else{l.forEach(m=>{h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:12px 14px;font-size:13px"><b>'+m.staff_no+'</b></td><td style="padding:12px 14px"><div style="font-weight:700;font-size:14px">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'</div></td><td style="padding:12px 14px;font-size:13px">'+m.project+'</td></tr>';});}document.getElementById('tbl').innerHTML=h;}function fil(){let qq=document.getElementById('q').value.toLowerCase();render(all.filter(m=>(m.full_names+m.staff_no+m.project).toLowerCase().includes(qq)));}load();</script>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Members</div><div class='card-sub'>All welfare members with photos</div></div><div style='padding:12px'><input class='input' id='q' placeholder='Search...' oninput='fil()'></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Project</th></tr></thead><tbody id='tbl'></tbody></table></div></div></div>
+<script>let all=[];async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}function render(l){let h='';if(l.length==0){h='<tr><td colspan=3 style="padding:30px;text-align:center;color:#64748b">No members yet</td></tr>';}else{l.forEach(m=>{let photo=m.photo?'<img src="'+m.photo+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0">':'<div style="width:48px;height:48px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700;color:#64748b">'+m.full_names.charAt(0)+'</div>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px 14px">'+photo+'</td><td style="padding:10px 14px"><div style="font-size:12px"><b style="background:#f1f5f9;padding:2px 8px;border-radius:6px">'+m.staff_no+'</b></div><div style="font-weight:700;font-size:14px;margin-top:4px">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'</div></td><td style="padding:10px 14px;font-size:13px"><span style="background:#e3f2fd;color:#1565c0;padding:4px 10px;border-radius:999px;font-weight:600;font-size:12px">'+m.project+'</span></td></tr>';});}document.getElementById('tbl').innerHTML=h;}function fil(){let qq=document.getElementById('q').value.toLowerCase();render(all.filter(m=>(m.full_names+m.staff_no+m.project).toLowerCase().includes(qq)));}load();</script>
 </body></html>"""
     return render_template_string(html)
 
 @app.route("/register")
 def register_page():
     opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Welfare Registration Form</div><div class='card-sub'>Professional welfare data collection</div></div><div class='card-body'>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Welfare Registration Form</div><div class='card-sub'>Add member with photo</div></div><div class='card-body'>
+
+<div style="display:flex;gap:20px;align-items:center;margin-bottom:20px">
+<div class="photo-box" id="photoBox" onclick="document.getElementById('photoInput').click()">
+<img id="photoPreview" style="display:none">
+<div id="photoPlaceholder"><div style="font-size:32px">📷</div><div class="photo-upload-text">Add Photo</div></div>
+</div>
+<div><div style="font-weight:700;font-size:14px">Member Photo</div><div style="font-size:12px;color:#64748b;margin-top:4px">Tap to upload photo<br>Max 2MB - JPG, PNG</div><input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)"></div>
+</div>
+
 <div class='section'><div class='section-num'>1</div><div class='section-label'>Staff Information</div></div>
 <div class='grid2'><div><label class='label'>Staff Number</label><input class='input' id='staff_no' placeholder='PWANI/001'></div><div><label class='label'>Project</label><select class='input' id='project'>""" + opts + """</select></div></div>
 <div style='margin-top:12px' class='grid2'><div><label class='label'>Date Joined</label><input class='input' id='month_joined' placeholder='Jan 2024'></div><div><label class='label'>Full Names *</label><input class='input' id='full_names' placeholder='Full Name'></div></div>
@@ -151,7 +163,36 @@ def register_page():
 <div style='margin-top:12px' class='grid2'><div><label class='label'>Kid 4</label><input class='input' id='kid4'></div><div><label class='label'>Kid 5</label><input class='input' id='kid5'></div></div>
 <button class='btn-primary' onclick='doReg()' id='btn'>Create Member</button><p id='msg' style='text-align:center;font-size:13px;margin-top:10px;font-weight:600'></p>
 </div></div></div>
-<script>async function doReg(){let d={staff_no:document.getElementById('staff_no').value,project:document.getElementById('project').value,full_names:document.getElementById('full_names').value,email:document.getElementById('email').value,password:document.getElementById('password').value,month_joined:document.getElementById('month_joined').value,father_id:document.getElementById('father_id').value,mother_id:document.getElementById('mother_id').value,guardian_id:document.getElementById('guardian_id').value,spouse_id:document.getElementById('spouse_id').value,kid1:document.getElementById('kid1').value,kid2:document.getElementById('kid2').value,kid3:document.getElementById('kid3').value,kid4:document.getElementById('kid4').value,kid5:document.getElementById('kid5').value};if(!d.email||!d.password||!d.full_names){document.getElementById('msg').textContent='Required: Full Names, Email, Password';document.getElementById('msg').style.color='#dc2626';return;}let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});let j=await r.json();let m=document.getElementById('msg');m.textContent=j.error||j.message;m.style.color=r.ok?'#16a34a':'#dc2626';if(r.ok){setTimeout(()=>location.href='/members',800);}}</script>
+<script>
+let photoBase64 = "";
+function handlePhoto(e){
+ let file = e.target.files[0];
+ if(!file) return;
+ if(file.size > 2*1024*1024){alert('File too large, max 2MB');return;}
+ let reader = new FileReader();
+ reader.onload = function(ev){
+   photoBase64 = ev.target.result;
+   document.getElementById('photoPreview').src = photoBase64;
+   document.getElementById('photoPreview').style.display='block';
+   document.getElementById('photoPlaceholder').style.display='none';
+   document.getElementById('photoBox').classList.add('has-photo');
+ };
+ reader.readAsDataURL(file);
+}
+async function doReg(){
+ let btn=document.getElementById('btn');
+ btn.textContent='Creating...';
+ let d={staff_no:document.getElementById('staff_no').value,project:document.getElementById('project').value,full_names:document.getElementById('full_names').value,email:document.getElementById('email').value,password:document.getElementById('password').value,month_joined:document.getElementById('month_joined').value,father_id:document.getElementById('father_id').value,mother_id:document.getElementById('mother_id').value,guardian_id:document.getElementById('guardian_id').value,spouse_id:document.getElementById('spouse_id').value,kid1:document.getElementById('kid1').value,kid2:document.getElementById('kid2').value,kid3:document.getElementById('kid3').value,kid4:document.getElementById('kid4').value,kid5:document.getElementById('kid5').value,photo:photoBase64};
+ if(!d.email||!d.password||!d.full_names){document.getElementById('msg').textContent='Required: Full Names, Email, Password';document.getElementById('msg').style.color='#dc2626';btn.textContent='Create Member';return;}
+ let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+ let j=await r.json();
+ let m=document.getElementById('msg');
+ m.textContent=j.error||j.message;
+ m.style.color=r.ok?'#16a34a':'#dc2626';
+ btn.textContent=r.ok?'Created':'Create Member';
+ if(r.ok){setTimeout(()=>location.href='/members',800);}
+}
+</script>
 </body></html>"""
     return render_template_string(html)
 
@@ -167,8 +208,8 @@ def admin_dashboard():
     key = request.args.get("key")
     if key != ADMIN_KEY:
         return redirect("/admin")
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header'><div class='card-title'>Admin - Welfare Management</div></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Project</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div></div>
-<script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let btn=prot?'<span style="color:#94a3b8;font-size:12px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;border:1px solid #fee2e2;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer">Delete</button>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:14px"><b>'+m.staff_no+'</b><div style="font-weight:700">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">'+m.email+'</div></td><td style="padding:14px"><span style="background:#f1f5f9;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600">'+m.project+'</span></td><td style="padding:14px;font-size:11px">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'<br>Kids:'+([m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(',')||'-')+'</td><td style="padding:14px">'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header'><div class='card-title'>Admin - Welfare Management with Photos</div></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div></div>
+<script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let photo=m.photo?'<img src="'+m.photo+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover">':'<div style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700">'+(m.full_names||'A').charAt(0)+'</div>';let btn=prot?'<span style="color:#94a3b8;font-size:12px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;border:1px solid #fee2e2;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer">Delete</button>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px">'+photo+'</td><td style="padding:14px"><b>'+m.staff_no+'</b><div style="font-weight:700">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">'+m.email+'</div></td><td style="padding:14px;font-size:11px">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'<br>Kids:'+([m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(',')||'-')+'</td><td style="padding:14px">'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
 </body></html>"""
     return render_template_string(html)
 
@@ -188,7 +229,7 @@ def api_stats():
 def api_members():
     conn = get_db()
     try:
-        rows = conn.execute("SELECT id,staff_no,full_names,project,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
+        rows = conn.execute("SELECT id,staff_no,full_names,project,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
         return jsonify({"members": [dict(r) for r in rows]})
     finally:
         conn.close()
@@ -197,7 +238,7 @@ def api_members():
 def api_members_admin():
     conn = get_db()
     try:
-        rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users ORDER BY id DESC").fetchall()
+        rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo FROM users ORDER BY id DESC").fetchall()
         return jsonify({"members": [dict(r) for r in rows]})
     finally:
         conn.close()
@@ -226,9 +267,13 @@ def api_register():
         if conn.execute("SELECT id FROM users WHERE email=?", (data["email"],)).fetchone():
             return jsonify({"error": "Email exists"}), 400
         api_key = "lonma_" + secrets.token_hex(16)
-        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (data.get("staff_no",""), data.get("full_names",""), data.get("project","HQ"), data["email"], generate_password_hash(data["password"]), api_key, data.get("month_joined",""), data.get("father_id",""), data.get("mother_id",""), data.get("guardian_id",""), data.get("spouse_id",""), data.get("kid1",""), data.get("kid2",""), data.get("kid3",""), data.get("kid4",""), data.get("kid5","")))
+        photo = data.get("photo","")
+        # limit photo size to prevent DB bloat
+        if len(photo) > 500000:
+            photo = photo[:500000]
+        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (data.get("staff_no",""), data.get("full_names",""), data.get("project","HQ"), data["email"], generate_password_hash(data["password"]), api_key, data.get("month_joined",""), data.get("father_id",""), data.get("mother_id",""), data.get("guardian_id",""), data.get("spouse_id",""), data.get("kid1",""), data.get("kid2",""), data.get("kid3",""), data.get("kid4",""), data.get("kid5",""), photo))
         conn.commit()
-        return jsonify({"message": "Created"}), 201
+        return jsonify({"message": "Member created with photo"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     finally:
