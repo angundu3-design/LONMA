@@ -15,8 +15,7 @@ def get_db():
     try:
         conn.execute("PRAGMA journal_mode=WAL;")
         conn.execute("PRAGMA busy_timeout=10000;")
-    except:
-        pass
+    except: pass
     return conn
 
 def init_db():
@@ -48,8 +47,6 @@ BASE = """
 .brand-icon{width:36px;height:36px;background:#fff;color:#1565c0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800}
 .brand-name{font-weight:800;font-size:14px;line-height:1.1}.brand-name span{font-size:10px;font-weight:600;display:block;opacity:.9}
 .header-icons{display:flex;gap:12px}.h-icon{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px}
-
-/* Sidebar Overlay */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}
 .overlay.show{display:block}
 .sidebar{position:fixed;top:0;left:0;width:300px;height:100%;background:#fff;z-index:50;transform:translateX(-100%);transition:transform .3s ease;overflow:hidden;display:flex;flex-direction:column;border-radius:0 20px 20px 0;box-shadow:4px 0 24px rgba(0,0,0,.15)}
@@ -93,20 +90,16 @@ BASE = """
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 <div class="sidebar" id="sidebar">
 <div class="sidebar-top">
-<div class="avatar"><img src="https://i.pravatar.cc/150?img=3" onerror="this.style.display='none';this.parentElement.textContent='👤'"></div>
-<div class="profile-name" id="pName">LONMA ADMIN</div>
-<div class="profile-email" id="pEmail">admin@lonma.com</div>
+<div class="avatar"><img src="https://i.pravatar.cc/150?img=3"></div>
+<div class="profile-name">LONMA ADMIN</div>
+<div class="profile-email">admin@lonma.com</div>
 </div>
 <div class="menu-list">
 <a class="menu-item" href="/"><span class="icon">📊</span> Overview</a>
 <a class="menu-item" href="/members"><span class="icon">👥</span> Members</a>
 <a class="menu-item" href="/register"><span class="icon">➕</span> Register Member</a>
 <div style="height:1px;background:#f1f5f9;margin:8px 20px"></div>
-<a class="menu-item" href="#"><span class="icon">$</span> Pricelist</a>
-<a class="menu-item" href="#"><span class="icon">⊞</span> Products</a>
-<a class="menu-item" href="#"><span class="icon">📍</span> Live Location</a>
 <a class="menu-item" href="#"><span class="icon">🔄</span> Syncing</a>
-<a class="menu-item" href="#"><span class="icon">🔖</span> Off Site Order</a>
 <a class="menu-item" href="#"><span class="icon">💬</span> Give Feedback</a>
 <a class="menu-item" href="#"><span class="icon">🎧</span> Contact Support</a>
 <a class="menu-item" href="/admin"><span class="icon">⚙️</span> Settings</a>
@@ -125,7 +118,7 @@ document.addEventListener('DOMContentLoaded',()=>{let path=location.pathname;doc
 def home():
     html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>LONMA</title>""" + BASE + """<div class='page'>
 <div class='stat-grid'><div class='stat'><div class='stat-l'>Total Members</div><div class='stat-v' id='total'>0</div></div><div class='stat'><div class='stat-l'>Projects</div><div class='stat-v'>12</div></div><div class='stat'><div class='stat-l'>Status</div><div class='stat-v' style='color:#16a34a'>Active</div></div></div>
-<div class='card'><div class='card-header'><div class='card-title'>Project Distribution</div><div class='card-sub'>Members per project</div></div><div id='breakdown'></div></div>
+<div class='card'><div class='card-header'><div class='card-title'>Project Distribution</div><div class='card-sub'>Members per project (HQ 0)</div></div><div id='breakdown'></div></div>
 </div>
 <script>
 async function load(){let r=await fetch('/api/stats');let d=await r.json();document.getElementById('total').textContent=d.total_members;let h='';for(let k in d.projects_breakdown){h+='<div style="padding:14px 22px;border-bottom:1px solid #f8fafc;display:flex;justify-content:space-between;font-size:14px"><span>'+k+'</span><b>'+d.projects_breakdown[k]+'</b></div>';}document.getElementById('breakdown').innerHTML=h;}
