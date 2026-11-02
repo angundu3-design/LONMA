@@ -1,10 +1,13 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, redirect
 import sqlite3, os, secrets
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 DB = "lonma.db"
 PROJECTS = ["Pwani Oil Products","Java House","SJ Johnson","Kanji","HQ","Antonio","TF-TDs","TF-MT","TF-LM","GCB-MT","GCB-Ws","Hichem"]
+ADMIN_KEY = "lonma_api_key_12345"
+ADMIN_EMAIL = "admin@lonma.com"
+ADMIN_PASS = "admin123"
 
 def get_db():
     conn = sqlite3.connect(DB, timeout=10, check_same_thread=False, isolation_level=None)
@@ -19,20 +22,17 @@ def get_db():
 def init_db():
     conn = get_db()
     conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, staff_no TEXT, full_names TEXT, project TEXT, month_year_joined TEXT, email TEXT UNIQUE, password TEXT, role TEXT, phone TEXT, father_id TEXT, mother_id TEXT, guardian_id TEXT, spouse_id TEXT, kid1 TEXT, kid2 TEXT, kid3 TEXT, kid4 TEXT, kid5 TEXT, api_key TEXT, is_protected INTEGER DEFAULT 0)')
-    exists = conn.execute("SELECT id FROM users WHERE email='admin@lonma.com'").fetchone()
-    if not exists:
-        # FIXED: 10 placeholders for 10 values
-        conn.execute("INSERT INTO users (staff_no,full_names,project,month_year_joined,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ","Oct 2026","admin@lonma.com",generate_password_hash("admin123"),"Admin","0700000000","lonma_api_key_12345",1))
+    if not conn.execute("SELECT id FROM users WHERE email=?", (ADMIN_EMAIL,)).fetchone():
+        conn.execute("INSERT INTO users (staff_no,full_names,project,month_year_joined,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ","Oct 2026",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
     conn.close()
-
 init_db()
 
 @app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,X-API-KEY')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS')
-    return response
+def after(r):
+    r.headers.add('Access-Control-Allow-Origin','*')
+    r.headers.add('Access-Control-Allow-Headers','Content-Type,X-API-KEY')
+    r.headers.add('Access-Control-Allow-Methods','GET,POST,DELETE,OPTIONS')
+    return r
 
 CSS = """
 <style>
@@ -56,21 +56,41 @@ table{width:100%;border-collapse:collapse}th{font-size:10px;font-weight:700;colo
 </style>
 """
 
+# PUBLIC OVERVIEW
 @app.route("/")
 def home():
-    html = "<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>LONMA Welfare</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Welfare Management System</span></div></div><div class='nav'><a href='/' class='active'>Overview</a><a href='/dashboard'>Members</a><a href='/register'>Register</a></div></div><div class='page'><div class='stats'><div class='stat'><label>Total Members</label><b id='total'>0</b></div><div class='stat'><label>Projects</label><b>12</b></div><div class='stat'><label>Status</label><b style='color:#16a34a'>Active</b></div></div><div class='card'><div class='card-h'><div><div style='font-weight:600;font-size:13px'>Project Distribution</div><div style='font-size:11px;color:#64748b'>Members per project</div></div><a href='/dashboard' class='btn'>View All</a></div><div id='breakdown'><div class='row'>Loading...</div></div></div></div><script>async function loadData(){try{const r=await fetch('/api/stats');const d=await r.json();document.getElementById('total').textContent=d.total_members;let html='';for(const proj in d.projects_breakdown){html+='<div class=\"row\"><span>'+proj+'</span><b>'+d.projects_breakdown[proj]+'</b></div>';}document.getElementById('breakdown').innerHTML=html||'<div class=\"row\">No members yet</div>';}catch(e){document.getElementById('breakdown').innerHTML='<div class=\"row\">Loading...</div>';}}loadData();</script></body></html>"
+    html = "<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>LONMA</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Welfare Management</span></div></div><div class='nav'><a href='/' class='active'>Overview</a><a href='/members'>Members</a><a href='/admin'>Admin</a></div></div><div class='page'><div class='stats'><div class='stat'><label>Total Members</label><b id='total'>0</b></div><div class='stat'><label>Projects</label><b>12</b></div><div class='stat'><label>Status</label><b style='color:#16a34a'>Active</b></div></div><div class='card'><div class='card-h'><div><div style='font-weight:600;font-size:13px'>Project Distribution</div><div style='font-size:11px;color:#64748b'>Members per project</div></div><a href='/members' class='btn'>View Members</a></div><div id='breakdown'><div class='row'>Loading...</div></div></div></div><script>async function load(){let r=await fetch('/api/stats');let d=await r.json();document.getElementById('total').textContent=d.total_members;let h='';for(let k in d.projects_breakdown){h+='<div class=\"row\"><span>'+k+'</span><b>'+d.projects_breakdown[k]+'</b></div>';}document.getElementById('breakdown').innerHTML=h;}load();</script></body></html>"
     return render_template_string(html)
 
-@app.route("/dashboard")
-def dashboard():
+# MEMBERS LINK - READ ONLY
+@app.route("/members")
+def members_page():
     opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
-    html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Welfare</span></div></div><div class='nav'><a href='/'>Overview</a><a href='/dashboard' class='active'>Members</a><a href='/register'>Register</a></div></div><div class='page'><div style='display:flex;justify-content:space-between;margin-bottom:12px'><div><b>Members</b><div style='font-size:11px;color:#64748b'><span id='cnt'>0</span> records</div></div><a href='/register' class='btn btn-dark'>+ New</a></div><div class='card'><div style='padding:10px 12px;border-bottom:1px solid #e2e8f0;display:flex;gap:8px'><input class='input' id='q' placeholder='Search...' style='max-width:220px;height:34px' oninput='fil()'><select class='input' id='pf' style='max-width:160px;height:34px' onchange='fil()'><option value=''>All Projects</option>" + opts + "</select></div><div style='overflow:auto'><table id='tbl'></table></div></div></div><script>let all=[];async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;document.getElementById('cnt').textContent=d.total;render(d.members);}function render(l){let h='<tr><th>Staff</th><th>Name</th><th>Project</th><th>Contact</th><th></th></tr>';l.forEach(m=>{let prot=m.is_protected==1||m.email=='admin@lonma.com';let badge=prot?'<span style=\"font-size:9px;background:#0f172a;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px\">PROTECTED</span>':'';let btn=prot?'<span style=\"font-size:11px;color:#94a3b8\">System</span>':'<button onclick=\"del('+m.id+')\" style=\"height:30px;padding:0 10px;border-radius:6px;border:1px solid #fee2e2;background:#fff;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer\">Delete</button>';h+='<tr style=\"'+(prot?'background:#f8fafc':'')+'\"><td style=\"font-weight:600\">'+m.staff_no+' '+badge+'</td><td>'+m.full_names+'</td><td><span class=\"badge\">'+m.project+'</span></td><td>'+m.email+'</td><td>'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}function fil(){let qq=document.getElementById('q').value.toLowerCase();let pp=document.getElementById('pf').value;let f=all.filter(m=>{let t=(m.full_names+m.staff_no+m.email).toLowerCase();return t.includes(qq)&&(!pp||m.project==pp);});render(f);}async function del(id){if(!confirm('Delete '+id+'?'))return;let r=await fetch('/api/members/'+id+'?api_key=lonma_api_key_12345',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script></body></html>"
+    html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - LONMA</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Members</span></div></div><div class='nav'><a href='/'>Overview</a><a href='/members' class='active'>Members</a><a href='/admin'>Admin</a></div></div><div class='page'><div style='display:flex;justify-content:space-between;margin-bottom:12px'><div><b>Members Directory</b><div style='font-size:11px;color:#64748b'><span id='cnt'>0</span> members - View Only</div></div></div><div class='card'><div style='padding:10px 12px;border-bottom:1px solid #e2e8f0;display:flex;gap:8px'><input class='input' id='q' placeholder='Search...' style='max-width:220px;height:34px' oninput='fil()'><select class='input' id='pf' style='max-width:160px;height:34px' onchange='fil()'><option value=''>All Projects</option>" + opts + "</select></div><div style='overflow:auto'><table id='tbl'></table></div></div></div><script>let all=[];async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;document.getElementById('cnt').textContent=d.total;render(d.members);}function render(l){let h='<tr><th>Staff No</th><th>Name</th><th>Project</th><th>Joined</th></tr>';l.forEach(m=>{h+='<tr><td style=\"font-weight:600\">'+m.staff_no+'</td><td>'+m.full_names+'</td><td><span class=\"badge\">'+m.project+'</span></td><td style=\"font-size:11px;color:#64748b\">'+(m.month_year_joined||'')+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}function fil(){let qq=document.getElementById('q').value.toLowerCase();let pp=document.getElementById('pf').value;render(all.filter(m=>{let t=(m.full_names+m.staff_no+m.project).toLowerCase();return t.includes(qq)&&(!pp||m.project==pp);}));}load();</script></body></html>"
     return render_template_string(html)
 
-@app.route("/register")
-def register_page():
+# ADMIN LOGIN
+@app.route("/admin")
+def admin_login():
+    html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin Login</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Admin</span></div></div><div class='nav'><a href='/'>Overview</a><a href='/members'>Members</a><a href='/admin' class='active'>Admin</a></div></div><div class='page' style='max-width:400px'><div class='card'><div class='card-h'><b>Admin Login</b></div><div style='padding:20px'><label>Email</label><input class='input' id='email' value='admin@lonma.com'><div style='margin-top:10px'><label>Password</label><input class='input' id='pass' type='password' value='admin123'></div><button class='btn btn-dark' style='width:100%;margin-top:16px;justify-content:center' onclick='login()'>Login to Admin Panel</button><p id='msg' style='font-size:12px;margin-top:10px;text-align:center;color:#dc2626'></p></div></div></div><script>async function login(){let e=document.getElementById('email').value;let p=document.getElementById('pass').value;let r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});let j=await r.json();if(r.ok){location.href='/admin/dashboard?key='+j.key;}else{document.getElementById('msg').textContent=j.error;}}</script></body></html>"
+    return render_template_string(html)
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    key = request.args.get("key")
+    if key != ADMIN_KEY:
+        return redirect("/admin")
     opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
-    html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Welfare</span></div></div><div class='nav'><a href='/'>Overview</a><a href='/dashboard'>Members</a><a href='/register' class='active'>Register</a></div></div><div class='page' style='max-width:700px'><div class='card'><div class='card-h'><b>New Member</b></div><div style='padding:18px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'><div><label>Staff No *</label><input class='input' id='staff_no'></div><div><label>Project *</label><select class='input' id='project'>" + opts + "</select></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px'><div><label>Full Names *</label><input class='input' id='full_names'></div><div><label>Email *</label><input class='input' id='email'></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px'><div><label>Password *</label><input class='input' id='password' type='password'></div><div><label>Phone</label><input class='input' id='phone'></div></div><div style='margin-top:10px'><label>Month/Year</label><input class='input' id='month_year_joined'></div><div style='margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px'><div style='font-size:12px;font-weight:600;margin-bottom:8px'>Family</div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'><div><label>Father ID</label><input class='input' id='father_id'></div><div><label>Mother ID</label><input class='input' id='mother_id'></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px'><div><label>Guardian</label><input class='input' id='guardian_id'></div><div><label>Spouse</label><input class='input' id='spouse_id'></div></div></div><div style='margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px'><div style='font-size:12px;font-weight:600;margin-bottom:8px'>Children</div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'><div><label>Child1</label><input class='input' id='kid1'></div><div><label>Child2</label><input class='input' id='kid2'></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px'><div><label>Child3</label><input class='input' id='kid3'></div><div><label>Child4</label><input class='input' id='kid4'></div></div><div style='margin-top:8px'><label>Child5</label><input class='input' id='kid5'></div></div><button class='btn btn-dark' style='width:100%;margin-top:18px;justify-content:center' onclick='doReg()'>Create Member</button><p id='msg' style='font-size:12px;margin-top:10px;text-align:center'></p></div></div></div><script>async function doReg(){let f=['staff_no','project','full_names','email','password','phone','month_year_joined','father_id','mother_id','guardian_id','spouse_id','kid1','kid2','kid3','kid4','kid5'];let d={};f.forEach(k=>d[k]=document.getElementById(k).value);let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});let j=await r.json();let m=document.getElementById('msg');m.textContent=j.error||j.message;m.style.color=r.ok?'#16a34a':'#dc2626';if(r.ok)setTimeout(()=>location.href='/dashboard',700);}</script></body></html>"
+    html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin Dashboard</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Admin Panel</span></div></div><div class='nav'><a href='/'>Overview</a><a href='/members'>Members</a><a href='/admin/dashboard?key=" + ADMIN_KEY + "' class='active'>Admin Dashboard</a></div></div><div class='page'><div style='display:flex;justify-content:space-between;margin-bottom:12px'><div><b>Admin - Full Control</b><div style='font-size:11px;color:#64748b'><span id='cnt'>0</span> records - You can Delete & Register</div></div><a href='/admin/register?key=" + ADMIN_KEY + "' class='btn btn-dark'>+ Register Member</a></div><div class='card'><div style='padding:10px 12px;border-bottom:1px solid #e2e8f0;display:flex;gap:8px'><input class='input' id='q' placeholder='Search...' style='max-width:220px;height:34px' oninput='fil()'><select class='input' id='pf' style='max-width:160px;height:34px' onchange='fil()'><option value=''>All Projects</option>" + opts + "</select></div><div style='overflow:auto'><table id='tbl'></table></div></div></div><script>let all=[];async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;document.getElementById('cnt').textContent=d.total;render(d.members);}function render(l){let h='<tr><th>Staff</th><th>Name</th><th>Project</th><th>Contact</th><th>Action</th></tr>';l.forEach(m=>{let prot=m.is_protected==1||m.email=='admin@lonma.com';let badge=prot?'<span style=\"font-size:9px;background:#0f172a;color:#fff;padding:2px 6px;border-radius:4px;margin-left:6px\">PROTECTED</span>':'';let btn=prot?'<span style=\"font-size:11px;color:#94a3b8\">System</span>':'<button onclick=\"del('+m.id+')\" style=\"height:30px;padding:0 10px;border-radius:6px;border:1px solid #fee2e2;background:#fff;color:#dc2626;font-size:12px;font-weight:600;cursor:pointer\">Delete</button>';h+='<tr style=\"'+(prot?'background:#f8fafc':'')+'\"><td style=\"font-weight:600\">'+m.staff_no+' '+badge+'</td><td>'+m.full_names+'</td><td><span class=\"badge\">'+m.project+'</span></td><td>'+m.email+'</td><td>'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}function fil(){let qq=document.getElementById('q').value.toLowerCase();let pp=document.getElementById('pf').value;render(all.filter(m=>{let t=(m.full_names+m.staff_no+m.email).toLowerCase();return t.includes(qq)&&(!pp||m.project==pp);}));}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=" + ADMIN_KEY + "',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script></body></html>"
+    return render_template_string(html)
+
+@app.route("/admin/register")
+def admin_register():
+    key = request.args.get("key")
+    if key != ADMIN_KEY:
+        return redirect("/admin")
+    opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
+    html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register - Admin</title><link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>" + CSS + "</head><body><div class='header'><div class='brand'><div class='brand-icon'>L</div><div class='brand-name'>LONMA<span>Admin</span></div></div><div class='nav'><a href='/admin/dashboard?key=" + ADMIN_KEY + "' class='active'>Dashboard</a><a href='/admin/register?key=" + ADMIN_KEY + "'>Register</a></div></div><div class='page' style='max-width:700px'><div class='card'><div class='card-h'><b>Register New Member</b></div><div style='padding:18px'><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'><div><label>Staff No *</label><input class='input' id='staff_no'></div><div><label>Project *</label><select class='input' id='project'>" + opts + "</select></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px'><div><label>Full Names *</label><input class='input' id='full_names'></div><div><label>Email *</label><input class='input' id='email'></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px'><div><label>Password *</label><input class='input' id='password' type='password'></div><div><label>Phone</label><input class='input' id='phone'></div></div><div style='margin-top:10px'><label>Month/Year</label><input class='input' id='month_year_joined'></div><div style='margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px'><div style='font-size:12px;font-weight:600;margin-bottom:8px'>Family</div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'><div><label>Father ID</label><input class='input' id='father_id'></div><div><label>Mother ID</label><input class='input' id='mother_id'></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px'><div><label>Guardian</label><input class='input' id='guardian_id'></div><div><label>Spouse</label><input class='input' id='spouse_id'></div></div></div><div style='margin-top:16px;border-top:1px solid #e2e8f0;padding-top:12px'><div style='font-size:12px;font-weight:600;margin-bottom:8px'>Children</div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'><div><label>Child1</label><input class='input' id='kid1'></div><div><label>Child2</label><input class='input' id='kid2'></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px'><div><label>Child3</label><input class='input' id='kid3'></div><div><label>Child4</label><input class='input' id='kid4'></div></div><div style='margin-top:8px'><label>Child5</label><input class='input' id='kid5'></div></div><button class='btn btn-dark' style='width:100%;margin-top:18px;justify-content:center' onclick='doReg()'>Create Member</button><p id='msg' style='font-size:12px;margin-top:10px;text-align:center'></p></div></div></div><script>async function doReg(){let f=['staff_no','project','full_names','email','password','phone','month_year_joined','father_id','mother_id','guardian_id','spouse_id','kid1','kid2','kid3','kid4','kid5'];let d={};f.forEach(k=>d[k]=document.getElementById(k).value);let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});let j=await r.json();let m=document.getElementById('msg');m.textContent=j.error||j.message;m.style.color=r.ok?'#16a34a':'#dc2626';if(r.ok)setTimeout(()=>location.href='/admin/dashboard?key=" + ADMIN_KEY + "',700);}</script></body></html>"
     return render_template_string(html)
 
 @app.route("/api/stats")
@@ -92,6 +112,20 @@ def api_members():
         rows = conn.execute("SELECT id,staff_no,full_names,project,month_year_joined,email,phone,is_protected FROM users ORDER BY is_protected DESC, id DESC").fetchall()
         members = [dict(r) for r in rows]
         return jsonify({"total": len(members), "members": members})
+    finally:
+        conn.close()
+
+@app.route("/api/admin/login", methods=["POST"])
+def admin_login_api():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid"}), 400
+    conn = get_db()
+    try:
+        user = conn.execute("SELECT password,api_key FROM users WHERE email=?", (data.get("email"),)).fetchone()
+        if not user or not check_password_hash(user["password"], data.get("password","")):
+            return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"key": user["api_key"]})
     finally:
         conn.close()
 
@@ -123,17 +157,20 @@ def api_register():
 def api_delete(member_id):
     if request.method == "OPTIONS":
         return "", 200
+    key = request.args.get("key") or request.args.get("api_key")
+    if key != ADMIN_KEY:
+        return jsonify({"error": "Admin key required - use admin panel"}), 401
     conn = get_db()
     try:
         user = conn.execute("SELECT id,email,is_protected,role FROM users WHERE id=?", (member_id,)).fetchone()
         if not user:
-            return jsonify({"error": "Member not found"}), 404
-        if user["is_protected"] == 1 or user["email"] == "admin@lonma.com" or user["role"] == "Admin":
-            return jsonify({"error": "Cannot delete Protected System Administrator"}), 403
+            return jsonify({"error": "Not found"}), 404
+        if user["is_protected"] == 1 or user["email"] == ADMIN_EMAIL or user["role"] == "Admin":
+            return jsonify({"error": "Cannot delete Protected Admin"}), 403
         conn.execute("BEGIN IMMEDIATE")
         conn.execute("DELETE FROM users WHERE id=?", (member_id,))
         conn.execute("COMMIT")
-        return jsonify({"message": "Member deleted"})
+        return jsonify({"message": "Deleted"})
     except Exception as e:
         try:
             conn.execute("ROLLBACK")
