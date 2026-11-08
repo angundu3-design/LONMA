@@ -8,6 +8,9 @@ PROJECTS = ["Pwani Oil Products","Java House","SJ Johnson","Kanji","HQ","Antonio
 ADMIN_KEY = "lonma_api_key_12345"
 ADMIN_EMAIL = "admin@lonma.com"
 ADMIN_PASS = "admin123"
+SUPPORT_WHATSAPP = "254707780807"
+SUPPORT_PHONE_DISPLAY = "0707 780 807"
+SUPPORT_EMAIL = "info@lonmaorbit.co.ke"
 
 def get_db():
     conn = sqlite3.connect(DB, timeout=10, check_same_thread=False, isolation_level=None)
@@ -92,7 +95,6 @@ BASE = """
 .photo-box img{width:100%;height:100%;object-fit:cover}
 .photo-box.has-photo{border-style:solid;border-color:#1e88e5}
 .photo-upload-text{font-size:11px;color:#64748b;font-weight:600;text-align:center}
-/* POPUPS */
 .popup{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
 .popup.show{display:flex}
 .popup-card{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;max-height:82vh;overflow:auto;padding-bottom:20px;animation:slideUp .25s ease}
@@ -128,8 +130,6 @@ BASE = """
 </div>
 <div class="sidebar-bottom"><span>LONMA WELFARE</span><span>v4.33.0 (patch 1)</span></div>
 </div>
-
-<!-- BELL POPUP -->
 <div class="popup" id="bellPopup" onclick="if(event.target===this)closeBell()">
 <div class="popup-card">
 <div class="popup-head"><div><div style="font-weight:800;font-size:17px">🔔 Notifications</div><div style="font-size:12px;color:#64748b" id="notifCount">3 new</div></div><button onclick="closeBell()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;font-size:18px;cursor:pointer">✕</button></div>
@@ -137,15 +137,13 @@ BASE = """
 <div style="padding:0 20px"><button onclick="markRead()" style="width:100%;height:44px;border-radius:12px;border:1px solid #e2e8f0;background:#fff;font-weight:700;cursor:pointer">Mark all as read</button></div>
 </div>
 </div>
-
-<!-- SUPPORT POPUP -->
 <div class="popup" id="supportPopup" onclick="if(event.target===this)closeSupport()">
 <div class="popup-card">
 <div class="popup-head"><div><div style="font-weight:800;font-size:17px">🎧 Contact Support</div><div style="font-size:12px;color:#64748b">We reply within 1 hour</div></div><button onclick="closeSupport()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;font-size:18px;cursor:pointer">✕</button></div>
 <div style="padding:18px 20px">
-<div class="support-opt" onclick="window.open('https://wa.me/254700000000?text=Hi LONMA Support, I need help','_blank')"><div style="font-size:28px">💬</div><div><div style="font-weight:700">WhatsApp Support</div><div style="font-size:12px;color:#64748b">Chat now - 0700 000 000</div></div><div style="margin-left:auto">›</div></div>
-<div class="support-opt" onclick="window.location.href='mailto:admin@lonma.com?subject=LONMA Support'"><div style="font-size:28px">📧</div><div><div style="font-weight:700">Email Support</div><div style="font-size:12px;color:#64748b">admin@lonma.com</div></div><div style="margin-left:auto">›</div></div>
-<div class="support-opt" onclick="window.location.href='tel:0700000000'"><div style="font-size:28px">📞</div><div><div style="font-weight:700">Call Support</div><div style="font-size:12px;color:#64748b">0700 000 000 - Mon-Sat 8am-6pm</div></div><div style="margin-left:auto">›</div></div>
+<div class="support-opt" onclick="window.open('https://wa.me/254707780807?text=Hi LONMA Support, I need help','_blank')"><div style="font-size:28px">💬</div><div><div style="font-weight:700">WhatsApp Support</div><div style="font-size:12px;color:#64748b">Chat now - 0707 780 807</div></div><div style="margin-left:auto">›</div></div>
+<div class="support-opt" onclick="window.location.href='mailto:info@lonmaorbit.co.ke?subject=LONMA Support'"><div style="font-size:28px">📧</div><div><div style="font-weight:700">Email Support</div><div style="font-size:12px;color:#64748b">info@lonmaorbit.co.ke</div></div><div style="margin-left:auto">›</div></div>
+<div class="support-opt" onclick="window.location.href='tel:0707780807'"><div style="font-size:28px">📞</div><div><div style="font-weight:700">Call Support</div><div style="font-size:12px;color:#64748b">0707 780 807 - Mon-Sat 8am-6pm</div></div><div style="margin-left:auto">›</div></div>
 <div style="margin:18px 0 10px;font-weight:800;font-size:13px">SEND A MESSAGE</div>
 <label class="label">Your Name</label><input class="input" id="supName" placeholder="Your name">
 <div style="margin-top:12px"><label class="label">Message</label><textarea id="supMsg" style="width:100%;height:90px;border:1px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;outline:none" placeholder="Describe your issue..."></textarea></div>
@@ -154,7 +152,6 @@ BASE = """
 </div>
 </div>
 </div>
-
 <script>
 function openMenu(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show')}
 function closeMenu(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
