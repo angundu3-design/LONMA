@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template_string, redirect
-import sqlite3, os, secrets, base64
+import sqlite3, os, secrets
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -21,12 +21,18 @@ def get_db():
 def init_db():
     conn = get_db()
     conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, staff_no TEXT, full_names TEXT, project TEXT, email TEXT UNIQUE, password TEXT, role TEXT, phone TEXT, api_key TEXT, is_protected INTEGER DEFAULT 0, month_joined TEXT, father_id TEXT, mother_id TEXT, guardian_id TEXT, spouse_id TEXT, kid1 TEXT, kid2 TEXT, kid3 TEXT, kid4 TEXT, kid5 TEXT, photo TEXT)')
+    conn.execute('CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, msg TEXT, created TEXT)')
+    conn.execute('CREATE TABLE IF NOT EXISTS support_msgs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, msg TEXT, created TEXT)')
     for col in ["month_joined","father_id","mother_id","guardian_id","spouse_id","kid1","kid2","kid3","kid4","kid5","photo"]:
         try: conn.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
         except: pass
     if not conn.execute("SELECT id FROM users WHERE email=?", (ADMIN_EMAIL,)).fetchone():
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
-    conn.close()
+    if not conn.execute("SELECT id FROM notifications").fetchone():
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to LONMA","Your welfare system is active. HQ 0 - ready to register members.","Now"))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Photo Feature Added","You can now add a photo for each member in Register.","Now"))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("System Update","Pricelist, Products, Live Location & Off Site Order removed.","Now"))
+    conn.commit(); conn.close()
 init_db()
 
 @app.after_request
@@ -46,7 +52,9 @@ BASE = """
 .brand-top{display:flex;align-items:center;gap:10px}
 .brand-icon{width:36px;height:36px;background:#fff;color:#1565c0;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800}
 .brand-name{font-weight:800;font-size:14px;line-height:1.1}.brand-name span{font-size:10px;font-weight:600;display:block;opacity:.9}
-.header-icons{display:flex;gap:12px}.h-icon{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px}
+.header-icons{display:flex;gap:12px;position:relative}.h-icon{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;position:relative}
+.h-icon:active{background:rgba(255,255,255,.35)}
+.badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #1565c0}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}.overlay.show{display:block}
 .sidebar{position:fixed;top:0;left:0;width:300px;height:100%;background:#fff;z-index:50;transform:translateX(-100%);transition:transform .3s ease;overflow:hidden;display:flex;flex-direction:column;border-radius:0 20px 20px 0;box-shadow:4px 0 24px rgba(0,0,0,.15)}
 .sidebar.open{transform:translateX(0)}
@@ -84,11 +92,20 @@ BASE = """
 .photo-box img{width:100%;height:100%;object-fit:cover}
 .photo-box.has-photo{border-style:solid;border-color:#1e88e5}
 .photo-upload-text{font-size:11px;color:#64748b;font-weight:600;text-align:center}
+/* POPUPS */
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.popup.show{display:flex}
+.popup-card{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;max-height:82vh;overflow:auto;padding-bottom:20px;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.popup-head{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f1f5f9;position:sticky;top:0;background:#fff}
+.notif-item{padding:16px 20px;border-bottom:1px solid #f8fafc;display:flex;gap:12px}
+.notif-dot{width:10px;height:10px;background:#1565c0;border-radius:50%;margin-top:6px;flex-shrink:0}
+.support-opt{display:flex;gap:14px;align-items:center;padding:16px;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;cursor:pointer}
 @media(max-width:600px){.stat-grid{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
 </style>
 <div class="app-header">
 <div class="left"><button class="menu-btn" onclick="openMenu()">☰</button><div class="brand-top"><div class="brand-icon">L</div><div class="brand-name">LONMA<span>WELFARE SYSTEM</span></div></div></div>
-<div class="header-icons"><div class="h-icon">🔔</div><div class="h-icon">🎧</div></div>
+<div class="header-icons"><div class="h-icon" onclick="openBell()">🔔<span class="badge" id="bellBadge">3</span></div><div class="h-icon" onclick="openSupport()">🎧</div></div>
 </div>
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 <div class="sidebar" id="sidebar">
@@ -102,17 +119,65 @@ BASE = """
 <a class="menu-item" href="/members"><span class="icon">👥</span> Members</a>
 <a class="menu-item" href="/register"><span class="icon">➕</span> Register Member</a>
 <div style="height:1px;background:#f1f5f9;margin:8px 20px"></div>
+<a class="menu-item" href="#" onclick="openBell();return false"><span class="icon">🔔</span> Notifications</a>
+<a class="menu-item" href="#" onclick="openSupport();return false"><span class="icon">🎧</span> Contact Support</a>
 <a class="menu-item" href="#"><span class="icon">🔄</span> Syncing</a>
 <a class="menu-item" href="#"><span class="icon">💬</span> Give Feedback</a>
-<a class="menu-item" href="#"><span class="icon">🎧</span> Contact Support</a>
 <a class="menu-item" href="/admin"><span class="icon">⚙️</span> Settings</a>
 <a class="menu-item" href="/admin" style="color:#dc2626"><span class="icon">⏻</span> Log Out</a>
 </div>
 <div class="sidebar-bottom"><span>LONMA WELFARE</span><span>v4.33.0 (patch 1)</span></div>
 </div>
+
+<!-- BELL POPUP -->
+<div class="popup" id="bellPopup" onclick="if(event.target===this)closeBell()">
+<div class="popup-card">
+<div class="popup-head"><div><div style="font-weight:800;font-size:17px">🔔 Notifications</div><div style="font-size:12px;color:#64748b" id="notifCount">3 new</div></div><button onclick="closeBell()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;font-size:18px;cursor:pointer">✕</button></div>
+<div id="notifList"><div style="padding:30px;text-align:center;color:#64748b">Loading...</div></div>
+<div style="padding:0 20px"><button onclick="markRead()" style="width:100%;height:44px;border-radius:12px;border:1px solid #e2e8f0;background:#fff;font-weight:700;cursor:pointer">Mark all as read</button></div>
+</div>
+</div>
+
+<!-- SUPPORT POPUP -->
+<div class="popup" id="supportPopup" onclick="if(event.target===this)closeSupport()">
+<div class="popup-card">
+<div class="popup-head"><div><div style="font-weight:800;font-size:17px">🎧 Contact Support</div><div style="font-size:12px;color:#64748b">We reply within 1 hour</div></div><button onclick="closeSupport()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;font-size:18px;cursor:pointer">✕</button></div>
+<div style="padding:18px 20px">
+<div class="support-opt" onclick="window.open('https://wa.me/254700000000?text=Hi LONMA Support, I need help','_blank')"><div style="font-size:28px">💬</div><div><div style="font-weight:700">WhatsApp Support</div><div style="font-size:12px;color:#64748b">Chat now - 0700 000 000</div></div><div style="margin-left:auto">›</div></div>
+<div class="support-opt" onclick="window.location.href='mailto:admin@lonma.com?subject=LONMA Support'"><div style="font-size:28px">📧</div><div><div style="font-weight:700">Email Support</div><div style="font-size:12px;color:#64748b">admin@lonma.com</div></div><div style="margin-left:auto">›</div></div>
+<div class="support-opt" onclick="window.location.href='tel:0700000000'"><div style="font-size:28px">📞</div><div><div style="font-weight:700">Call Support</div><div style="font-size:12px;color:#64748b">0700 000 000 - Mon-Sat 8am-6pm</div></div><div style="margin-left:auto">›</div></div>
+<div style="margin:18px 0 10px;font-weight:800;font-size:13px">SEND A MESSAGE</div>
+<label class="label">Your Name</label><input class="input" id="supName" placeholder="Your name">
+<div style="margin-top:12px"><label class="label">Message</label><textarea id="supMsg" style="width:100%;height:90px;border:1px solid #e2e8f0;border-radius:12px;padding:12px;font-size:14px;outline:none" placeholder="Describe your issue..."></textarea></div>
+<button class="btn-primary" onclick="sendSupport()">Send Message →</button>
+<p id="supStatus" style="text-align:center;font-size:13px;margin-top:10px;font-weight:600"></p>
+</div>
+</div>
+</div>
+
 <script>
 function openMenu(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show')}
 function closeMenu(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+async function openBell(){
+ closeMenu();
+ document.getElementById('bellPopup').classList.add('show');
+ let r=await fetch('/api/notifications');let d=await r.json();
+ let h='';
+ if(d.notifications.length==0) h='<div style="padding:30px;text-align:center;color:#64748b">No notifications</div>';
+ else d.notifications.forEach(n=>{h+='<div class="notif-item"><div class="notif-dot"></div><div><div style="font-weight:700;font-size:14px">'+n.title+'</div><div style="font-size:13px;color:#475569;margin-top:3px">'+n.msg+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">'+n.created+'</div></div></div>'});
+ document.getElementById('notifList').innerHTML=h;
+ document.getElementById('notifCount').textContent=d.notifications.length+' notifications';
+}
+function closeBell(){document.getElementById('bellPopup').classList.remove('show')}
+function markRead(){document.getElementById('bellBadge').style.display='none';document.getElementById('notifList').innerHTML='<div style="padding:30px;text-align:center;color:#16a34a;font-weight:700">✓ All read</div>';}
+function openSupport(){closeMenu();document.getElementById('supportPopup').classList.add('show')}
+function closeSupport(){document.getElementById('supportPopup').classList.remove('show')}
+async function sendSupport(){
+ let name=document.getElementById('supName').value;let msg=document.getElementById('supMsg').value;
+ if(!msg){document.getElementById('supStatus').textContent='Please write a message';document.getElementById('supStatus').style.color='#dc2626';return;}
+ let r=await fetch('/api/support',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,msg:msg})});
+ let j=await r.json();let s=document.getElementById('supStatus');s.textContent=j.message;s.style.color='#16a34a';document.getElementById('supMsg').value='';
+}
 document.addEventListener('DOMContentLoaded',()=>{let path=location.pathname;document.querySelectorAll('.menu-item').forEach(a=>{if(a.getAttribute('href')===path)a.classList.add('active')})})
 </script>
 """
@@ -141,7 +206,6 @@ def members_page():
 def register_page():
     opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
     html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Welfare Registration Form</div><div class='card-sub'>Add member with photo</div></div><div class='card-body'>
-
 <div style="display:flex;gap:20px;align-items:center;margin-bottom:20px">
 <div class="photo-box" id="photoBox" onclick="document.getElementById('photoInput').click()">
 <img id="photoPreview" style="display:none">
@@ -149,7 +213,6 @@ def register_page():
 </div>
 <div><div style="font-weight:700;font-size:14px">Member Photo</div><div style="font-size:12px;color:#64748b;margin-top:4px">Tap to upload photo<br>Max 2MB - JPG, PNG</div><input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)"></div>
 </div>
-
 <div class='section'><div class='section-num'>1</div><div class='section-label'>Staff Information</div></div>
 <div class='grid2'><div><label class='label'>Staff Number</label><input class='input' id='staff_no' placeholder='PWANI/001'></div><div><label class='label'>Project</label><select class='input' id='project'>""" + opts + """</select></div></div>
 <div style='margin-top:12px' class='grid2'><div><label class='label'>Date Joined</label><input class='input' id='month_joined' placeholder='Jan 2024'></div><div><label class='label'>Full Names *</label><input class='input' id='full_names' placeholder='Full Name'></div></div>
@@ -208,8 +271,9 @@ def admin_dashboard():
     key = request.args.get("key")
     if key != ADMIN_KEY:
         return redirect("/admin")
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header'><div class='card-title'>Admin - Welfare Management with Photos</div></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div></div>
-<script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let photo=m.photo?'<img src="'+m.photo+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover">':'<div style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700">'+(m.full_names||'A').charAt(0)+'</div>';let btn=prot?'<span style="color:#94a3b8;font-size:12px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;border:1px solid #fee2e2;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer">Delete</button>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px">'+photo+'</td><td style="padding:14px"><b>'+m.staff_no+'</b><div style="font-weight:700">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">'+m.email+'</div></td><td style="padding:14px;font-size:11px">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'<br>Kids:'+([m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(',')||'-')+'</td><td style="padding:14px">'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header'><div class='card-title'>Admin - Welfare Management with Photos</div></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div>
+<div class='card'><div class='card-header'><div class='card-title'>📩 Support Messages</div></div><div id='supList' style='padding:10px 20px'>Loading...</div></div></div>
+<script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let photo=m.photo?'<img src="'+m.photo+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover">':'<div style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700">'+(m.full_names||'A').charAt(0)+'</div>';let btn=prot?'<span style="color:#94a3b8;font-size:12px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;border:1px solid #fee2e2;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer">Delete</button>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px">'+photo+'</td><td style="padding:14px"><b>'+m.staff_no+'</b><div style="font-weight:700">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">'+m.email+'</div></td><td style="padding:14px;font-size:11px">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'<br>Kids:'+([m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(',')||'-')+'</td><td style="padding:14px">'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;let r2=await fetch('/api/support_list');let d2=await r2.json();let h2='';if(d2.messages.length==0)h2='<div style="color:#64748b">No support messages yet</div>';else d2.messages.forEach(m=>{h2+='<div style="padding:12px 0;border-bottom:1px solid #f1f5f9"><b>'+(m.name||'Guest')+'</b> <span style="font-size:11px;color:#94a3b8">'+m.created+'</span><div style="font-size:14px">'+m.msg+'</div></div>'});document.getElementById('supList').innerHTML=h2;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
 </body></html>"""
     return render_template_string(html)
 
@@ -222,6 +286,35 @@ def api_stats():
         for p in PROJECTS:
             breakdown[p] = conn.execute("SELECT COUNT(*) FROM users WHERE project=? AND email != ?", (p, ADMIN_EMAIL)).fetchone()[0]
         return jsonify({"total_members": total, "projects_breakdown": breakdown})
+    finally:
+        conn.close()
+
+@app.route("/api/notifications")
+def api_notifs():
+    conn = get_db()
+    try:
+        rows = conn.execute("SELECT * FROM notifications ORDER BY id DESC").fetchall()
+        return jsonify({"notifications": [dict(r) for r in rows]})
+    finally:
+        conn.close()
+
+@app.route("/api/support", methods=["POST"])
+def api_support():
+    data = request.get_json(silent=True) or {}
+    conn = get_db()
+    try:
+        conn.execute("INSERT INTO support_msgs (name,msg,created) VALUES (?,?,datetime('now'))", (data.get("name","Guest"), data.get("msg","")))
+        conn.commit()
+        return jsonify({"message": "Message sent! Support will reply soon."})
+    finally:
+        conn.close()
+
+@app.route("/api/support_list")
+def api_support_list():
+    conn = get_db()
+    try:
+        rows = conn.execute("SELECT * FROM support_msgs ORDER BY id DESC").fetchall()
+        return jsonify({"messages": [dict(r) for r in rows]})
     finally:
         conn.close()
 
@@ -268,10 +361,10 @@ def api_register():
             return jsonify({"error": "Email exists"}), 400
         api_key = "lonma_" + secrets.token_hex(16)
         photo = data.get("photo","")
-        # limit photo size to prevent DB bloat
         if len(photo) > 500000:
             photo = photo[:500000]
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (data.get("staff_no",""), data.get("full_names",""), data.get("project","HQ"), data["email"], generate_password_hash(data["password"]), api_key, data.get("month_joined",""), data.get("father_id",""), data.get("mother_id",""), data.get("guardian_id",""), data.get("spouse_id",""), data.get("kid1",""), data.get("kid2",""), data.get("kid3",""), data.get("kid4",""), data.get("kid5",""), photo))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("New Member Registered", f"{data.get('full_names','')} joined {data.get('project','')}", "Just now"))
         conn.commit()
         return jsonify({"message": "Member created with photo"}), 201
     except Exception as e:
