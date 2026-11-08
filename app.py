@@ -5,9 +5,42 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 DB = "lonma.db"
 PROJECTS = ["Pwani Oil Products","Java House","SJ Johnson","Kanji","HQ","Antonio","TF-TDs","TF-MT","TF-LM","GCB-MT","GCB-Ws","Hichem"]
+PROJECT_MAP = {"Pwani":"Pwani Oil Products","Pwani Oil Products":"Pwani Oil Products","Java":"Java House","SJ":"SJ Johnson"}
 ADMIN_KEY = "lonma_api_key_12345"
 ADMIN_EMAIL = "admin@lonma.com"
 ADMIN_PASS = "admin123"
+
+# --- YOUR EXCEL DATA - PWANI - 13 MEMBERS ---
+SEED_DATA = [
+ ("202712","Pwani","Nov.2022","Laura Imali","","","0327707","37982161","112409612","","","",""),
+ ("202710","Pwani","Dec.2020","Edith Kabera","","","23740423","23965879","10700481","112152616","11250650","",""),
+ ("202677","Pwani","October.2024","Phoebe Anyango","1014509","2266278","","","","","","",""),
+ ("202706","Pwani","Aug.2021","Cynthia Awuor","","9892352","","","1231202182","","","",""),
+ ("202707","Pwani","Nov.2021","Maureen Owino","2859205","4313510","28254592","24675501","9927L79","3300789","26057L7","9999788",""),
+ ("202721","Pwani","March .2023","Merceline Adhiambo","4026148","13199939","","27472316","3271828","","","",""),
+ ("202705","Pwani","Marh 2019","Odiembo Yvonne","","8351397","","","will give later","","","",""),
+ ("202722","Pwani","Dec.2023","Linet Oduor","2828431","14479498","","","","","","",""),
+ ("202746","Pwani","Nov.2025","Divyan Dorcas","","13603542","","","","","","",""),
+ ("202708","Pwani","Jan. 2020","Lilian Muchuma","","261270","","","110707451","","","",""),
+ ("202711","Pwani","Sept.2021","John Adiel","","1329824","28565804","32190036","","","","",""),
+ ("292932","Pwani","May.2026","Milcah Otiende","8232129","7861021","","32624856","4094626","","","",""),
+ ("280370","Pwani","Sept. 2026","Lucy Mwende Mbatha","2991561","2965465","","","0852106551","","","",""),
+]
+
+def clean(v):
+    if v is None: return ""
+    s = str(v).strip()
+    if s.upper() in ("NA","N/A","NA ","-","NONE"): return ""
+    if "will give" in s.lower(): return ""
+    return s
+
+def make_email(full_names, staff_no):
+    parts = [p for p in full_names.lower().replace(".","").split() if p.isalpha()]
+    if len(parts) >= 2:
+        return f"{parts[0]}.{parts[-1]}@figbrands.co.ke"
+    elif parts:
+        return f"{parts[0]}.{staff_no}@figbrands.co.ke"
+    return f"member.{staff_no}@figbrands.co.ke"
 
 def get_db():
     conn = sqlite3.connect(DB, timeout=10, check_same_thread=False, isolation_level=None)
@@ -30,9 +63,22 @@ def init_db():
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
     if not conn.execute("SELECT id FROM notifications").fetchone():
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to F.I.G BRANDS WELFARE","Your welfare system is active. HQ 0 - ready to register members.","Now"))
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Photo Feature Added","You can now add a photo for each member in Register.","Now"))
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("System Update","Pricelist, Products, Live Location & Off Site Order removed.","Now"))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Pwani Data Imported","13 Pwani members added from Excel.","Now"))
+    # SEED EXCEL DATA - per project - skip if staff_no exists
+    added = 0
+    for staff_no, proj_raw, month, names, father, mother, guardian, spouse, k1, k2, k3, k4, k5 in SEED_DATA:
+        staff_no = clean(staff_no); names = clean(names)
+        if not staff_no or not names: continue
+        if conn.execute("SELECT id FROM users WHERE staff_no=?", (staff_no,)).fetchone(): continue
+        project = PROJECT_MAP.get(proj_raw, proj_raw)
+        email = make_email(names, staff_no)
+        # avoid email clash
+        if conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone():
+            email = f"member.{staff_no}@figbrands.co.ke"
+        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (staff_no, names, project, email, generate_password_hash(staff_no), "fig_"+secrets.token_hex(12), clean(month), clean(father), clean(mother), clean(guardian), clean(spouse), clean(k1), clean(k2), clean(k3), clean(k4), clean(k5), ""))
+        added += 1
     conn.commit(); conn.close()
+    print(f"Seeded {added} Pwani members")
 init_db()
 
 @app.after_request
@@ -185,7 +231,7 @@ MEMBER_BASE = BASE.replace('F.I.G ADMIN','F.I.G MEMBER').replace('admin@lonma.co
 def home():
     html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>F.I.G BRANDS WELFARE</title>""" + BASE + """<div class='page'>
 <div class='stat-grid'><div class='stat'><div class='stat-l'>Total Members</div><div class='stat-v' id='total'>0</div></div><div class='stat'><div class='stat-l'>Projects</div><div class='stat-v'>12</div></div><div class='stat'><div class='stat-l'>Status</div><div class='stat-v' style='color:#16a34a'>Active</div></div></div>
-<div class='card'><div class='card-header'><div class='card-title'>Project Distribution</div><div class='card-sub'>Members per project (HQ 0)</div></div><div id='breakdown'></div></div>
+<div class='card'><div class='card-header'><div class='card-title'>Project Distribution</div><div class='card-sub'>Members per project</div></div><div id='breakdown'></div></div>
 </div>
 <script>
 async function load(){let r=await fetch('/api/stats');let d=await r.json();document.getElementById('total').textContent=d.total_members;let h='';for(let k in d.projects_breakdown){h+='<div style="padding:14px 22px;border-bottom:1px solid #f8fafc;display:flex;justify-content:space-between;font-size:14px"><span>'+k+'</span><b>'+d.projects_breakdown[k]+'</b></div>';}document.getElementById('breakdown').innerHTML=h;}
@@ -196,14 +242,15 @@ load();
 
 @app.route("/members")
 def members_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - F.I.G BRANDS WELFARE</title>""" + MEMBER_BASE + """<div class='page' style='max-width:900px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px'><div><div class='card-title'>Members - Credentials</div><div class='card-sub'>Registered member credentials only - No photo</div></div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='padding:12px'><input class='input' id='q' placeholder='Search by name, staff no, project...' oninput='fil()'></div><div id='list' style='padding:0 12px 16px'></div></div></div>
+    proj_opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in ["All Projects"]+PROJECTS])
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - F.I.G BRANDS WELFARE</title>""" + MEMBER_BASE + """<div class='page' style='max-width:900px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px'><div><div class='card-title'>Members - Credentials</div><div class='card-sub'>Registered member credentials only - No photo</div></div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='padding:12px;display:flex;gap:10px'><input class='input' id='q' placeholder='Search by name, staff no, project...' oninput='fil()' style='flex:2'><select class='input' id='projFilter' onchange='fil()' style='flex:1'>""" + proj_opts + """</select></div><div id='list' style='padding:0 12px 16px'></div></div></div>
 <script>
 let all=[];
 async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}
 function row(label,val){return '<div class="cred-row"><span>'+label+'</span><span>'+(val||'-')+'</span></div>';}
 function render(l){
  let h='';
- if(l.length==0){h='<div style="padding:30px;text-align:center;color:#64748b">No members yet</div>';}
+ if(l.length==0){h='<div style="padding:30px;text-align:center;color:#64748b">No members yet for this project</div>';}
  else{l.forEach(m=>{
    let kids=[m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(', ')||'-';
    h+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin-bottom:12px">'
@@ -219,7 +266,15 @@ function render(l){
  });}
  document.getElementById('list').innerHTML=h;
 }
-function fil(){let qq=document.getElementById('q').value.toLowerCase();render(all.filter(m=>(m.full_names+' '+m.staff_no+' '+m.project+' '+(m.guardian_id||'')+' '+(m.spouse_id||'')).toLowerCase().includes(qq)));}
+function fil(){
+ let qq=document.getElementById('q').value.toLowerCase();
+ let pf=document.getElementById('projFilter').value;
+ render(all.filter(m=>{
+   let okSearch=(m.full_names+' '+m.staff_no+' '+m.project+' '+(m.guardian_id||'')+' '+(m.spouse_id||'')).toLowerCase().includes(qq);
+   let okProj=(pf=='All Projects'||m.project==pf);
+   return okSearch&&okProj;
+ }));
+}
 load();
 </script>
 </body></html>"""
@@ -302,9 +357,13 @@ def admin_dashboard():
 
 @app.route("/download/excel")
 def download_excel():
+    proj = request.args.get("project","")
     conn = get_db()
     try:
-        rows = conn.execute("SELECT staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
+        if proj and proj != "All Projects":
+            rows = conn.execute("SELECT staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? AND project=? ORDER BY id DESC", (ADMIN_EMAIL, proj)).fetchall()
+        else:
+            rows = conn.execute("SELECT staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
         headers = ["Staff Number","Full Names","Project","Email","Date Joined","Father ID","Mother ID","Guardian ID","Spouse ID","Kid 1 Birth Cert","Kid 2 Birth Cert","Kid 3 Birth Cert","Kid 4 Birth Cert","Kid 5 Birth Cert"]
         try:
             from openpyxl import Workbook
@@ -375,9 +434,13 @@ def api_support_list():
 
 @app.route("/api/members")
 def api_members():
+    proj = request.args.get("project","")
     conn = get_db()
     try:
-        rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
+        if proj and proj != "All Projects":
+            rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? AND project=? ORDER BY id DESC", (ADMIN_EMAIL, proj)).fetchall()
+        else:
+            rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
         return jsonify({"members": [dict(r) for r in rows]})
     finally:
         conn.close()
@@ -414,12 +477,13 @@ def api_register():
     try:
         if conn.execute("SELECT id FROM users WHERE email=?", (data["email"],)).fetchone():
             return jsonify({"error": "Email exists"}), 400
-        api_key = "lonma_" + secrets.token_hex(16)
+        api_key = "fig_"+secrets.token_hex(12)
         photo = data.get("photo","")
         if len(photo) > 500000:
             photo = photo[:500000]
-        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (data.get("staff_no",""), data.get("full_names",""), data.get("project","HQ"), data["email"], generate_password_hash(data["password"]), api_key, data.get("month_joined",""), data.get("father_id",""), data.get("mother_id",""), data.get("guardian_id",""), data.get("spouse_id",""), data.get("kid1",""), data.get("kid2",""), data.get("kid3",""), data.get("kid4",""), data.get("kid5",""), photo))
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("New Member Registered", f"{data.get('full_names','')} joined {data.get('project','')}", "Just now"))
+        proj = PROJECT_MAP.get(data.get("project","HQ"), data.get("project","HQ"))
+        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (data.get("staff_no",""), data.get("full_names",""), proj, data["email"], generate_password_hash(data["password"]), api_key, data.get("month_joined",""), data.get("father_id",""), data.get("mother_id",""), data.get("guardian_id",""), data.get("spouse_id",""), data.get("kid1",""), data.get("kid2",""), data.get("kid3",""), data.get("kid4",""), data.get("kid5",""), photo))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("New Member Registered", f"{data.get('full_names','')} joined {proj}", "Just now"))
         conn.commit()
         return jsonify({"message": "Member created with photo"}), 201
     except Exception as e:
