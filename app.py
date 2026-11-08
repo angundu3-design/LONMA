@@ -5,12 +5,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 DB = "lonma.db"
 PROJECTS = ["Pwani Oil Products","Java House","SJ Johnson","Kanji","HQ","Antonio","TF-TDs","TF-MT","TF-LM","GCB-MT","GCB-Ws","Hichem"]
-PROJECT_MAP = {"Pwani":"Pwani Oil Products","Pwani Oil Products":"Pwani Oil Products","Java":"Java House","SJ":"SJ Johnson"}
+PROJECT_MAP = {"Pwani":"Pwani Oil Products","Pwani Oil Products":"Pwani Oil Products","Pwani Oil Products Ltd.":"Pwani Oil Products","Java":"Java House","SJ":"SJ Johnson"}
 ADMIN_KEY = "lonma_api_key_12345"
 ADMIN_EMAIL = "admin@lonma.com"
 ADMIN_PASS = "admin123"
 
 SEED_DATA = [
+ # --- FIRST FILE - 13 PWANI ---
  ("202712","Pwani","Nov.2022","Laura Imali","","","0327707","37982161","112409612","","","",""),
  ("202710","Pwani","Dec.2020","Edith Kabera","","","23740423","23965879","10700481","112152616","11250650","",""),
  ("202677","Pwani","October.2024","Phoebe Anyango","1014509","2266278","","","","","","",""),
@@ -24,12 +25,30 @@ SEED_DATA = [
  ("202711","Pwani","Sept.2021","John Adiel","","1329824","28565804","32190036","","","","",""),
  ("292932","Pwani","May.2026","Milcah Otiende","8232129","7861021","","32624856","4094626","","","",""),
  ("280370","Pwani","Sept. 2026","Lucy Mwende Mbatha","2991561","2965465","","","0852106551","","","",""),
+ # --- SECOND FILE - NORTH RIFT - 17 PWANI OIL PRODUCTS LTD. ---
+ ("202700","Pwani Oil Products Ltd.","Mar.2025","Charles Kimutai Kirui","3872261","3872429","","31045698","612112010","","","",""),
+ ("202709","Pwani Oil Products Ltd.","Mar.2025","Oyoyo Yvonne Bentar","","11801824","","27464418","","","","",""),
+ ("202678","Pwani Oil Products Ltd.","Mar.2025","Owen Muthee Waithaka","21217575","22555615","","","","","","",""),
+ ("202733","Pwani Oil Products Ltd.","Mar.2025","Sharon Cherono","","11635405","","","","","","",""),
+ ("202529","Pwani Oil Products Ltd.","Mar.2025","Alex Shangala","4176764","7956390","","33313078","692102029","691828162","","",""),
+ ("202729","Pwani Oil Products Ltd.","Mar.2025","Rose Lumonya Saidi","","4252080","","","","","","",""),
+ ("202747","Pwani Oil Products Ltd.","Jul.2025","Brenda Nelima Wafula","","133101","","","","","","",""),
+ ("10405","Pwani Oil Products Ltd.","Mar.2025","Diana Atieno Oduor","","4722494","757617564","28078423- Ben Kitui","","370702896 -Dennis Adams","21506184- Joy Nelima","Samantha Malia Achieng",""),
+ ("202749","Pwani Oil Products Ltd.","Mar.2025","Celine Nasimiyu Wamalwa","","8784757","","28990208","William Musungu","Moses Musungu","Bryton Musungu","",""),
+ ("292976","Pwani Oil Products Ltd.","Apr.2026","Belinda Chemtai","","4722288","","","372315084","182018971","","",""),
+ ("202702","Pwani Oil Products Ltd.","May.2025","Betty Akinyi Namamba","Fabians Namamba","Janet Atieno","","","","","","",""),
+ ("202723","Pwani Oil Products Ltd.","Mar.2025","Metrine Cherop Chumo","","","","29934624","411700883","411506469","","",""),
+ ("50516","Pwani Oil Products Ltd.","May.2025","Sheila Adisa Volemi","VOLEMI","TERESIA","HUDSON IMBAYI","22175541","","","",""),
+ ("202701","Pwani Oil Products Ltd.","Mar.2025","Everlyne Mukoya Stephen","","","","23600368","","671767","395330","",""),
+ ("202703","Pwani Oil Products Ltd.","Mar.2025","Caren Nanjala Chonge","","5639451","","22086206","364057","6090663","","",""),
+ ("202704","Pwani Oil Products Ltd.","Mar.2025","Hellen Achieng Onyango","711723882","726994852","","722618476","","","","",""),
+ ("202724","Pwani Oil Products Ltd.","Mar.2025","Benta Achieng Muruka","CHRISTOPHER MURUKA","JANE MAGENGA","","28687282","1311214785","21910561","","",""),
 ]
 
 def clean(v):
     if v is None: return ""
     s = str(v).strip()
-    if s.upper() in ("NA","N/A","NA ","-","NONE"): return ""
+    if s.upper() in ("NA","N/A","NA ","-","NONE","LATER"): return ""
     if "will give" in s.lower(): return ""
     return s
 
@@ -62,7 +81,7 @@ def init_db():
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
     if not conn.execute("SELECT id FROM notifications").fetchone():
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to F.I.G BRANDS WELFARE","Your welfare system is active. HQ 0 - ready to register members.","Now"))
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Pwani Data Imported","13 Pwani members added from Excel.","Now"))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Pwani Data Imported","30 Pwani members added from Excel - incl North Rift.","Now"))
     added = 0
     for staff_no, proj_raw, month, names, father, mother, guardian, spouse, k1, k2, k3, k4, k5 in SEED_DATA:
         staff_no = clean(staff_no); names = clean(names)
@@ -72,11 +91,10 @@ def init_db():
         email = make_email(names, staff_no)
         if conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone():
             email = f"member.{staff_no}@figbrands.co.ke"
-        # FIXED: 17 columns = 17 ? below
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (staff_no, names, project, email, generate_password_hash(staff_no), "fig_"+secrets.token_hex(12), clean(month), clean(father), clean(mother), clean(guardian), clean(spouse), clean(k1), clean(k2), clean(k3), clean(k4), clean(k5), ""))
         added += 1
     conn.commit(); conn.close()
-    print(f"Seeded {added} Pwani members")
+    print(f"Seeded {added} new members - total seed {len(SEED_DATA)}")
 init_db()
 
 @app.after_request
