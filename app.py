@@ -11,7 +11,6 @@ ADMIN_EMAIL = "admin@lonma.com"
 ADMIN_PASS = "admin123"
 
 SEED_DATA = [
- # --- FIRST FILE - 13 PWANI ---
  ("202712","Pwani","Nov.2022","Laura Imali","","","0327707","37982161","112409612","","","",""),
  ("202710","Pwani","Dec.2020","Edith Kabera","","","23740423","23965879","10700481","112152616","11250650","",""),
  ("202677","Pwani","October.2024","Phoebe Anyango","1014509","2266278","","","","","","",""),
@@ -25,7 +24,6 @@ SEED_DATA = [
  ("202711","Pwani","Sept.2021","John Adiel","","1329824","28565804","32190036","","","","",""),
  ("292932","Pwani","May.2026","Milcah Otiende","8232129","7861021","","32624856","4094626","","","",""),
  ("280370","Pwani","Sept. 2026","Lucy Mwende Mbatha","2991561","2965465","","","0852106551","","","",""),
- # --- SECOND FILE - NORTH RIFT - 17 PWANI OIL PRODUCTS LTD. ---
  ("202700","Pwani Oil Products Ltd.","Mar.2025","Charles Kimutai Kirui","3872261","3872429","","31045698","612112010","","","",""),
  ("202709","Pwani Oil Products Ltd.","Mar.2025","Oyoyo Yvonne Bentar","","11801824","","27464418","","","","",""),
  ("202678","Pwani Oil Products Ltd.","Mar.2025","Owen Muthee Waithaka","21217575","22555615","","","","","","",""),
@@ -38,7 +36,7 @@ SEED_DATA = [
  ("292976","Pwani Oil Products Ltd.","Apr.2026","Belinda Chemtai","","4722288","","","372315084","182018971","","",""),
  ("202702","Pwani Oil Products Ltd.","May.2025","Betty Akinyi Namamba","Fabians Namamba","Janet Atieno","","","","","","",""),
  ("202723","Pwani Oil Products Ltd.","Mar.2025","Metrine Cherop Chumo","","","","29934624","411700883","411506469","","",""),
- ("50516","Pwani Oil Products Ltd.","May.2025","Sheila Adisa Volemi","VOLEMI","TERESIA","HUDSON IMBAYI","22175541","","","",""),
+ ("50516","Pwani Oil Products Ltd.","May.2025","Sheila Adisa Volemi","VOLEMI","TERESIA","HUDSON IMBAYI","22175541","","","","",""),
  ("202701","Pwani Oil Products Ltd.","Mar.2025","Everlyne Mukoya Stephen","","","","23600368","","671767","395330","",""),
  ("202703","Pwani Oil Products Ltd.","Mar.2025","Caren Nanjala Chonge","","5639451","","22086206","364057","6090663","","",""),
  ("202704","Pwani Oil Products Ltd.","Mar.2025","Hellen Achieng Onyango","711723882","726994852","","722618476","","","","",""),
@@ -83,7 +81,10 @@ def init_db():
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to F.I.G BRANDS WELFARE","Your welfare system is active. HQ 0 - ready to register members.","Now"))
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Pwani Data Imported","30 Pwani members added from Excel - incl North Rift.","Now"))
     added = 0
-    for staff_no, proj_raw, month, names, father, mother, guardian, spouse, k1, k2, k3, k4, k5 in SEED_DATA:
+    for _row in SEED_DATA:
+        # FIX: auto-pad short rows to 13 - never crash on ValueError again
+        _row = tuple(list(_row) + [""] * (13 - len(_row)))[:13]
+        staff_no, proj_raw, month, names, father, mother, guardian, spouse, k1, k2, k3, k4, k5 = _row
         staff_no = clean(staff_no); names = clean(names)
         if not staff_no or not names: continue
         if conn.execute("SELECT id FROM users WHERE staff_no=?", (staff_no,)).fetchone(): continue
