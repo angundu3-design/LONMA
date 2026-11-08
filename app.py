@@ -68,53 +68,28 @@ SEED_DATA = [
  ("202907","TF WSL","22/07/2026","Janet Wairimu","Joseph Waiganjo Kariuki","Grace Muthakyi Kimanzi","10767868","","3868681","","",""),
  ("280293","TF WSL","13th July 2026","Catherine Mukami","Andrew Kiruja","Naomi Adrew","","24041649","361716972","5810997","",""),
 ]
-# --- BREAKDOWN DATA - WALFARE_API_DATA.xlsx Sheet1 ---
-# project, dec, jan, feb, mar, apr, may, dec_n, jan_n, feb_n, mar_n, apr_n, may_n
-FINANCE_PROJECTS = [
- ("Pwani",21000,20400,21300,21000,21300,21600,70,68,71,70,71,72),
- ("Java",9000,9600,9900,9900,9600,9300,30,32,33,33,32,31),
- ("Johnson",10500,9600,10200,9900,9900,9300,35,32,34,33,33,31),
- ("Kanji",900,900,900,900,900,900,3,3,3,3,3,3),
- ("HQ",1200,1200,1200,1200,1200,1200,4,4,4,4,4,4),
- ("GCB-MT",4500,4500,4800,4800,4800,4500,15,15,16,16,16,15),
- ("TF-WS",4800,5100,4800,4800,4800,4500,16,17,16,16,16,15),
- ("TF-LM",12300,12300,11700,11700,12600,9300,41,41,39,39,42,31),
- ("TF-MT",19800,20700,21900,22200,21300,21300,66,69,73,74,71,71),
- ("GCB-TDs",2700,3000,3000,3300,3600,3600,9,10,10,11,12,12),
- ("Highchem",0,0,0,0,0,4800,0,0,0,0,0,16),
+# --- BREAKDOWN v44 - F.I.G_WALFARE_UPDATES.xlsx ---
+# Period 1: Oct24-Dec25 (14 months), Period 2: Dec25-Oct26 (10 months, Dec25 is overlap/correction)
+PERIODS = [
+ {"label":"Period 1: Oct 2024 - Dec 2025","months":["Oct24","Nov24","Dec24","Jan25","Feb25","Mar25","Apr25","May25","Jun25","Jul25","Aug25","Sep25","Oct25","Nov25","Dec25"],"totals":[98100,95400,95400,101700,108000,108000,110700,110700,104100,101700,99900,96600,86700,87000],"counts":[327,318,318,339,360,360,369,369,347,339,333,322,289,290,0],"grand":1404000,"expenditures":494625,
+  "projects":[("Pwani",[24600,23700,22500,24900,21600,21900,21600,21300,21900,21600,21300,21300,21300,21000,0]),("Java",[8700,8400,8700,9300,7800,7800,8700,8100,9600,9300,9600,8700,9600,9300,0]),("Johnson",[10500,10800,10200,9300,9000,9000,10200,9900,10200,9900,10200,10200,10200,9600,0]),("Kaysalt",[9600,9600,9300,9600,9000,8400,8700,8700,0,0,0,0,0,0,0]),("Kanji",[900]*15),("HQ",[900,0,1800,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,0]),("GCB-MT",[5400,4800,5100,4800,4800,4800,5100,5700,4800,4800,4800,4800,5100,5100,0]),("TF-WS",[3300,3300,3000,6300,6900,6900,5700,5100,5100,5700,5400,4800,4800,4800,0]),("TF-LM",[11700,12300,12300,11700,13200,13200,12600,12600,12300,12300,12000,12000,12600,12300,0]),("TF-MT",[19200,18000,17700,19800,17700,18000,18600,18000,18900,18000,18600,18300,18600,20100,0]),("Kenafric",[0,0,0,0,11700,12000,12300,12000,12300,12000,12600,12000,0,0,0]),("GCB-TDs",[3300,3600,3900,3900,4200,3900,5100,4800,3900,3600,3300,2400,2400,2700,0]),("LAB",[0,0,0,0,0,0,0,2400,3000,2400,0,0,0,0,0])]},
+ {"label":"Period 2: Dec 2025 - Oct 2026","months":["Dec25","Jan26","Feb26","Mar26","Apr26","May26","Jun26","Jul26","Aug26","Sep26","Oct26"],"totals":[86700,87300,89700,89700,90000,90300,92400,92400,94800,89700,0],"counts":[289,291,299,299,300,301,308,308,316,299,0],"grand":903000,"expenditures":385141,
+  "projects":[("Pwani",[21000,20400,21300,21000,21300,21600,21300,21600,20700,15300,0]),("Java",[9000,9600,9900,9900,9600,9300,9600,9300,9900,9900,0]),("Johnson",[10500,9600,10200,9900,9900,9300,8400,8700,8700,8100,0]),("Kanji",[900]*11),("HQ",[1200,1200,1200,1200,1200,1200,1200,1200,1500,1500,0]),("GCB-MT",[4500,4500,4800,4800,4800,4500,6000,5100,6000,5700,0]),("TF-WS",[4800,5100,4800,4800,4800,4500,4500,4200,3900,3900,0]),("TF-LM",[12300,12300,11700,11700,12600,9300,9000,9900,10200,12000,0]),("TF-MT",[19800,20700,21900,22200,21300,21300,21900,21900,22200,21900,0]),("GCB-TDs",[2700,3000,3000,3300,3600,3600,3600,3600,4800,5100,0]),("Highchem",[0,0,0,0,0,4800,5100,5100,5400,4800,0]),("Antonia",[0,0,0,0,0,0,900,900,600,600,0])]},
 ]
-FINANCE_TOTALS = (86700,87300,89700,89700,90000,90300,289,291,299,299,300,301)
-BENEFICIARIES = [
- ("Rose Lumonya Saidi","POPL","Death-Father","Dec 2025",40000),
- ("Nostar","TF","Loss of earning","Dec 2025",19000),
- ("Susan Ndungu","TF","Death-Father","26 Jan 2026",40000),
- ("Irene Wairimu","Java","Death-Guardian","May 2026",40000),
- ("Mercy Mwende","GCB","Loss of earning","May 2026",11075),
- ("Damarais Muyoka","TF","Death-Father","May 2026",40000),
- ("Ruth Amollo Nyangun","","Death-Father","Jun 2026",40000),
- ("Sheila Okomo","TF","Loss of earning","May",9000),
- ("Sheila Okomo","TF","Loss of earning","June",9000),
+# Beneficiaries unique - Period1 461000 (20) + Period2 new 320075 (11, Nostar dup removed) = 781075
+BENEFICIARIES2 = [
+ ("Period 1","Mary Ngota","GCB","Dad-Death","Nov 2024",30000),("Period 1","Mariamu","GCB","Dad-Death","Dec 2024",30000),("Period 1","Claire Osiako","Kaysalt","Dad-Death","2 Dec 2024",30000),("Period 1","Rachael Ndungu","Pwani","Mum-Death","10 Dec 2024",30000),("Period 1","Teresih Kariuki","TF","Dad-Death","17 Dec 2024",30000),("Period 1","Hannah Ngaruiya","Pwani","Loss of earning","4 Dec 2024",9500),("Period 1","Hannah Ngaruiya","Pwani","Loss of earning","2 Jan 2025",9500),("Period 1","Hannah Ngaruiya","Pwani","Loss of earning","2 Feb 2025",9500),("Period 1","(Unnamed)","SJ","Daughter-Death","",30000),("Period 1","Jecinta Nduta Karanja","TF","Loss of earning","",9000),("Period 1","Winnie","TF B","Dad-Death","",30000),("Period 1","Maureen Kiare","Kenafric","Dad-Death","July",30000),("Period 1","Eugene Otieno","TF","Dad-Death","July",30000),("Period 1","Ann Wambui Muchemi","Java","Loss of earning","Aug 2025",22000),("Period 1","Mercy Mwikali","TF","Guardian","Aug 2025",30000),("Period 1","Ann Wambui Muchemi","Java","Loss of earning","Aug 2025",11000),("Period 1","Annah Nthamba Musyoki","Java","Dad-Death","Sep 2025",30000),("Period 1","Eunice Wairimu Wanjiku","SJ","Dad-Death","Oct 2025",30000),("Period 1","JJJJ","","Loss of earning","",11500),("Period 1","Nostar","TF","Loss of earning","",19000),
+ ("Period 2","Rose Lumonya Saidi","POPL","Death-Father","Dec 2025",40000),("Period 2","Susan Ndungu","TF","Death-Father","26 Jan 2026",40000),("Period 2","Irene Wairimu","Java","Death-Guardian","May 2026",40000),("Period 2","Mercy Mwende","GCB","Loss of earning","May 2026",11075),("Period 2","Damarais Muyoka","TF","Death-Father","May 2026",40000),("Period 2","Ruth Amollo Nyangun","","Death-Father","Jun 2026",40000),("Period 2","Sheila Okomo","TF","Loss of earning","May",9000),("Period 2","Sheila Okomo","TF","Loss of earning","June",9000),("Period 2","(Unnamed)","TF","Death-Father","",40000),("Period 2","Vivian Moraa","Java","Loss of earning","",11000),("Period 2","Hannah Wanjiku","TF","Death-Father","17 Aug",40000),
 ]
-FARES = [
- ("Eunice Makona","0714910135",1200),
- ("Hellen Onyango","0724570228",1200),
- ("Caren Chonge","0710427468",900),
- ("Antony Mwendia","",1500),
- ("Gladys Nyaga","",1500),
- ("Marlon K. Ang'undu","",1200),
- ("Gladys Wambaire Kinuthia","",1200),
- ("Evapertual Wambui","",1200),
- ("Catherine Ogutu","",1700),
- ("Ebby Lomoi","",1700),
- ("Jackline Ayiga","",1700),
- ("Esther Marenya","",1600),
- ("George Odhiambo","",1400),
+# Fares - Period1 30000 (25) / Latest 28200 (18, incl 5 new)
+FARES2 = [
+ ("Period 1","Peter Ikegu","0704886421",1000),("Period 1","George Ibuba","0113964865",1000),("Period 1","Kevin Kipkurui","0704284388",1000),("Period 1","Valary Chepkoech","0713053696",1500),("Period 1","Mercy Njeri","0713881793",1500),("Period 1","Margaret Wangari","0720331094",1000),("Period 1","Mary Wangare","0796805933",1000),("Period 1","Daniel Mayaka","0722620252",1000),("Period 1","(Unnamed)","",1000),("Period 1","(Unnamed)","",1000),("Period 1","(Unnamed)","",1000),("Period 1","Rose","",3000),("Period 1","Jecinta Apondi","",1000),("Period 1","Mercy Onyango","",1000),("Period 1","Preskila Ondiek","",1000),("Period 1","Jane Wangari","",1500),("Period 1","Caroline Wachira","",1500),("Period 1","Joy","",1500),("Period 1","Berbciter","",1500),("Period 1","Irene Wamuyu","0719606834",1000),("Period 1","Ann Mulema","0729218786",1000),("Period 1","Gloria Luksenaka","0796426074",1000),("Period 1","Mary Thika","0719572174",1000),("Period 1","Joshua Iguna","0792529926",1000),("Period 1","Jackline Kamau","0724562145",1000),
+ ("Latest","Eunice Makona","0714910135",1200),("Latest","Hellen Onyango","0724570228",1200),("Latest","Caren Chonge","0710427468",900),("Latest","Antony Mwendia","",1500),("Latest","Gladys Nyaga","",1500),("Latest","Marlon K. Ang'undu","",1200),("Latest","Gladys Wambaire Kinuthia","",1200),("Latest","Evapertual Wambui","",1200),("Latest","Catherine Ogutu","",1700),("Latest","Ebby Lomoi","",1700),("Latest","Jackline Ayiga","",1700),("Latest","Esther Marenya","",1600),("Latest","George Odhiambo","",1400),("Latest","Kiplimo","",4200),("Latest","Maureen Njeri Kamunyu","",1500),("Latest","Eunice Wairimu","",2000),("Latest","Victoria Wangechi Mugwe","",2000),("Latest","(Unnamed)","",500),
 ]
-GRAND_TOTAL = 783700
+MONTHLY_INDIVIDUAL = [("Oct 2024",327,98100),("Nov 2024",318,95400),("Dec 2024",318,95400),("Jan 2025",339,101700)]
+GRAND_TOTAL = 1153000
 TRANSFER_TOTAL = 673270
-EXPENDITURES_TOTAL = 283141
-BENEFICIARIES_TOTAL = 248075
-FARES_TOTAL = 18000
+BENEFICIARIES_TOTAL = 781075
 
 def clean(v):
     if v is None: return ""
@@ -147,9 +122,8 @@ def init_db():
     conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, staff_no TEXT, full_names TEXT, project TEXT, email TEXT UNIQUE, password TEXT, role TEXT, phone TEXT, api_key TEXT, is_protected INTEGER DEFAULT 0, month_joined TEXT, father_id TEXT, mother_id TEXT, guardian_id TEXT, spouse_id TEXT, kid1 TEXT, kid2 TEXT, kid3 TEXT, kid4 TEXT, kid5 TEXT, photo TEXT)')
     conn.execute('CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, msg TEXT, created TEXT)')
     conn.execute('CREATE TABLE IF NOT EXISTS support_msgs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, msg TEXT, created TEXT)')
-    conn.execute('CREATE TABLE IF NOT EXISTS finance_projects (id INTEGER PRIMARY KEY AUTOINCREMENT, project TEXT UNIQUE, dec_amt REAL, jan_amt REAL, feb_amt REAL, mar_amt REAL, apr_amt REAL, may_amt REAL, dec_n INTEGER, jan_n INTEGER, feb_n INTEGER, mar_n INTEGER, apr_n INTEGER, may_n INTEGER)')
-    conn.execute('CREATE TABLE IF NOT EXISTS beneficiaries (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, project TEXT, reason TEXT, date_str TEXT, amount REAL)')
-    conn.execute('CREATE TABLE IF NOT EXISTS fares (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT, amount REAL)')
+    conn.execute('CREATE TABLE IF NOT EXISTS beneficiaries2 (id INTEGER PRIMARY KEY AUTOINCREMENT, period TEXT, name TEXT, project TEXT, reason TEXT, date_str TEXT, amount REAL)')
+    conn.execute('CREATE TABLE IF NOT EXISTS fares2 (id INTEGER PRIMARY KEY AUTOINCREMENT, period TEXT, name TEXT, phone TEXT, amount REAL)')
     for col in ["month_joined","father_id","mother_id","guardian_id","spouse_id","kid1","kid2","kid3","kid4","kid5","photo"]:
         try: conn.execute(f"ALTER TABLE users ADD COLUMN {col} TEXT")
         except: pass
@@ -157,7 +131,7 @@ def init_db():
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
     if not conn.execute("SELECT id FROM notifications").fetchone():
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to F.I.G BRANDS WELFARE","Your welfare system is active. HQ 0 - ready to register members.","Now"))
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Breakdown Added","Finance breakdown Dec-May added - 534,700 contributions, 248,075 beneficiaries.","Now"))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Full History Added","Oct 2024-Oct 2026 breakdown - 1,404,000 + 903,000, beneficiaries 781,075.","Now"))
     added = 0
     for _row in SEED_DATA:
         _row = tuple(list(_row) + [""] * (13 - len(_row)))[:13]
@@ -171,15 +145,12 @@ def init_db():
             email = f"member.{staff_no}@figbrands.co.ke"
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (staff_no, names, project, email, generate_password_hash(staff_no), "fig_"+secrets.token_hex(12), clean(month), clean(father), clean(mother), clean(guardian), clean(spouse), clean(k1), clean(k2), clean(k3), clean(k4), clean(k5), ""))
         added += 1
-    if not conn.execute("SELECT id FROM finance_projects").fetchone():
-        for p,dec,jan,feb,mar,apr,may,dn,jn,fn,man,an,mn in FINANCE_PROJECTS:
-            conn.execute("INSERT INTO finance_projects (project,dec_amt,jan_amt,feb_amt,mar_amt,apr_amt,may_amt,dec_n,jan_n,feb_n,mar_n,apr_n,may_n) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (p,dec,jan,feb,mar,apr,may,dn,jn,fn,man,an,mn))
-    if not conn.execute("SELECT id FROM beneficiaries").fetchone():
-        for n,p,r,d,a in BENEFICIARIES:
-            conn.execute("INSERT INTO beneficiaries (name,project,reason,date_str,amount) VALUES (?,?,?,?,?)", (n,p,r,d,a))
-    if not conn.execute("SELECT id FROM fares").fetchone():
-        for n,ph,a in FARES:
-            conn.execute("INSERT INTO fares (name,phone,amount) VALUES (?,?,?)", (n,ph,a))
+    if not conn.execute("SELECT id FROM beneficiaries2").fetchone():
+        for per,n,p,r,d,a in BENEFICIARIES2:
+            conn.execute("INSERT INTO beneficiaries2 (period,name,project,reason,date_str,amount) VALUES (?,?,?,?,?,?)", (per,n,p,r,d,a))
+    if not conn.execute("SELECT id FROM fares2").fetchone():
+        for per,n,ph,a in FARES2:
+            conn.execute("INSERT INTO fares2 (period,name,phone,amount) VALUES (?,?,?,?)", (per,n,ph,a))
     conn.commit(); conn.close()
     print(f"Seeded {added} new members - total seed {len(SEED_DATA)}")
 init_db()
@@ -251,7 +222,7 @@ BASE = """
 .cred-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed #f1f5f9;font-size:13px}
 .cred-row span:first-child{color:#64748b}
 .cred-row span:last-child{font-weight:600;text-align:right}
-table.fin{width:100%;border-collapse:collapse;font-size:13px}table.fin th{padding:10px 8px;background:#f8fafc;text-align:left;font-size:11px}table.fin td{padding:10px 8px;border-bottom:1px solid #f1f5f9}table.fin tr.total td{font-weight:800;background:#e3f2fd}
+table.fin{width:100%;border-collapse:collapse;font-size:12px}table.fin th{padding:8px 6px;background:#f8fafc;text-align:left;font-size:10px;white-space:nowrap}table.fin td{padding:8px 6px;border-bottom:1px solid #f1f5f9;white-space:nowrap}table.fin tr.total td{font-weight:800;background:#e3f2fd}
 @media(max-width:600px){.stat-grid{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
 </style>
 <div class="app-header">
@@ -335,8 +306,8 @@ MEMBER_BASE = BASE.replace('F.I.G ADMIN','F.I.G MEMBER').replace('admin@lonma.co
 @app.route("/")
 def home():
     html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>F.I.G BRANDS WELFARE</title>""" + BASE + """<div class='page'>
-<div class='stat-grid'><div class='stat'><div class='stat-l'>Total Members</div><div class='stat-v' id='total'>0</div></div><div class='stat'><div class='stat-l'>Grand Total</div><div class='stat-v' style='font-size:20px'>Ksh 783,700</div></div><div class='stat'><div class='stat-l'>Contributions Dec-May</div><div class='stat-v' style='font-size:20px;color:#16a34a'>Ksh 534,700</div></div></div>
-<div class='stat-grid'><div class='stat'><div class='stat-l'>Beneficiaries Paid</div><div class='stat-v' style='font-size:20px;color:#dc2626'>Ksh 248,075</div></div><div class='stat'><div class='stat-l'>Fares</div><div class='stat-v' style='font-size:20px'>Ksh 18,000</div></div><div class='stat'><div class='stat-l'>Status</div><div class='stat-v' style='color:#16a34a'>Active</div></div></div>
+<div class='stat-grid'><div class='stat'><div class='stat-l'>Total Members</div><div class='stat-v' id='total'>0</div></div><div class='stat'><div class='stat-l'>Grand Total</div><div class='stat-v' style='font-size:20px'>Ksh 1,153,000</div></div><div class='stat'><div class='stat-l'>Period 1 Oct24-Dec25</div><div class='stat-v' style='font-size:20px;color:#16a34a'>Ksh 1,404,000</div></div></div>
+<div class='stat-grid'><div class='stat'><div class='stat-l'>Period 2 Dec25-Oct26</div><div class='stat-v' style='font-size:20px;color:#16a34a'>Ksh 903,000</div></div><div class='stat'><div class='stat-l'>Beneficiaries Unique</div><div class='stat-v' style='font-size:20px;color:#dc2626'>Ksh 781,075</div></div><div class='stat'><div class='stat-l'>Status</div><div class='stat-v' style='color:#16a34a'>Active</div></div></div>
 <div class='card'><div class='card-header'><div class='card-title'>Project Distribution</div><div class='card-sub'>Members per project - <a href='/breakdown'>View Full Breakdown →</a></div></div><div id='breakdown'></div></div>
 </div>
 <script>
@@ -348,17 +319,20 @@ load();
 
 @app.route("/breakdown")
 def breakdown_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Breakdown - F.I.G BRANDS</title>""" + BASE + """<div class='page' style='max-width:1000px'>
-<div class='stat-grid'><div class='stat'><div class='stat-l'>Grand Total</div><div class='stat-v' style='font-size:20px'>Ksh 783,700</div></div><div class='stat'><div class='stat-l'>Transfer</div><div class='stat-v' style='font-size:20px'>Ksh 673,270</div></div><div class='stat'><div class='stat-l'>Expenditures</div><div class='stat-v' style='font-size:20px;color:#dc2626'>Ksh 283,141</div></div></div>
-<div class='card'><div class='card-header'><div class='card-title'>💰 Monthly Contributions by Project - Dec to May</div><div class='card-sub'>Amount (Ksh) + Members in brackets</div></div><div style='overflow:auto'><table class='fin'><thead><tr><th>Project</th><th>DEC</th><th>JAN</th><th>FEB</th><th>MAR</th><th>APR</th><th>MAY</th><th>Total</th></tr></thead><tbody id='finBody'></tbody></table></div></div>
-<div class='card'><div class='card-header'><div class='card-title'>🎁 Beneficiaries - Ksh 248,075</div><div class='card-sub'>9 payouts</div></div><div id='benList' style='padding:6px 20px 16px'></div></div>
-<div class='card'><div class='card-header'><div class='card-title'>🚌 Fares - Ksh 18,000</div><div class='card-sub'>13 people</div></div><div id='fareList' style='padding:6px 20px 16px'></div></div>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Breakdown - F.I.G BRANDS</title>""" + BASE + """<div class='page' style='max-width:1100px'>
+<div class='stat-grid'><div class='stat'><div class='stat-l'>Grand Total (2026 file)</div><div class='stat-v' style='font-size:20px'>Ksh 1,153,000</div></div><div class='stat'><div class='stat-l'>Transfer</div><div class='stat-v' style='font-size:20px'>Ksh 673,270</div></div><div class='stat'><div class='stat-l'>Pwani BF / End Yr</div><div class='stat-v' style='font-size:20px'>909,375 / 659,375</div></div></div>
+<div class='card'><div class='card-header'><div class='card-title'>👥 Monthly Individual - 300 each</div><div class='card-sub'>Oct 2024 - Jan 2025 verified from individual sheets</div></div><div id='indiv' style='padding:6px 20px 16px'></div></div>
+<div id='periods'></div>
+<div class='card'><div class='card-header'><div class='card-title'>🎁 Beneficiaries - Unique Ksh 781,075</div><div class='card-sub'>Period 1: 461,000 (20) + Period 2 new: 320,075 (11) - Nostar 19,000 dup removed</div></div><div id='benList' style='padding:6px 20px 16px'></div></div>
+<div class='card'><div class='card-header'><div class='card-title'>🚌 Fares</div><div class='card-sub'>Period 1: 30,000 (25) | Latest: 28,200 (18)</div></div><div id='fareList' style='padding:6px 20px 16px'></div></div>
 </div>
 <script>
 function fmt(n){return Number(n).toLocaleString()}
-async function load(){let r=await fetch('/api/breakdown');let d=await r.json();let h='';let tot=[0,0,0,0,0,0];let totN=[0,0,0,0,0,0];d.projects.forEach(p=>{let rowTotal=p.dec_amt+p.jan_amt+p.feb_amt+p.mar_amt+p.apr_amt+p.may_amt;h+='<tr><td><b>'+p.project+'</b></td><td>'+fmt(p.dec_amt)+' ('+p.dec_n+')</td><td>'+fmt(p.jan_amt)+' ('+p.jan_n+')</td><td>'+fmt(p.feb_amt)+' ('+p.feb_n+')</td><td>'+fmt(p.mar_amt)+' ('+p.mar_n+')</td><td>'+fmt(p.apr_amt)+' ('+p.apr_n+')</td><td>'+fmt(p.may_amt)+' ('+p.may_n+')</td><td><b>'+fmt(rowTotal)+'</b></td></tr>';});h+='<tr class="total"><td>TOTAL</td><td>'+fmt(d.totals[0])+' ('+d.totals[6]+')</td><td>'+fmt(d.totals[1])+' ('+d.totals[7]+')</td><td>'+fmt(d.totals[2])+' ('+d.totals[8]+')</td><td>'+fmt(d.totals[3])+' ('+d.totals[9]+')</td><td>'+fmt(d.totals[4])+' ('+d.totals[10]+')</td><td>'+fmt(d.totals[5])+' ('+d.totals[11]+')</td><td>'+fmt(d.totals.slice(0,6).reduce((a,b)=>a+b,0))+'</td></tr>';document.getElementById('finBody').innerHTML=h;
-let bh='';d.beneficiaries.forEach(b=>{bh+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #f1f5f9;font-size:14px"><span><b>'+b.name+'</b> <span style="color:#64748b">- '+b.project+' - '+b.reason+' - '+b.date_str+'</span></span><b>Ksh '+fmt(b.amount)+'</b></div>';});bh+='<div style="display:flex;justify-content:space-between;padding:12px 0;font-weight:800"><span>TOTAL BENEFICIARIES</span><span>Ksh '+fmt(d.beneficiaries_total)+'</span></div>';document.getElementById('benList').innerHTML=bh;
-let fh='';d.fares.forEach(f=>{fh+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #f1f5f9;font-size:14px"><span><b>'+f.name+'</b> <span style="color:#64748b">'+(f.phone||'')+'</span></span><b>Ksh '+fmt(f.amount)+'</b></div>';});fh+='<div style="display:flex;justify-content:space-between;padding:12px 0;font-weight:800"><span>TOTAL FARES</span><span>Ksh '+fmt(d.fares_total)+'</span></div>';document.getElementById('fareList').innerHTML=fh;}
+async function load(){let r=await fetch('/api/breakdown');let d=await r.json();
+let ih='';d.monthly_individual.forEach(m=>{ih+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #f1f5f9;font-size:14px"><span><b>'+m[0]+'</b> - '+m[1]+' people x 300</span><b>Ksh '+fmt(m[2])+'</b></div>';});document.getElementById('indiv').innerHTML=ih;
+let ph='';d.periods.forEach(p=>{let cols=p.months.map(m=>'<th>'+m+'</th>').join('');let rows='';p.projects.forEach(pr=>{let tot=pr[1].reduce((a,b)=>a+b,0);rows+='<tr><td><b>'+pr[0]+'</b></td>'+pr[1].map(v=>'<td>'+fmt(v)+'</td>').join('')+'<td><b>'+fmt(tot)+'</b></td></tr>';});let totRow='<tr class="total"><td>TOTAL</td>'+p.totals.map((v,i)=>'<td>'+fmt(v)+' ('+(p.counts[i]||'')+')</td>').join('')+'<td>'+fmt(p.grand)+'</td></tr>';ph+='<div class="card"><div class="card-header"><div class="card-title">💰 '+p.label+' - Ksh '+fmt(p.grand)+'</div><div class="card-sub">Expenditures: Ksh '+fmt(p.expenditures)+'</div></div><div style="overflow:auto"><table class="fin"><thead><tr><th>Project</th>'+cols+'<th>Total</th></tr></thead><tbody>'+rows+totRow+'</tbody></table></div></div>';});document.getElementById('periods').innerHTML=ph;
+let bh='';let cur='';d.beneficiaries.forEach(b=>{if(b.period!==cur){cur=b.period;bh+='<div style="font-weight:800;margin:14px 0 4px">'+cur+'</div>';}bh+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #f1f5f9;font-size:13px"><span><b>'+b.name+'</b> <span style="color:#64748b">- '+b.project+' - '+b.reason+' - '+b.date_str+'</span></span><b>Ksh '+fmt(b.amount)+'</b></div>';});bh+='<div style="display:flex;justify-content:space-between;padding:12px 0;font-weight:800"><span>TOTAL UNIQUE</span><span>Ksh '+fmt(d.beneficiaries_total)+'</span></div>';document.getElementById('benList').innerHTML=bh;
+let fh='';let cur2='';d.fares.forEach(f=>{if(f.period!==cur2){cur2=f.period;fh+='<div style="font-weight:800;margin:14px 0 4px">'+cur2+'</div>';}fh+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #f1f5f9;font-size:13px"><span><b>'+f.name+'</b> <span style="color:#64748b">'+(f.phone||'')+'</span></span><b>Ksh '+fmt(f.amount)+'</b></div>';});document.getElementById('fareList').innerHTML=fh;}
 load();
 </script>
 </body></html>"""
@@ -367,282 +341,4 @@ load();
 @app.route("/members")
 def members_page():
     proj_opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in ["All Projects"]+PROJECTS])
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - F.I.G BRANDS WELFARE</title>""" + MEMBER_BASE + """<div class='page' style='max-width:900px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px'><div><div class='card-title'>Members - Credentials</div><div class='card-sub'>Registered member credentials only - No photo</div></div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='padding:12px;display:flex;gap:10px'><input class='input' id='q' placeholder='Search by name, staff no, project...' oninput='fil()' style='flex:2'><select class='input' id='projFilter' onchange='fil()' style='flex:1'>""" + proj_opts + """</select></div><div id='list' style='padding:0 12px 16px'></div></div></div>
-<script>
-let all=[];
-async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}
-function row(label,val){return '<div class="cred-row"><span>'+label+'</span><span>'+(val||'-')+'</span></div>';}
-function render(l){
- let h='';
- if(l.length==0){h='<div style="padding:30px;text-align:center;color:#64748b">No members yet for this project</div>';}
- else{l.forEach(m=>{
-   let kids=[m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(', ')||'-';
-   h+='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin-bottom:12px">'
-   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div><div style="font-weight:800;font-size:16px">'+m.full_names+'</div><div style="font-size:12px;color:#64748b">'+m.email+'</div></div><span style="background:#e3f2fd;color:#1565c0;padding:5px 12px;border-radius:999px;font-weight:700;font-size:12px">'+m.project+'</span></div>'
-   +row('Staff Number',m.staff_no)
-   +row('Date Joined',m.month_joined)
-   +row('Father ID',m.father_id)
-   +row('Mother ID',m.mother_id)
-   +row('Guardian ID No.',m.guardian_id)
-   +row('Spouse ID No.',m.spouse_id)
-   +row('Kids Birth Certs',kids)
-   +'</div>';
- });}
- document.getElementById('list').innerHTML=h;
-}
-function fil(){
- let qq=document.getElementById('q').value.toLowerCase();
- let pf=document.getElementById('projFilter').value;
- render(all.filter(m=>{
-   let okSearch=(m.full_names+' '+m.staff_no+' '+m.project+' '+(m.guardian_id||'')+' '+(m.spouse_id||'')).toLowerCase().includes(qq);
-   let okProj=(pf=='All Projects'||m.project==pf);
-   return okSearch&&okProj;
- }));
-}
-load();
-</script>
-</body></html>"""
-    return render_template_string(html)
-
-@app.route("/register")
-def register_page():
-    opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register - F.I.G BRANDS</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Welfare Registration Form</div><div class='card-sub'>F.I.G BRANDS WELFARE - Add member with photo</div></div><div class='card-body'>
-<div style="display:flex;gap:20px;align-items:center;margin-bottom:20px">
-<div class="photo-box" id="photoBox" onclick="document.getElementById('photoInput').click()">
-<img id="photoPreview" style="display:none">
-<div id="photoPlaceholder"><div style="font-size:32px">📷</div><div class="photo-upload-text">Add Photo</div></div>
-</div>
-<div><div style="font-weight:700;font-size:14px">Member Photo</div><div style="font-size:12px;color:#64748b;margin-top:4px">Tap to upload photo<br>Max 2MB - JPG, PNG</div><input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)"></div>
-</div>
-<div class='section'><div class='section-num'>1</div><div class='section-label'>Staff Information</div></div>
-<div class='grid2'><div><label class='label'>Staff Number</label><input class='input' id='staff_no' placeholder='PWANI/001'></div><div><label class='label'>Project</label><select class='input' id='project'>""" + opts + """</select></div></div>
-<div style='margin-top:12px' class='grid2'><div><label class='label'>Date Joined</label><input class='input' id='month_joined' placeholder='Jan 2024'></div><div><label class='label'>Full Names *</label><input class='input' id='full_names' placeholder='Full Name'></div></div>
-<div style='margin-top:12px' class='grid2'><div><label class='label'>Email *</label><input class='input' id='email' placeholder='email@figbrands.co.ke'></div><div><label class='label'>Password *</label><input class='input' id='password' type='password' placeholder='••••'></div></div>
-<div class='section'><div class='section-num'>2</div><div class='section-label'>Parents IDs</div></div>
-<div class='grid2'><div><label class='label'>Father ID</label><input class='input' id='father_id'></div><div><label class='label'>Mother ID</label><input class='input' id='mother_id'></div></div>
-<div class='section'><div class='section-num'>3</div><div class='section-label'>Guardian & Spouse</div></div>
-<div class='grid2'><div><label class='label'>Guardian ID No.</label><input class='input' id='guardian_id' placeholder='22400966'></div><div><label class='label'>Spouse ID No.</label><input class='input' id='spouse_id' placeholder='23601476'></div></div>
-<div class='section'><div class='section-num'>4</div><div class='section-label'>Kids Birth Certificates</div></div>
-<div class='grid3'><div><label class='label'>Kid 1</label><input class='input' id='kid1' placeholder='42107914'></div><div><label class='label'>Kid 2</label><input class='input' id='kid2' placeholder='111041990'></div><div><label class='label'>Kid 3</label><input class='input' id='kid3'></div></div>
-<div style='margin-top:12px' class='grid2'><div><label class='label'>Kid 4</label><input class='input' id='kid4'></div><div><label class='label'>Kid 5</label><input class='input' id='kid5'></div></div>
-<button class='btn-primary' onclick='doReg()' id='btn'>Create Member</button><p id='msg' style='text-align:center;font-size:13px;margin-top:10px;font-weight:600'></p>
-</div></div></div>
-<script>
-let photoBase64 = "";
-function handlePhoto(e){
- let file = e.target.files[0];
- if(!file) return;
- if(file.size > 2*1024*1024){alert('File too large, max 2MB');return;}
- let reader = new FileReader();
- reader.onload = function(ev){
-   photoBase64 = ev.target.result;
-   document.getElementById('photoPreview').src = photoBase64;
-   document.getElementById('photoPreview').style.display='block';
-   document.getElementById('photoPlaceholder').style.display='none';
-   document.getElementById('photoBox').classList.add('has-photo');
- };
- reader.readAsDataURL(file);
-}
-async function doReg(){
- let btn=document.getElementById('btn');
- btn.textContent='Creating...';
- let d={staff_no:document.getElementById('staff_no').value,project:document.getElementById('project').value,full_names:document.getElementById('full_names').value,email:document.getElementById('email').value,password:document.getElementById('password').value,month_joined:document.getElementById('month_joined').value,father_id:document.getElementById('father_id').value,mother_id:document.getElementById('mother_id').value,guardian_id:document.getElementById('guardian_id').value,spouse_id:document.getElementById('spouse_id').value,kid1:document.getElementById('kid1').value,kid2:document.getElementById('kid2').value,kid3:document.getElementById('kid3').value,kid4:document.getElementById('kid4').value,kid5:document.getElementById('kid5').value,photo:photoBase64};
- if(!d.email||!d.password||!d.full_names){document.getElementById('msg').textContent='Required: Full Names, Email, Password';document.getElementById('msg').style.color='#dc2626';btn.textContent='Create Member';return;}
- let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
- let j=await r.json();
- let m=document.getElementById('msg');
- m.textContent=j.error||j.message;
- m.style.color=r.ok?'#16a34a':'#dc2626';
- btn.textContent=r.ok?'Created':'Create Member';
- if(r.ok){setTimeout(()=>location.href='/members',800);}
-}
-</script>
-</body></html>"""
-    return render_template_string(html)
-
-@app.route("/admin")
-def admin_login_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - F.I.G BRANDS</title>""" + BASE + """<div class='page' style='max-width:400px'><div class='card'><div class='card-header'><div class='card-title'>Admin Login - F.I.G BRANDS WELFARE</div></div><div class='card-body'><label class='label'>Email</label><input class='input' id='email' value='admin@lonma.com'><div style='margin-top:12px'><label class='label'>Password</label><input class='input' id='pass' type='password' value='admin123'></div><button class='btn-primary' onclick='login()'>Login</button><p id='msg' style='text-align:center;color:#dc2626;margin-top:10px'></p></div></div></div>
-<script>async function login(){let e=document.getElementById('email').value;let p=document.getElementById('pass').value;let r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});let j=await r.json();if(r.ok){location.href='/admin/dashboard?key='+j.key;}else{document.getElementById('msg').textContent=j.error;}}</script>
-</body></html>"""
-    return render_template_string(html)
-
-@app.route("/admin/dashboard")
-def admin_dashboard():
-    key = request.args.get("key")
-    if key != ADMIN_KEY:
-        return redirect("/admin")
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - F.I.G BRANDS</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center'><div class='card-title'>Admin - F.I.G BRANDS Welfare Management with Photos</div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div>
-<div class='card'><div class='card-header'><div class='card-title'>📩 Support Messages</div></div><div id='supList' style='padding:10px 20px'>Loading...</div></div></div>
-<script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let photo=m.photo?'<img src="'+m.photo+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover">':'<div style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700">'+(m.full_names||'A').charAt(0)+'</div>';let btn=prot?'<span style="color:#94a3b8;font-size:12px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;border:1px solid #fee2e2;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer">Delete</button>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px">'+photo+'</td><td style="padding:14px"><b>'+m.staff_no+'</b><div style="font-weight:700">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">'+m.email+'</div></td><td style="padding:14px;font-size:11px">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'<br>Kids:'+([m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(',')||'-')+'</td><td style="padding:14px">'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;let r2=await fetch('/api/support_list');let d2=await r2.json();let h2='';if(d2.messages.length==0)h2='<div style="color:#64748b">No support messages yet</div>';else d2.messages.forEach(m=>{h2+='<div style="padding:12px 0;border-bottom:1px solid #f1f5f9"><b>'+(m.name||'Guest')+'</b> <span style="font-size:11px;color:#94a3b8">'+m.created+'</span><div style="font-size:14px">'+m.msg+'</div></div>'});document.getElementById('supList').innerHTML=h2;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
-</body></html>"""
-    return render_template_string(html)
-
-@app.route("/download/excel")
-def download_excel():
-    proj = request.args.get("project","")
-    conn = get_db()
-    try:
-        if proj and proj != "All Projects":
-            rows = conn.execute("SELECT staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? AND project=? ORDER BY id DESC", (ADMIN_EMAIL, proj)).fetchall()
-        else:
-            rows = conn.execute("SELECT staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
-        headers = ["Staff Number","Full Names","Project","Email","Date Joined","Father ID","Mother ID","Guardian ID","Spouse ID","Kid 1 Birth Cert","Kid 2 Birth Cert","Kid 3 Birth Cert","Kid 4 Birth Cert","Kid 5 Birth Cert"]
-        try:
-            from openpyxl import Workbook
-            from openpyxl.styles import Font, PatternFill, Alignment
-            wb = Workbook(); ws = wb.active; ws.title = "F.I.G BRANDS Members"
-            ws.append(headers)
-            for c in ws[1]:
-                c.font = Font(bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="1565C0"); c.alignment = Alignment(horizontal="center")
-            for r in rows:
-                ws.append([r["staff_no"] or "", r["full_names"] or "", r["project"] or "", r["email"] or "", r["month_joined"] or "", r["father_id"] or "", r["mother_id"] or "", r["guardian_id"] or "", r["spouse_id"] or "", r["kid1"] or "", r["kid2"] or "", r["kid3"] or "", r["kid4"] or "", r["kid5"] or ""])
-            for col in ws.columns:
-                ws.column_dimensions[col[0].column_letter].width = 18
-            ws.column_dimensions['B'].width = 28
-            ws.column_dimensions['D'].width = 30
-            ws.freeze_panes = "A2"
-            ws.auto_filter.ref = ws.dimensions
-            out = io.BytesIO(); wb.save(out); out.seek(0)
-            return send_file(out, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="fig_brands_members.xlsx")
-        except ImportError:
-            out = io.StringIO(); w = csv.writer(out); w.writerow(headers)
-            for r in rows:
-                w.writerow([r["staff_no"] or "", r["full_names"] or "", r["project"] or "", r["email"] or "", r["month_joined"] or "", r["father_id"] or "", r["mother_id"] or "", r["guardian_id"] or "", r["spouse_id"] or "", r["kid1"] or "", r["kid2"] or "", r["kid3"] or "", r["kid4"] or "", r["kid5"] or ""])
-            b = io.BytesIO(out.getvalue().encode('utf-8-sig')); b.seek(0)
-            return send_file(b, mimetype="text/csv", as_attachment=True, download_name="fig_brands_members.csv")
-    finally:
-        conn.close()
-
-@app.route("/api/stats")
-def api_stats():
-    conn = get_db()
-    try:
-        total = conn.execute("SELECT COUNT(*) FROM users WHERE email != ?", (ADMIN_EMAIL,)).fetchone()[0]
-        breakdown = {}
-        for p in PROJECTS:
-            breakdown[p] = conn.execute("SELECT COUNT(*) FROM users WHERE project=? AND email != ?", (p, ADMIN_EMAIL)).fetchone()[0]
-        return jsonify({"total_members": total, "projects_breakdown": breakdown})
-    finally:
-        conn.close()
-
-@app.route("/api/breakdown")
-def api_breakdown():
-    conn = get_db()
-    try:
-        prows = conn.execute("SELECT * FROM finance_projects ORDER BY id").fetchall()
-        brows = conn.execute("SELECT * FROM beneficiaries ORDER BY id").fetchall()
-        frows = conn.execute("SELECT * FROM fares ORDER BY id").fetchall()
-        return jsonify({"projects": [dict(r) for r in prows], "totals": list(FINANCE_TOTALS), "beneficiaries": [dict(r) for r in brows], "beneficiaries_total": BENEFICIARIES_TOTAL, "fares": [dict(r) for r in frows], "fares_total": FARES_TOTAL, "grand_total": GRAND_TOTAL, "transfer_total": TRANSFER_TOTAL, "expenditures_total": EXPENDITURES_TOTAL})
-    finally:
-        conn.close()
-
-@app.route("/api/notifications")
-def api_notifs():
-    conn = get_db()
-    try:
-        rows = conn.execute("SELECT * FROM notifications ORDER BY id DESC").fetchall()
-        return jsonify({"notifications": [dict(r) for r in rows]})
-    finally:
-        conn.close()
-
-@app.route("/api/support", methods=["POST"])
-def api_support():
-    data = request.get_json(silent=True) or {}
-    conn = get_db()
-    try:
-        conn.execute("INSERT INTO support_msgs (name,msg,created) VALUES (?,?,datetime('now'))", (data.get("name","Guest"), data.get("msg","")))
-        conn.commit()
-        return jsonify({"message": "Message sent! Support will reply soon."})
-    finally:
-        conn.close()
-
-@app.route("/api/support_list")
-def api_support_list():
-    conn = get_db()
-    try:
-        rows = conn.execute("SELECT * FROM support_msgs ORDER BY id DESC").fetchall()
-        return jsonify({"messages": [dict(r) for r in rows]})
-    finally:
-        conn.close()
-
-@app.route("/api/members")
-def api_members():
-    proj = request.args.get("project","")
-    conn = get_db()
-    try:
-        if proj and proj != "All Projects":
-            rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? AND project=? ORDER BY id DESC", (ADMIN_EMAIL, proj)).fetchall()
-        else:
-            rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
-        return jsonify({"members": [dict(r) for r in rows]})
-    finally:
-        conn.close()
-
-@app.route("/api/members_admin")
-def api_members_admin():
-    conn = get_db()
-    try:
-        rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo FROM users ORDER BY id DESC").fetchall()
-        return jsonify({"members": [dict(r) for r in rows]})
-    finally:
-        conn.close()
-
-@app.route("/api/admin/login", methods=["POST"])
-def api_admin_login():
-    data = request.get_json(silent=True)
-    conn = get_db()
-    try:
-        user = conn.execute("SELECT password,api_key FROM users WHERE email=?", (data.get("email"),)).fetchone()
-        if not user or not check_password_hash(user["password"], data.get("password","")):
-            return jsonify({"error": "Invalid"}), 401
-        return jsonify({"key": user["api_key"]})
-    finally:
-        conn.close()
-
-@app.route("/api/register", methods=["POST","OPTIONS"])
-def api_register():
-    if request.method == "OPTIONS":
-        return "", 200
-    data = request.get_json(silent=True)
-    if not data or not data.get("email") or not data.get("password"):
-        return jsonify({"error": "email and password required"}), 400
-    conn = get_db()
-    try:
-        if conn.execute("SELECT id FROM users WHERE email=?", (data["email"],)).fetchone():
-            return jsonify({"error": "Email exists"}), 400
-        api_key = "fig_"+secrets.token_hex(12)
-        photo = data.get("photo","")
-        if len(photo) > 500000:
-            photo = photo[:500000]
-        proj = PROJECT_MAP.get(data.get("project","HQ"), data.get("project","HQ"))
-        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (data.get("staff_no",""), data.get("full_names",""), proj, data["email"], generate_password_hash(data["password"]), api_key, data.get("month_joined",""), data.get("father_id",""), data.get("mother_id",""), data.get("guardian_id",""), data.get("spouse_id",""), data.get("kid1",""), data.get("kid2",""), data.get("kid3",""), data.get("kid4",""), data.get("kid5",""), photo))
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("New Member Registered", f"{data.get('full_names','')} joined {proj}", "Just now"))
-        conn.commit()
-        return jsonify({"message": "Member created with photo"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-    finally:
-        conn.close()
-
-@app.route("/api/members/<int:member_id>", methods=["DELETE","OPTIONS"])
-def api_delete(member_id):
-    if request.method == "OPTIONS":
-        return "", 200
-    key = request.args.get("key")
-    if key != ADMIN_KEY:
-        return jsonify({"error": "Admin key required"}), 401
-    conn = get_db()
-    try:
-        u = conn.execute("SELECT email FROM users WHERE id=?", (member_id,)).fetchone()
-        if not u or u["email"]==ADMIN_EMAIL:
-            return jsonify({"error": "Cannot delete Protected Admin"}), 403
-        conn.execute("DELETE FROM users WHERE id=?", (member_id,))
-        conn.commit()
-        return jsonify({"message": "Deleted"})
-    finally:
-        conn.close()
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT",10000)))
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1
