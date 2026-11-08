@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify, render_template_string, redirect
-import sqlite3, os, secrets
+from flask import Flask, request, jsonify, render_template_string, redirect, send_file
+import sqlite3, os, secrets, io, csv
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -42,7 +42,6 @@ def after(r):
     r.headers.add('Access-Control-Allow-Methods','GET,POST,DELETE,OPTIONS')
     return r
 
-# ADMIN LAYOUT - for Overview / Register / Admin
 BASE = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -84,6 +83,7 @@ BASE = """
 .section-num{width:22px;height:22px;background:#0f172a;color:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
 .section-label{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
 .btn-primary{width:100%;height:50px;background:#0f172a;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;margin-top:10px}
+.btn-excel{display:inline-flex;align-items:center;gap:8px;background:#16a34a;color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;font-size:13px;text-decoration:none;border:none;cursor:pointer}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 .stat{background:#fff;border-radius:16px;padding:18px;border:1px solid #e2e8f0}
 .stat-l{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px}
@@ -119,6 +119,7 @@ BASE = """
 <a class="menu-item" href="/"><span class="icon">📊</span> Overview</a>
 <a class="menu-item" href="/members"><span class="icon">👥</span> Members</a>
 <a class="menu-item" href="/register"><span class="icon">➕</span> Register Member</a>
+<a class="menu-item" href="/download/excel"><span class="icon">📥</span> Download Excel</a>
 <div style="height:1px;background:#f1f5f9;margin:8px 20px"></div>
 <a class="menu-item" href="#" onclick="openBell();return false"><span class="icon">🔔</span> Notifications</a>
 <a class="menu-item" href="#" onclick="openSupport();return false"><span class="icon">🎧</span> Contact Support</a>
@@ -178,8 +179,7 @@ document.addEventListener('DOMContentLoaded',()=>{let path=location.pathname;doc
 </script>
 """
 
-# CLEAN MEMBERS LAYOUT - No Admin, No Photo, No Settings/LogOut
-MEMBER_BASE = BASE.replace('LONMA ADMIN','LONMA MEMBER').replace('admin@lonma.com','info@lonmaorbit.co.ke').replace('<a class="menu-item" href="/admin"><span class="icon">⚙️</span> Settings</a>','').replace('<a class="menu-item" href="/admin" style="color:#dc2626"><span class="icon">⏻</span> Log Out</a>','').replace('https://i.pravatar.cc/150?img=3','https://i.pravatar.cc/150?img=12')
+MEMBER_BASE = BASE.replace('LONMA ADMIN','LONMA MEMBER').replace('admin@lonma.com','info@lonmaorbit.co.ke').replace('https://i.pravatar.cc/150?img=3','https://i.pravatar.cc/150?img=12')
 
 @app.route("/")
 def home():
@@ -196,7 +196,7 @@ load();
 
 @app.route("/members")
 def members_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - Credentials</title>""" + MEMBER_BASE + """<div class='page' style='max-width:900px'><div class='card'><div class='card-header'><div class='card-title'>Members - Credentials</div><div class='card-sub'>Registered member credentials only - No photo, No admin features</div></div><div style='padding:12px'><input class='input' id='q' placeholder='Search by name, staff no, project...' oninput='fil()'></div><div id='list' style='padding:0 12px 16px'></div></div></div>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - Credentials</title>""" + MEMBER_BASE + """<div class='page' style='max-width:900px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px'><div><div class='card-title'>Members - Credentials</div><div class='card-sub'>Registered member credentials only - No photo</div></div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='padding:12px'><input class='input' id='q' placeholder='Search by name, staff no, project...' oninput='fil()'></div><div id='list' style='padding:0 12px 16px'></div></div></div>
 <script>
 let all=[];
 async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}
@@ -294,11 +294,43 @@ def admin_dashboard():
     key = request.args.get("key")
     if key != ADMIN_KEY:
         return redirect("/admin")
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header'><div class='card-title'>Admin - Welfare Management with Photos</div></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center'><div class='card-title'>Admin - Welfare Management with Photos</div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div>
 <div class='card'><div class='card-header'><div class='card-title'>📩 Support Messages</div></div><div id='supList' style='padding:10px 20px'>Loading...</div></div></div>
 <script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let photo=m.photo?'<img src="'+m.photo+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover">':'<div style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700">'+(m.full_names||'A').charAt(0)+'</div>';let btn=prot?'<span style="color:#94a3b8;font-size:12px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;border:1px solid #fee2e2;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer">Delete</button>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px">'+photo+'</td><td style="padding:14px"><b>'+m.staff_no+'</b><div style="font-weight:700">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">'+m.email+'</div></td><td style="padding:14px;font-size:11px">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'<br>Kids:'+([m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(',')||'-')+'</td><td style="padding:14px">'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;let r2=await fetch('/api/support_list');let d2=await r2.json();let h2='';if(d2.messages.length==0)h2='<div style="color:#64748b">No support messages yet</div>';else d2.messages.forEach(m=>{h2+='<div style="padding:12px 0;border-bottom:1px solid #f1f5f9"><b>'+(m.name||'Guest')+'</b> <span style="font-size:11px;color:#94a3b8">'+m.created+'</span><div style="font-size:14px">'+m.msg+'</div></div>'});document.getElementById('supList').innerHTML=h2;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
 </body></html>"""
     return render_template_string(html)
+
+@app.route("/download/excel")
+def download_excel():
+    conn = get_db()
+    try:
+        rows = conn.execute("SELECT staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
+        headers = ["Staff Number","Full Names","Project","Email","Date Joined","Father ID","Mother ID","Guardian ID","Spouse ID","Kid 1 Birth Cert","Kid 2 Birth Cert","Kid 3 Birth Cert","Kid 4 Birth Cert","Kid 5 Birth Cert"]
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Font, PatternFill, Alignment
+            wb = Workbook(); ws = wb.active; ws.title = "LONMA Members"
+            ws.append(headers)
+            for c in ws[1]:
+                c.font = Font(bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="1565C0"); c.alignment = Alignment(horizontal="center")
+            for r in rows:
+                ws.append([r["staff_no"] or "", r["full_names"] or "", r["project"] or "", r["email"] or "", r["month_joined"] or "", r["father_id"] or "", r["mother_id"] or "", r["guardian_id"] or "", r["spouse_id"] or "", r["kid1"] or "", r["kid2"] or "", r["kid3"] or "", r["kid4"] or "", r["kid5"] or ""])
+            for col in ws.columns:
+                ws.column_dimensions[col[0].column_letter].width = 18
+            ws.column_dimensions['B'].width = 28
+            ws.column_dimensions['D'].width = 30
+            ws.freeze_panes = "A2"
+            ws.auto_filter.ref = ws.dimensions
+            out = io.BytesIO(); wb.save(out); out.seek(0)
+            return send_file(out, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="lonma_members.xlsx")
+        except ImportError:
+            out = io.StringIO(); w = csv.writer(out); w.writerow(headers)
+            for r in rows:
+                w.writerow([r["staff_no"] or "", r["full_names"] or "", r["project"] or "", r["email"] or "", r["month_joined"] or "", r["father_id"] or "", r["mother_id"] or "", r["guardian_id"] or "", r["spouse_id"] or "", r["kid1"] or "", r["kid2"] or "", r["kid3"] or "", r["kid4"] or "", r["kid5"] or ""])
+            b = io.BytesIO(out.getvalue().encode('utf-8-sig')); b.seek(0)
+            return send_file(b, mimetype="text/csv", as_attachment=True, download_name="lonma_members.csv")
+    finally:
+        conn.close()
 
 @app.route("/api/stats")
 def api_stats():
@@ -345,7 +377,6 @@ def api_support_list():
 def api_members():
     conn = get_db()
     try:
-        # No photo sent to public members page - credentials only
         rows = conn.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC", (ADMIN_EMAIL,)).fetchall()
         return jsonify({"members": [dict(r) for r in rows]})
     finally:
