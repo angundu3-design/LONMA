@@ -10,7 +10,6 @@ ADMIN_KEY = "lonma_api_key_12345"
 ADMIN_EMAIL = "admin@lonma.com"
 ADMIN_PASS = "admin123"
 
-# --- YOUR EXCEL DATA - PWANI - 13 MEMBERS ---
 SEED_DATA = [
  ("202712","Pwani","Nov.2022","Laura Imali","","","0327707","37982161","112409612","","","",""),
  ("202710","Pwani","Dec.2020","Edith Kabera","","","23740423","23965879","10700481","112152616","11250650","",""),
@@ -64,7 +63,6 @@ def init_db():
     if not conn.execute("SELECT id FROM notifications").fetchone():
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to F.I.G BRANDS WELFARE","Your welfare system is active. HQ 0 - ready to register members.","Now"))
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Pwani Data Imported","13 Pwani members added from Excel.","Now"))
-    # SEED EXCEL DATA - per project - skip if staff_no exists
     added = 0
     for staff_no, proj_raw, month, names, father, mother, guardian, spouse, k1, k2, k3, k4, k5 in SEED_DATA:
         staff_no = clean(staff_no); names = clean(names)
@@ -72,10 +70,10 @@ def init_db():
         if conn.execute("SELECT id FROM users WHERE staff_no=?", (staff_no,)).fetchone(): continue
         project = PROJECT_MAP.get(proj_raw, proj_raw)
         email = make_email(names, staff_no)
-        # avoid email clash
         if conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone():
             email = f"member.{staff_no}@figbrands.co.ke"
-        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (staff_no, names, project, email, generate_password_hash(staff_no), "fig_"+secrets.token_hex(12), clean(month), clean(father), clean(mother), clean(guardian), clean(spouse), clean(k1), clean(k2), clean(k3), clean(k4), clean(k5), ""))
+        # FIXED: 17 columns = 17 ? below
+        conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (staff_no, names, project, email, generate_password_hash(staff_no), "fig_"+secrets.token_hex(12), clean(month), clean(father), clean(mother), clean(guardian), clean(spouse), clean(k1), clean(k2), clean(k3), clean(k4), clean(k5), ""))
         added += 1
     conn.commit(); conn.close()
     print(f"Seeded {added} Pwani members")
