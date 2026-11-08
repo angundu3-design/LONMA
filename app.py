@@ -29,7 +29,7 @@ def init_db():
     if not conn.execute("SELECT id FROM users WHERE email=?", (ADMIN_EMAIL,)).fetchone():
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
     if not conn.execute("SELECT id FROM notifications").fetchone():
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to LONMA","Your welfare system is active. HQ 0 - ready to register members.","Now"))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to F.I.G BRANDS WELFARE","Your welfare system is active. HQ 0 - ready to register members.","Now"))
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Photo Feature Added","You can now add a photo for each member in Register.","Now"))
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("System Update","Pricelist, Products, Live Location & Off Site Order removed.","Now"))
     conn.commit(); conn.close()
@@ -105,14 +105,14 @@ BASE = """
 @media(max-width:600px){.stat-grid{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
 </style>
 <div class="app-header">
-<div class="left"><button class="menu-btn" onclick="openMenu()">☰</button><div class="brand-top"><div class="brand-icon">L</div><div class="brand-name">LONMA<span>WELFARE SYSTEM</span></div></div></div>
+<div class="left"><button class="menu-btn" onclick="openMenu()">☰</button><div class="brand-top"><div class="brand-icon">F</div><div class="brand-name">F.I.G BRANDS<span>WELFARE SYSTEM</span></div></div></div>
 <div class="header-icons"><div class="h-icon" onclick="openBell()">🔔<span class="badge" id="bellBadge">3</span></div><div class="h-icon" onclick="openSupport()">🎧</div></div>
 </div>
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 <div class="sidebar" id="sidebar">
 <div class="sidebar-top">
 <div class="avatar"><img src="https://i.pravatar.cc/150?img=3"></div>
-<div class="profile-name">LONMA ADMIN</div>
+<div class="profile-name">F.I.G ADMIN</div>
 <div class="profile-email">admin@lonma.com</div>
 </div>
 <div class="menu-list">
@@ -128,7 +128,7 @@ BASE = """
 <a class="menu-item" href="/admin"><span class="icon">⚙️</span> Settings</a>
 <a class="menu-item" href="/admin" style="color:#dc2626"><span class="icon">⏻</span> Log Out</a>
 </div>
-<div class="sidebar-bottom"><span>LONMA WELFARE</span><span>v4.33.0 (patch 1)</span></div>
+<div class="sidebar-bottom"><span>F.I.G BRANDS WELFARE</span><span>v4.33.0 (patch 1)</span></div>
 </div>
 <div class="popup" id="bellPopup" onclick="if(event.target===this)closeBell()">
 <div class="popup-card">
@@ -141,8 +141,8 @@ BASE = """
 <div class="popup-card">
 <div class="popup-head"><div><div style="font-weight:800;font-size:17px">🎧 Contact Support</div><div style="font-size:12px;color:#64748b">We reply within 1 hour</div></div><button onclick="closeSupport()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;font-size:18px;cursor:pointer">✕</button></div>
 <div style="padding:18px 20px">
-<div class="support-opt" onclick="window.open('https://wa.me/254707780807?text=Hi LONMA Support, I need help','_blank')"><div style="font-size:28px">💬</div><div><div style="font-weight:700">WhatsApp Support</div><div style="font-size:12px;color:#64748b">Chat now - 0707 780 807</div></div><div style="margin-left:auto">›</div></div>
-<div class="support-opt" onclick="window.location.href='mailto:info@lonmaorbit.co.ke?subject=LONMA Support'"><div style="font-size:28px">📧</div><div><div style="font-weight:700">Email Support</div><div style="font-size:12px;color:#64748b">info@lonmaorbit.co.ke</div></div><div style="margin-left:auto">›</div></div>
+<div class="support-opt" onclick="window.open('https://wa.me/254707780807?text=Hi F.I.G BRANDS Support, I need help','_blank')"><div style="font-size:28px">💬</div><div><div style="font-weight:700">WhatsApp Support</div><div style="font-size:12px;color:#64748b">Chat now - 0707 780 807</div></div><div style="margin-left:auto">›</div></div>
+<div class="support-opt" onclick="window.location.href='mailto:info@figbrands.co.ke?subject=F.I.G BRANDS Support'"><div style="font-size:28px">📧</div><div><div style="font-weight:700">Email Support</div><div style="font-size:12px;color:#64748b">info@figbrands.co.ke</div></div><div style="margin-left:auto">›</div></div>
 <div class="support-opt" onclick="window.location.href='tel:0707780807'"><div style="font-size:28px">📞</div><div><div style="font-weight:700">Call Support</div><div style="font-size:12px;color:#64748b">0707 780 807 - Mon-Sat 8am-6pm</div></div><div style="margin-left:auto">›</div></div>
 <div style="margin:18px 0 10px;font-weight:800;font-size:13px">SEND A MESSAGE</div>
 <label class="label">Your Name</label><input class="input" id="supName" placeholder="Your name">
@@ -179,11 +179,11 @@ document.addEventListener('DOMContentLoaded',()=>{let path=location.pathname;doc
 </script>
 """
 
-MEMBER_BASE = BASE.replace('LONMA ADMIN','LONMA MEMBER').replace('admin@lonma.com','info@lonmaorbit.co.ke').replace('https://i.pravatar.cc/150?img=3','https://i.pravatar.cc/150?img=12')
+MEMBER_BASE = BASE.replace('F.I.G ADMIN','F.I.G MEMBER').replace('admin@lonma.com','info@figbrands.co.ke').replace('https://i.pravatar.cc/150?img=3','https://i.pravatar.cc/150?img=12')
 
 @app.route("/")
 def home():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>LONMA</title>""" + BASE + """<div class='page'>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>F.I.G BRANDS WELFARE</title>""" + BASE + """<div class='page'>
 <div class='stat-grid'><div class='stat'><div class='stat-l'>Total Members</div><div class='stat-v' id='total'>0</div></div><div class='stat'><div class='stat-l'>Projects</div><div class='stat-v'>12</div></div><div class='stat'><div class='stat-l'>Status</div><div class='stat-v' style='color:#16a34a'>Active</div></div></div>
 <div class='card'><div class='card-header'><div class='card-title'>Project Distribution</div><div class='card-sub'>Members per project (HQ 0)</div></div><div id='breakdown'></div></div>
 </div>
@@ -196,7 +196,7 @@ load();
 
 @app.route("/members")
 def members_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - Credentials</title>""" + MEMBER_BASE + """<div class='page' style='max-width:900px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px'><div><div class='card-title'>Members - Credentials</div><div class='card-sub'>Registered member credentials only - No photo</div></div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='padding:12px'><input class='input' id='q' placeholder='Search by name, staff no, project...' oninput='fil()'></div><div id='list' style='padding:0 12px 16px'></div></div></div>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Members - F.I.G BRANDS WELFARE</title>""" + MEMBER_BASE + """<div class='page' style='max-width:900px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px'><div><div class='card-title'>Members - Credentials</div><div class='card-sub'>Registered member credentials only - No photo</div></div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='padding:12px'><input class='input' id='q' placeholder='Search by name, staff no, project...' oninput='fil()'></div><div id='list' style='padding:0 12px 16px'></div></div></div>
 <script>
 let all=[];
 async function load(){let r=await fetch('/api/members');let d=await r.json();all=d.members;render(d.members);}
@@ -228,7 +228,7 @@ load();
 @app.route("/register")
 def register_page():
     opts = "".join(['<option value="%s">%s</option>' % (p,p) for p in PROJECTS])
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Welfare Registration Form</div><div class='card-sub'>Add member with photo</div></div><div class='card-body'>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Register - F.I.G BRANDS</title>""" + BASE + """<div class='page'><div class='card'><div class='card-header'><div class='card-title'>Welfare Registration Form</div><div class='card-sub'>F.I.G BRANDS WELFARE - Add member with photo</div></div><div class='card-body'>
 <div style="display:flex;gap:20px;align-items:center;margin-bottom:20px">
 <div class="photo-box" id="photoBox" onclick="document.getElementById('photoInput').click()">
 <img id="photoPreview" style="display:none">
@@ -239,7 +239,7 @@ def register_page():
 <div class='section'><div class='section-num'>1</div><div class='section-label'>Staff Information</div></div>
 <div class='grid2'><div><label class='label'>Staff Number</label><input class='input' id='staff_no' placeholder='PWANI/001'></div><div><label class='label'>Project</label><select class='input' id='project'>""" + opts + """</select></div></div>
 <div style='margin-top:12px' class='grid2'><div><label class='label'>Date Joined</label><input class='input' id='month_joined' placeholder='Jan 2024'></div><div><label class='label'>Full Names *</label><input class='input' id='full_names' placeholder='Full Name'></div></div>
-<div style='margin-top:12px' class='grid2'><div><label class='label'>Email *</label><input class='input' id='email' placeholder='email@lonma.com'></div><div><label class='label'>Password *</label><input class='input' id='password' type='password' placeholder='••••'></div></div>
+<div style='margin-top:12px' class='grid2'><div><label class='label'>Email *</label><input class='input' id='email' placeholder='email@figbrands.co.ke'></div><div><label class='label'>Password *</label><input class='input' id='password' type='password' placeholder='••••'></div></div>
 <div class='section'><div class='section-num'>2</div><div class='section-label'>Parents IDs</div></div>
 <div class='grid2'><div><label class='label'>Father ID</label><input class='input' id='father_id'></div><div><label class='label'>Mother ID</label><input class='input' id='mother_id'></div></div>
 <div class='section'><div class='section-num'>3</div><div class='section-label'>Guardian & Spouse</div></div>
@@ -284,7 +284,7 @@ async function doReg(){
 
 @app.route("/admin")
 def admin_login_page():
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:400px'><div class='card'><div class='card-header'><div class='card-title'>Admin Login</div></div><div class='card-body'><label class='label'>Email</label><input class='input' id='email' value='admin@lonma.com'><div style='margin-top:12px'><label class='label'>Password</label><input class='input' id='pass' type='password' value='admin123'></div><button class='btn-primary' onclick='login()'>Login</button><p id='msg' style='text-align:center;color:#dc2626;margin-top:10px'></p></div></div></div>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - F.I.G BRANDS</title>""" + BASE + """<div class='page' style='max-width:400px'><div class='card'><div class='card-header'><div class='card-title'>Admin Login - F.I.G BRANDS WELFARE</div></div><div class='card-body'><label class='label'>Email</label><input class='input' id='email' value='admin@lonma.com'><div style='margin-top:12px'><label class='label'>Password</label><input class='input' id='pass' type='password' value='admin123'></div><button class='btn-primary' onclick='login()'>Login</button><p id='msg' style='text-align:center;color:#dc2626;margin-top:10px'></p></div></div></div>
 <script>async function login(){let e=document.getElementById('email').value;let p=document.getElementById('pass').value;let r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});let j=await r.json();if(r.ok){location.href='/admin/dashboard?key='+j.key;}else{document.getElementById('msg').textContent=j.error;}}</script>
 </body></html>"""
     return render_template_string(html)
@@ -294,7 +294,7 @@ def admin_dashboard():
     key = request.args.get("key")
     if key != ADMIN_KEY:
         return redirect("/admin")
-    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center'><div class='card-title'>Admin - Welfare Management with Photos</div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div>
+    html = """<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - F.I.G BRANDS</title>""" + BASE + """<div class='page' style='max-width:1000px'><div class='card'><div class='card-header' style='display:flex;justify-content:space-between;align-items:center'><div class='card-title'>Admin - F.I.G BRANDS Welfare Management with Photos</div><a class='btn-excel' href='/download/excel'>📥 Download Excel</a></div><div style='overflow:auto'><table style='width:100%;border-collapse:collapse'><thead><tr><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Photo</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Staff & Name</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Family</th><th style='padding:10px 14px;background:#f8fafc;font-size:11px;text-align:left'>Action</th></tr></thead><tbody id='tbl'></tbody></table></div></div>
 <div class='card'><div class='card-header'><div class='card-title'>📩 Support Messages</div></div><div id='supList' style='padding:10px 20px'>Loading...</div></div></div>
 <script>async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{let prot=m.email=='admin@lonma.com';let photo=m.photo?'<img src="'+m.photo+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover">':'<div style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-weight:700">'+(m.full_names||'A').charAt(0)+'</div>';let btn=prot?'<span style="color:#94a3b8;font-size:12px">System</span>':'<button onclick="del('+m.id+')" style="color:#dc2626;border:1px solid #fee2e2;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer">Delete</button>';h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px">'+photo+'</td><td style="padding:14px"><b>'+m.staff_no+'</b><div style="font-weight:700">'+m.full_names+'</div><div style="font-size:11px;color:#64748b">'+m.email+'</div></td><td style="padding:14px;font-size:11px">G:'+(m.guardian_id||'-')+' S:'+(m.spouse_id||'-')+'<br>Kids:'+([m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(',')||'-')+'</td><td style="padding:14px">'+btn+'</td></tr>';});document.getElementById('tbl').innerHTML=h;let r2=await fetch('/api/support_list');let d2=await r2.json();let h2='';if(d2.messages.length==0)h2='<div style="color:#64748b">No support messages yet</div>';else d2.messages.forEach(m=>{h2+='<div style="padding:12px 0;border-bottom:1px solid #f1f5f9"><b>'+(m.name||'Guest')+'</b> <span style="font-size:11px;color:#94a3b8">'+m.created+'</span><div style="font-size:14px">'+m.msg+'</div></div>'});document.getElementById('supList').innerHTML=h2;}async function del(id){if(!confirm('Delete?'))return;let r=await fetch('/api/members/'+id+'?key=""" + ADMIN_KEY + """',{method:'DELETE'});let j=await r.json();if(!r.ok){alert(j.error);return;}load();}load();</script>
 </body></html>"""
@@ -309,7 +309,7 @@ def download_excel():
         try:
             from openpyxl import Workbook
             from openpyxl.styles import Font, PatternFill, Alignment
-            wb = Workbook(); ws = wb.active; ws.title = "LONMA Members"
+            wb = Workbook(); ws = wb.active; ws.title = "F.I.G BRANDS Members"
             ws.append(headers)
             for c in ws[1]:
                 c.font = Font(bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="1565C0"); c.alignment = Alignment(horizontal="center")
@@ -322,13 +322,13 @@ def download_excel():
             ws.freeze_panes = "A2"
             ws.auto_filter.ref = ws.dimensions
             out = io.BytesIO(); wb.save(out); out.seek(0)
-            return send_file(out, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="lonma_members.xlsx")
+            return send_file(out, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="fig_brands_members.xlsx")
         except ImportError:
             out = io.StringIO(); w = csv.writer(out); w.writerow(headers)
             for r in rows:
                 w.writerow([r["staff_no"] or "", r["full_names"] or "", r["project"] or "", r["email"] or "", r["month_joined"] or "", r["father_id"] or "", r["mother_id"] or "", r["guardian_id"] or "", r["spouse_id"] or "", r["kid1"] or "", r["kid2"] or "", r["kid3"] or "", r["kid4"] or "", r["kid5"] or ""])
             b = io.BytesIO(out.getvalue().encode('utf-8-sig')); b.seek(0)
-            return send_file(b, mimetype="text/csv", as_attachment=True, download_name="lonma_members.csv")
+            return send_file(b, mimetype="text/csv", as_attachment=True, download_name="fig_brands_members.csv")
     finally:
         conn.close()
 
