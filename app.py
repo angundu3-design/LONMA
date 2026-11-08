@@ -4,14 +4,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 DB = "lonma.db"
-PROJECTS = ["Pwani Oil Products","Java House","SJ Johnson","Kanji","HQ","Antonio","TF-TDs","TF-MT","TF-LM","GCB-MT","GCB-Ws","Hichem"]
-PROJECT_MAP = {"Pwani":"Pwani Oil Products","pwani":"Pwani Oil Products","PWANI":"Pwani Oil Products","Pwani Oil Products":"Pwani Oil Products","Pwani Oil Products Ltd.":"Pwani Oil Products","Java":"Java House","SJ":"SJ Johnson"}
+PROJECTS = ["Pwani Oil Products","Java House","SJ Johnson","Kanji","HQ","Antonio","TF-TDs","TF-MT","TF-LM","GCB-MT","GCB-Ws","Hichem","TF WSL"]
+PROJECT_MAP = {"Pwani":"Pwani Oil Products","pwani":"Pwani Oil Products","PWANI":"Pwani Oil Products","Pwani Oil Products":"Pwani Oil Products","Pwani Oil Products Ltd.":"Pwani Oil Products","Java":"Java House","SJ":"SJ Johnson","TF WSL":"TF WSL","TF":"TF WSL"}
 ADMIN_KEY = "lonma_api_key_12345"
 ADMIN_EMAIL = "admin@lonma.com"
 ADMIN_PASS = "admin123"
 
 SEED_DATA = [
- # --- FILE 1 - 13 PWANI ---
  ("202712","Pwani","Nov.2022","Laura Imali","","","0327707","37982161","112409612","","","",""),
  ("202710","Pwani","Dec.2020","Edith Kabera","","","23740423","23965879","10700481","112152616","11250650","",""),
  ("202677","Pwani","October.2024","Phoebe Anyango","1014509","2266278","","","","","","",""),
@@ -25,7 +24,6 @@ SEED_DATA = [
  ("202711","Pwani","Sept.2021","John Adiel","","1329824","28565804","32190036","","","","",""),
  ("292932","Pwani","May.2026","Milcah Otiende","8232129","7861021","","32624856","4094626","","","",""),
  ("280370","Pwani","Sept. 2026","Lucy Mwende Mbatha","2991561","2965465","","","0852106551","","","",""),
- # --- FILE 2 - NORTH RIFT - 17 ---
  ("202700","Pwani Oil Products Ltd.","Mar.2025","Charles Kimutai Kirui","3872261","3872429","","31045698","612112010","","","",""),
  ("202709","Pwani Oil Products Ltd.","Mar.2025","Oyoyo Yvonne Bentar","","11801824","","27464418","","","","",""),
  ("202678","Pwani Oil Products Ltd.","Mar.2025","Owen Muthee Waithaka","21217575","22555615","","","","","","",""),
@@ -43,7 +41,6 @@ SEED_DATA = [
  ("202703","Pwani Oil Products Ltd.","Mar.2025","Caren Nanjala Chonge","","5639451","","22086206","364057","6090663","","",""),
  ("202704","Pwani Oil Products Ltd.","Mar.2025","Hellen Achieng Onyango","711723882","726994852","","722618476","","","","",""),
  ("202724","Pwani Oil Products Ltd.","Mar.2025","Benta Achieng Muruka","CHRISTOPHER MURUKA","JANE MAGENGA","","28687282","1311214785","21910561","","",""),
- # --- FILE 3 - NYANZA - 13 ---
  ("202697","Pwani","Sept.2017","Naomi Mwango Abenga","1658833","","","22188003","121032026","121622654","112220451","",""),
  ("202696","Pwani","2015","Lydiah Nyaanga Osengo","1649626","1637770","","10020853","160900879","168706540/19","","",""),
  ("202693","Pwani","May.2022","Meggiling Abuga Nyakerario","","","8647005","","","","160900879","",""),
@@ -57,14 +54,29 @@ SEED_DATA = [
  ("202698","Pwani","Feb.2022","Postine Atieno","7921446","8398928","","38801320","122318007","","",""),
  ("202744","PWANI","Mar.2024","Anthony Manyara Chania","21022712","86260659","","923456988","","","",""),
  ("202683","Pwani","Mar.2013","Eunice Makona","","4722288","","210327239","7575163","7575161","7575162","",""),
+ # --- FILE 4 - WELFARE_DATA-2 - 13 TF WSL ---
+ ("202914","TF WSL","20th Jan 2025","Said Roseline Heri","Musa Bin Said","Beatrice N. Munoko","1319025","9765327","4408202","7758933","7108428","",""),
+ ("202906","TF WSL","27th Mar 2025","Jecinta Karanja","KARANJA NDUNG'U","PAULINE NJOKI","11114948","30461200","1358036","614595","","",""),
+ ("202905","TF WSL","5th Feb 2025","Mary Atieno","","Mary Atieno Onyango","14438209","","001432321","4898710","","",""),
+ ("202915","TF WSL","2025","Pauline Murathi","George Murathi","Jane Nungari","23236444","","","","",""),
+ ("202916","TF WSL","Jan.2027","Ann Njeri Kareiya","STEPHEN KAREIYA","JENNIFER WANGUI","32317216","23524787","9901560","","",""),
+ ("202913","TF WSL","Jan.2025","Tabitha Wanjiku","David Karugah","Grace David","10893197","33095213","37220833","","",""),
+ ("202917","TF WSL","13th Jan 2025","Prudence Achieng Wanyangu","","WILFRIDA ADHIAMBO WANYANGU","22482407","37155644","","","",""),
+ ("292943","TF WSL","15/01/2026","Linda Naliaka Juma","SIMON KARIUKI","Jane Jareda","24928699","","9655625","6031104","",""),
+ ("202908","TF WSL","2025","Pascaline Njoki","Joseph Wachira Ngigi (deceased)","Lucy Wanjiru Njogu","38761889","","645865","","",""),
+ ("202910","TF WSL","16th Oct 2025","Lucy Nyambura","","Eddah Wanjiru","14495721","","","","",""),
+ ("292977","TF WSL","2026","Diana Muse","Fanuel Muse","Regina Kaveza","28385461","","","","",""),
+ ("202907","TF WSL","22/07/2026","Janet Wairimu","Joseph Waiganjo Kariuki","Grace Muthakyi Kimanzi","10767868","","3868681","","",""),
+ ("280293","TF WSL","13th July 2026","Catherine Mukami","Andrew Kiruja","Naomi Adrew","","24041649","361716972","5810997","",""),
 ]
 
 def clean(v):
     if v is None: return ""
     s = str(v).strip()
-    if s.upper() in ("NA","N/A","NA ","-","NONE","LATER"): return ""
+    if s.upper() in ("NA","N/A","NA ","-","NONE","LATER","NULL"): return ""
     if "will give" in s.lower(): return ""
     if "will provide" in s.lower(): return ""
+    if "notification:" in s.lower(): return s.split(":",1)[1].strip()
     return s
 
 def make_email(full_names, staff_no):
@@ -96,7 +108,7 @@ def init_db():
         conn.execute("INSERT INTO users (staff_no,full_names,project,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
     if not conn.execute("SELECT id FROM notifications").fetchone():
         conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Welcome to F.I.G BRANDS WELFARE","Your welfare system is active. HQ 0 - ready to register members.","Now"))
-        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Pwani Data Imported","43 Pwani members added from Excel - incl North Rift + Nyanza.","Now"))
+        conn.execute("INSERT INTO notifications (title,msg,created) VALUES (?,?,?)", ("Pwani + TF WSL Data Imported","56 members added - 43 Pwani + 13 TF WSL.","Now"))
     added = 0
     for _row in SEED_DATA:
         _row = tuple(list(_row) + [""] * (13 - len(_row)))[:13]
