@@ -164,8 +164,8 @@ def init_db():
     if not c.execute("SELECT id FROM users WHERE email=?", (ADMIN_EMAIL,)).fetchone():
         c.execute("INSERT INTO users (staff_no,full_names,project,email,password,role,phone,api_key,is_protected) VALUES (?,?,?,?,?,?,?,?,?)", ("HQ/001","System Administrator","HQ",ADMIN_EMAIL,generate_password_hash(ADMIN_PASS),"Admin","0700000000",ADMIN_KEY,1))
     if not c.execute("SELECT id FROM notifications").fetchone():
-        c.execute("INSERT INTO notifications (title,msg,created,target,is_read) VALUES (?,?,?,?,?,?)", ("Welcome to F.I.G BRANDS Welfare","Your welfare system is active.","Now","/",0))
-        c.execute("INSERT INTO notifications (title,msg,created,target,is_read) VALUES (?,?,?,?,?,?)", ("Share-Out: BF less 200,000","BF 767,859 less 200,000 = 567,859 shared per month of contributions.","Now","/shareout",0))
+        c.execute("INSERT INTO notifications (title,msg,created,target,is_read) VALUES (?,?,?,?,?)", ("Welcome to F.I.G BRANDS Welfare","Your welfare system is active.","Now","/",0))
+        c.execute("INSERT INTO notifications (title,msg,created,target,is_read) VALUES (?,?,?,?,?)", ("Share-Out: BF less 200,000","BF 767,859 less 200,000 = 567,859 shared per month of contributions.","Now","/shareout",0))
     else:
         c.execute("UPDATE notifications SET target='/' WHERE title LIKE 'Welcome%' AND (target IS NULL OR target='')")
         c.execute("UPDATE notifications SET target='/shareout' WHERE title LIKE 'Share-Out%' AND (target IS NULL OR target='')")
