@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify, render_template_string, redirect, send_file
 import sqlite3, os, secrets, io, re
 from werkzeug.security import generate_password_hash, check_password_hash
