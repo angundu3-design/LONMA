@@ -472,7 +472,6 @@ def api_members():
   if proj and proj!="All Projects":qsql="SELECT id,staff_no,full_names,project,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE project=? ORDER BY id DESC";a=(norm_project(proj),)
   rows=c.execute(qsql,a).fetchall();members=[dict(r) for r in rows]
   if q:members=[m for m in members if q in (m.get("full_names") or "").lower() or q in (m.get("project") or "").lower() or q in (m.get("staff_no") or "").lower()]
-  return```python
   return jsonify({"members":members})
  finally:c.close()
 @app.route("/api/members_admin")
