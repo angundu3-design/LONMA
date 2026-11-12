@@ -516,7 +516,7 @@ def api_member_one(member_id):
  if request.args.get("key")!=ADMIN_KEY:return jsonify({"error":"Admin key required"}),401
  c=get_db()
  try:
-  u=c.execute("SELECT email FROM users WHERE id=?",(member_id,)).fetch```python
+  u=c.execute("SELECT email FROM users WHERE id=?",(member_id,)).fetchone()
   if not u:return jsonify({"error":"Not found"}),404
   if request.method=="DELETE":
    if u["email"]==ADMIN_EMAIL:return jsonify({"error":"Cannot delete Admin"}),403
