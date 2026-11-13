@@ -262,7 +262,7 @@ SEED_DATA=[tuple((l.split('|')+['']*13)[:13]) for l in SEED_TXT.strip().splitlin
 def clean(v):
  if v is None: return ""
  s=str(v).strip()
- if s.upper() in ("NA","N/A","-","NONE","LATER","NULL","NIL","N/A","N/A"): return ""
+ if s.upper() in ("NA","N/A","-","NONE","LATER","NULL","NIL"): return ""
  if "will give" in s.lower() or "will provide" in s.lower(): return ""
  return s
 def make_email(n,staff):
@@ -514,7 +514,6 @@ def api_notif():
     return jsonify({"notifications": rows, "unread": unread})
 @app.route("/api/notifications/<int:nid>/read", methods=["POST"])
 def api_notif_read(nid):
-    c=get_db(); c.execute("UPDATE notifications SET```python
     c=get_db(); c.execute("UPDATE notifications SET is_read=1 WHERE id=?", (nid,)); c.commit(); c.close(); return jsonify({"ok": True})
 @app.route("/api/notifications/read", methods=["POST"])
 def api_notif_read_all():
