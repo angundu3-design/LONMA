@@ -31,282 +31,156 @@ MONTHLY_RATE=300
 PERIOD_START=(2025,12)
 PERIOD_END=(2026,9)
 PERIODS=[{"label":"Oct 2024 - Dec 2025","total":1404000,"beneficiaries":463000,"fares":31625,"detail":"Pwani 310,500 | Java 123,600 | SC Johnson 139,200 | Kaysalt 72,900 | Kanji 12,600 | HQ 15,900 | GCB-MT 69,900 | TF-WS 71,100 | TF-LM 173,100 | TF-MT 259,500 | Kenafric 96,900 | GCB-TDs 51,000 | LAB 7,800"},{"label":"Dec 2025 - Nov 2026","total":991100,"beneficiaries":379075,"fares":32100,"detail":"Pwani 220,200 | Java House 106,200 | SC Johnson 101,400 | Kanji 9,900 | HQ 14,100 | GCB-MT 56,700 | TF-WS 49,200 | TF-LM 122,400 | TF-MT 236,100 | GCB-TDs 41,100 | Higchem 30,000 | Antonia 3,600"}]
-SEED_TXT='''10009|Pwani Oil Products|2024|Esther Wambui Kimani||||||||
-10025|Pwani Oil Products|2024|Nostar Nyanchama Osiemo||||||||
-10043|Pwani Oil Products|2024|Doreen Talu Mwanga||||||||
-10047|Pwani Oil Products|2024|Winnie Jemutai Chepkwony||||||||
-10048|Pwani Oil Products|2024|Millianna Anyango Sadaka||||||||
-10050|Pwani Oil Products|2024|Samuel Kikweo Nthenya||||||||
-10052|Pwani Oil Products|2024|Stephen Wesonga Ouma||||||||
-10072|Pwani Oil Products|2024|MARY WANGARI MWIMENYI||||||||
-10073|Pwani Oil Products|2024|Linet Awino Wayumba||||||||
-10077|Pwani Oil Products|2024|Celestine Achieng'||||||||
-10093|Pwani Oil Products|2024|Diana Nanjala Wafula||||||||
-10094|Pwani Oil Products|2024|NJUGU RISPA WANYAGA||||||||
-10099|Pwani Oil Products|2024|Phoebe Anyango Oliech||||||||
-10100|Pwani Oil Products|2024|Owen Muthee Waithaka||||||||
-10101|Pwani Oil Products|2024|George Mbithi Maingi||||||||
-10106|Pwani Oil Products|2024|Gwen Moraa Kegege||||||||
-10108|Pwani Oil Products|2024|Polly Wangui Nyaguthii||||||||
-10111|Pwani Oil Products|2024|Sally Kanaiza Barasa||||||||
-10112|Pwani Oil Products|2024|Evans Mwaita Ngoma||||||||
-10320|Pwani Oil Products|2024|Gabriel Michael Mutisya||||||||
-10321|Pwani Oil Products|2024|Jack Omondi Juma||||||||
-10322|Pwani Oil Products|2024|Samuel Njeru Njiru||||||||
-10323|Pwani Oil Products|2024|Marlon Ang'undu Kikuyu||||||||
-10324|Pwani Oil Products|2024|Getrude Juma Juma||||||||
-10325|Pwani Oil Products|2024|Maradi Ruth Mercylyne||||||||
-10329|Pwani Oil Products|2024|Victor Meso Onyango||||||||
-10330|Pwani Oil Products|2024|Meshack Ouma Ojwang||||||||
-10331|Pwani Oil Products|2024|Eunice Nafula Makona||||||||
-10333|Pwani Oil Products|2024|Nannis Karambu Samuel||||||||
-10334|Pwani Oil Products|2024|Maureen Wambui Kimani||||||||
-10335|Pwani Oil Products|2024|Evaperpetual Wambui Maina||||||||
-10336|Pwani Oil Products|2024|Millicent Njeri Matheng'e||||||||
-10337|Pwani Oil Products|2024|Lydia Karambu Matumbi||||||||
-10338|Pwani Oil Products|2024|Margaret Wambui Kamunya||||||||
-10339|Pwani Oil Products|2024|Caroline Wanja Wanja||||||||
-10340|Pwani Oil Products|2024|Peris Wangari Muriithi||||||||
-10341|Pwani Oil Products|2024|Alex Kalawai Shangala||||||||
-10342|Pwani Oil Products|2024|Meggiline Nyakerario Abuga||||||||
-10343|Pwani Oil Products|2024|Charles Savatia Adika||||||||
-10344|Pwani Oil Products|2024|Gorrety Adhiambo Otieno||||||||
-10345|Pwani Oil Products|2024|Janet Akinyi Oswago||||||||
-10346|Pwani Oil Products|2024|Lydiah Nyaanga Osengo||||||||
-10348|Pwani Oil Products|2024|Naomi Mwango Abenga||||||||
-10349|Pwani Oil Products|2024|Postine Atieno Atieno||||||||
-10350|Pwani Oil Products|2024|Sophia Nyamoita Mokaya||||||||
-10351|Pwani Oil Products|2024|Charles Kimutai Kirui||||||||
-10352|Pwani Oil Products|2024|Clare Vuyanzi Osiako||||||||
-10353|Pwani Oil Products|2024|Everlyne mukoya Stephen||||||||
-10355|Pwani Oil Products|2024|Peter Kibet Chepsigor||||||||
-10356|Pwani Oil Products|2024|Sheillah Jepchumba||||||||
-10357|Pwani Oil Products|2024|Betty Akinyi Namamba||||||||
-10358|Pwani Oil Products|2024|Alex Esamai||||||||
-10360|Pwani Oil Products|2024|Caren Nanjala Chonge||||||||
-10362|Pwani Oil Products|2024|Fredrick Nick Osotsi||||||||
-10363|Pwani Oil Products|2024|Hellen Achieng Onyango||||||||
-10366|Pwani Oil Products|2024|Odiembo Yvonne Awuor||||||||
-10367|Pwani Oil Products|2024|Awuor Cynthia Onyango||||||||
-10368|Pwani Oil Products|2024|Opiyo Irene Achieng||||||||
-10369|Pwani Oil Products|2024|Oduor Stephen Oduor||||||||
-10371|Pwani Oil Products|2024|Owino Maurine Achieng||||||||
-10372|Pwani Oil Products|2024|Muchuma Lilian Khalituma||||||||
-10373|Pwani Oil Products|2024|Oyoyo Yvonne Benter||||||||
-10375|Pwani Oil Products|2024|Kabera Edith Mmaitsi||||||||
-10376|Pwani Oil Products|2024|Adiel John Erick||||||||
-10377|Pwani Oil Products|2024|Imali Laura Imali||||||||
-10378|Pwani Oil Products|2024|Joan Mumbi Kahura||||||||
-10379|Pwani Oil Products|2024|Harriet Kaveza Olome||||||||
-10381|Pwani Oil Products|2024|Margaret Mugure Ngaruiya||||||||
-10382|Pwani Oil Products|2024|Hannah Muthoni Ngaruiya||||||||
-10385|Pwani Oil Products|2024|Peter Ikegu Mwaniki||||||||
-10386|Pwani Oil Products|2024|Rachel Wanjiku Ndungu||||||||
-10387|Pwani Oil Products|2024|Lydia Achieng Asaka||||||||
-10389|Pwani Oil Products|2024|Maureen Omuchinia Analo||||||||
-10390|Pwani Oil Products|2024|George Ibuba Nganga||||||||
-10391|Pwani Oil Products|2024|Mary Wambui Kahiga||||||||
-10397|Pwani Oil Products|2024|Jairus Oduor Makona||||||||
-10399|Pwani Oil Products|2024|Merceline Adhiambo Osewe||||||||
-10400|Pwani Oil Products|2024|Linet Achieng' Oduor||||||||
-10402|Pwani Oil Products|2024|Metrine Cherop Chumo||||||||
-10403|Pwani Oil Products|2024|Benta Achieng Muruka||||||||
-10405|Pwani Oil Products|2024|Diana Atieno Oduor||||||||
-10407|Pwani Oil Products|2024|Mercy Njeri Wanjiru||||||||
-10410|Pwani Oil Products|2024|Dorcas Wangeshi Mwaurah||||||||
-10415|Pwani Oil Products|2024|Henry Omondi Oganga||||||||
-10417|Pwani Oil Products|2024|INGAVI JULIUS SESEDA||||||||
-10419|Pwani Oil Products|2024|CORNELIUS MUTETI KIOKO||||||||
-10431|Pwani Oil Products|2024|Joackim Bachwa Bachwa||||||||
-11010|Pwani Oil Products|2024|Linda Kanana||||||||
-11018|Pwani Oil Products|2024|Agatha Wanjiku Mbugua||||||||
-11019|Pwani Oil Products|2024|Rhoda Akinyi Odhiambo||||||||
-11020|Pwani Oil Products|2024|Elizabeth Matinde||||||||
-11022|Pwani Oil Products|2024|Lavenda Anyango Otieno||||||||
-11028|Pwani Oil Products|2024|Brendah Mijidie Kiduyu||||||||
-11113|Pwani Oil Products|2024|Bernice Katende Muthoka||||||||
-11119|Pwani Oil Products|2024|Fridah Kathure Gatobu||||||||
-12169|Pwani Oil Products|2024|Boniface Museve Ashiona||||||||
-16322|Pwani Oil Products|2024|SHARON WAFULA AJWANGI||||||||
-17100|Pwani Oil Products|2024|DORICE AWINO ANYANGO||||||||
-17102|Pwani Oil Products|2024|Clarice ACHIENG OMAYA||||||||
-17103|Pwani Oil Products|2024|Teresia Mueni Kiama||||||||
-30102|Java House|2024|EUGENE DAUDI AURA||||||||
-30103|Java House|2024|WAMUYU IRENE WAIRIMU||||||||
-30104|Java House|2024|LENNOX AMANI DANIEL||||||||
-30105|Java House|2024|VICTORIA MBEKE NGAVE||||||||
-30106|Java House|2024|HILLARY OMONDI ALINDI||||||||
-30108|Java House|2024|FELIX KIARIE NDUNGU||||||||
-30110|Java House|2024|CLAIRE WAMBUI KARIUKI||||||||
-30111|Java House|2024|HELLEN AWUOR ODARI||||||||
-30112|Java House|2024|ZAWERIA KARUNGARI WAIREGI||||||||
-30113|Java House|2024|ANN WAMBUI MUCHEMI||||||||
-30115|Java House|2024|ESTHER WANGARI KARANJA||||||||
-30116|Java House|2024|EMILY WAITHERA NJENGA||||||||
-30117|Java House|2024|JUDITH CHEPNG'ENO||||||||
-30119|Java House|2024|MICHAEL ONDIEKI KEROSI||||||||
-30120|Java House|2024|GLORIA MUKHWANA LUSENAKA||||||||
-30121|Java House|2024|Judith Lozenjah Ominde||||||||
-30126|Java House|2024|Edwin Ondieki Kiyaka||||||||
-30129|Java House|2024|GLADYS KINUTHIA||||||||
-30131|Java House|2024|Onganga Gwako Edmond||||||||
-30133|Java House|2024|DIANA KATHURE||||||||
-38103|GCB-MT|2024|Evelyne Mpinda Kinyua||||||||
-38104|GCB-MT|2024|Hillary Nzive Kasiva||||||||
-38105|GCB-MT|2024|Mariamu Ali Juma||||||||
-38106|GCB-MT|2024|Dennis Mbindyo Mwamuli||||||||
-38107|GCB-MT|2024|Stanely Muigai Njoroge||||||||
-38108|GCB-MT|2024|Josyline Nkatha Karambu||||||||
-38109|GCB-MT|2024|Caroline Gaceri Kimathi||||||||
-38111|GCB-MT|2024|Peter Omondi Onyango||||||||
-38112|GCB-MT|2024|Mary Ngotah||||||||
-38116|GCB-MT|2024|Teresa Mwihaki Gichuki||||||||
-38117|GCB-MT|2024|Carol Wanjiku Njuguna||||||||
-38118|GCB-MT|2024|Mercy Jepkorir Yatich||||||||
-38120|GCB-MT|2024|Dennis Muchangi Wanja||||||||
-38122|GCB-MT|2024|Tabitha Wambui Mwangi||||||||
-38123|GCB-MT|2024|Rabin Nyasinga Winston||||||||
-38124|GCB-MT|2024|Cynthia Obaga lwangu||||||||
-38125|GCB-MT|2024|Pennina Awuor Olango||||||||
-38129|GCB-MT|2024|Ruth Waitherero Kihugu||||||||
-38130|GCB-MT|2024|Ferdinand Kafwa||||||||
-38133|GCB-MT|2024|Emily Mueni Mutua||||||||
-38135|GCB-MT|2024|Mourin Wangui Karomo||||||||
-38139|GCB-MT|2024|Abel Nyandega Rasugu||||||||
-38140|GCB-MT|2024|Samwel Erick Odhiambo||||||||
-40103|TF-LM|2024|Phylis Khayenga Barasa||||||||
-40105|TF-LM|2024|Caroline Nkatha Mbaya||||||||
-40106|TF-LM|2024|Mercy Mwikali Muthio||||||||
-40108|TF-LM|2024|Jackline Wambui Mwendia||||||||
-40109|TF-LM|2024|Joyce Wambui Wanjiru||||||||
-40110|TF-LM|2024|Linda Atieno Odhiambo||||||||
-40112|TF-LM|2024|Samuel Sidhani Menza||||||||
-40115|TF-LM|2024|Lucy Muhanji||||||||
-40118|TF-LM|2024|Josiah Manua Misiani||||||||
-40119|TF-LM|2024|Peter Ondieki Onyoni||||||||
-40120|TF-LM|2024|Susan Wambui Ndung'u||||||||
-40125|TF-LM|2024|Mueni Kisingu||||||||
-40126|TF-LM|2024|Jonathan Mutunga Kilonzo||||||||
-40127|TF-LM|2024|Gladys Nyamuhu Nyaga||||||||
-40130|TF-LM|2024|Matilder Jepkoech Chelimo||||||||
-40131|TF-LM|2024|Purity Wangechi Kariuki||||||||
-40132|TF-LM|2024|Esther Awuor Marenya||||||||
-40135|TF-LM|2024|Brian Odhiambo Otieno||||||||
-40322|TF-MT|2024|Leah Wangui Njeri||||||||
-40323|TF-MT|2024|Daniel Ejikon||||||||
-40414|TF-MT|2024|Veronicah Khevali Mukulwe||||||||
-40416|TF-MT|2024|Hellen Mbesa Mumbi||||||||
-40417|TF-MT|2024|Zainab Chizi Suleiman||||||||
-40418|TF-MT|2024|Lolonancy Mambori Mghenyi||||||||
-40419|TF-MT|2024|Raphael Mwenja Kagondo||||||||
-40420|TF-MT|2024|Isaack Kagunda King'ori||||||||
-40434|TF-MT|2024|Esther Awuor Agutu||||||||
-40440|TF-MT|2024|Mirriam Muthoni||||||||
-40442|TF-MT|2024|Faith Ingadima Bunyali||||||||
-40446|TF-MT|2024|Valerian Kemunto Misati||||||||
-40447|TF-MT|2024|Joshua Mwangi Iguna||||||||
-40451|TF-MT|2024|Kelvin Orina Sabwengi||||||||
-40455|TF-MT|2024|Blossom Nangila Wanyonyi||||||||
-40459|TF-MT|2024|Antony Manyara Chania||||||||
-40462|TF-MT|2024|Queen Ndila Mwania||||||||
-40463|TF-MT|2024|Ruth Amolo Nyangun||||||||
-40464|TF-MT|2024|Caleb Kibet Kirui||||||||
-40469|TF-MT|2024|Emmah Adhiambo Waswa||||||||
-40471|TF-MT|2024|Mary Joyce Wangeci Thika||||||||
-40472|TF-MT|2024|Purity Ndinda Ndunda||||||||
-40473|TF-MT|2024|Jackline Kamene Daniel||||||||
-40474|TF-MT|2024|Maureen Gathiru Mwaniki||||||||
-44031|TF WSL|2024|Oscar Kipkoech Ruto||||||||
-50030|TF WSL|2024|Faith Angulu Anyona||||||||
-50039|TF WSL|2024|Valary Chepkoech Bii||||||||
-55123|TF WSL|2024|Mercy Mwende||||||||
-55124|TF WSL|2024|Winfred Mukuba Mbaabu||||||||
-60127|SC Johnson|2024|Prisca Anjemo Injili||||||||
-60131|SC Johnson|2024|BRENDAH ACHIENG GUMBA||||||||
-60148|SC Johnson|2024|Paul Janes Okombo||||||||
-60156|SC Johnson|2024|Pauline Wambui Masila||||||||
-60182|SC Johnson|2024|Anne Kamonya Mulema||||||||
-60186|SC Johnson|2024|Daniel Katumo Musyoka||||||||
-60192|SC Johnson|2024|Mercy Waringa Waweru||||||||
-60198|SC Johnson|2024|Scholastica Loko Kilonzi||||||||
-60200|SC Johnson|2024|Winfred Katungwa Mulee||||||||
-60208|SC Johnson|2024|Loise Njoki Kibaiyu||||||||
-60218|SC Johnson|2024|Melvin Mumo Kimondiu||||||||
-70201|TF-MT|2024|Irene Atieno Ogutu||||||||
-70202|TF-MT|2024|Vicky Hellen Otieno||||||||
-70203|TF-MT|2024|Mercy Achieng Onyango||||||||
-70204|TF-MT|2024|Mourine Akoth||||||||
-70205|TF-MT|2024|Faith Atieni Ogembo||||||||
-70206|TF-MT|2024|Innolyne Anyango Agutu||||||||
-70207|TF-MT|2024|Lena Cherono Cheruiyot||||||||
-70208|TF-MT|2024|Jackline Kavere Ayiga||||||||
-70211|TF-MT|2024|George Okeyo Owiti||||||||
-70213|TF-MT|2024|Naomi Jeruto Tanui||||||||
-70216|TF-MT|2024|Linda Achieng Oduor||||||||
-70217|TF-MT|2024|John Gatitu Mwangi||||||||
-70219|TF-MT|2024|Mary Wangari Mwangi||||||||
-70220|TF-MT|2024|Maryanne Wanjiru Kariuki||||||||
-70221|TF-MT|2024|Pamela Awuor Nyadodo||||||||
-70222|TF-MT|2024|Damaris Muyoka Wekesa||||||||
-70223|TF-MT|2024|Gladys Wangeci Wahogo||||||||
-70224|TF-MT|2024|Laura Akumu Barasa||||||||
-70226|TF-MT|2024|Jane Wairimu||||||||
-70228|TF-MT|2024|Joseph Musyoka Mwasaru||||||||
-70229|TF-MT|2024|Daniel Ombui Mayaka||||||||
-70230|TF-MT|2024|Joyce Wangeci Murithi||||||||
-70231|TF-MT|2024|Faith Mutunge Mutua||||||||
-70234|TF-MT|2024|Elizabeth Kaluki Mbithe||||||||
-70235|TF-MT|2024|Fiona Apiyo Omondi||||||||
-70237|TF-MT|2024|Wellington Owino Lubale||||||||
-70238|TF-MT|2024|Daniel Mwangi||||||||
-70240|TF-MT|2024|Fidel Otieno||||||||
-70241|TF-MT|2024|Martin Munene Grishon||||||||
-70242|TF-MT|2024|Trizah Kabaki Wanjiku||||||||
-70243|TF-MT|2024|Julius Musau Mwania||||||||
-70246|TF-MT|2024|Abel Kiptoo Kosgei||||||||
-70247|TF-MT|2024|Ann Mathei Maive||||||||
-70250|TF-MT|2024|Samuel Nzau Muli||||||||
-70251|TF-MT|2024|Thomas Felix Mwatu||||||||
-77300|HQ|2024|Margaret Wangari George||||||||
-77301|HQ|2024|Teresia Muthoni Kariuki||||||||
-77311|HQ|2024|Colman Collins Were||||||||
-77314|HQ|2024|Miriam Wanjera Wangui||||||||
-80100|GCB-TDs|2024|Joice Wanjiru Mwaura||||||||
-80101|GCB-TDs|2024|Pamela Oduor||||||||
-80105|GCB-TDs|2024|Joane Wanjru||||||||
-80106|GCB-TDs|2024|Catherine Mukami||||||||
-80108|GCB-TDs|2024|Everlyn Nyambura||||||||
-80111|GCB-TDs|2024|Wendy Charles||||||||
-80113|GCB-TDs|2024|Phelistars Owino||||||||
-80120|GCB-TDs|2024|Mwanaidi David Emiliana||||||||
-80121|GCB-TDs|2024|Hellen Omiti Anyango||||||||
-90100|Kanji|2024|Sarah Wamuyu Kinyua||||||||
-90102|Kanji|2024|Anthony Njoroge Maina||||||||
-90103|Kanji|2024|Racheal Mueni Matali||||||||
-90105|Kanji|2024|Caroline Kathomi Njebiu||||||||
-90107|Kanji|2024|Elizabeth Njuru Kariuki||||||||
-90109|Kanji|2024|Mecyline Nelima Ndala||||||||
-90110|Kanji|2024|Jackline Nduta Kamau||||||||
-90111|Kanji|2024|Frankline Ombego Mokua||||||||
-90115|Kanji|2024|Brenda Jepkogei Cheruiyot||||||||
-90116|Kanji|2024|Mugwe Victoria Wangeci||||||||
-90117|Kanji|2024|Hilda Esende lugali||||||||
-90118|Kanji|2024|Fridah Olesi||||||||
-90119|Kanji|2024|Phesial Jaramogi Ooyi||||||||
-90120|Kanji|2024|Judith Oweya Lukale||||||||
-90121|Kanji|2024|Emily Nanjala Wafula||||||||
-90122|Kanji|2024|Afline Anyango Onyango||||||||
-90123|Kanji|2024|Celestine Auma Ouko||||||||
-90124|Kanji|2024|Euphate Sarange Kerubo||||||||
-90125|Kanji|2024|Cyril Mari Sadak||||||||
-98214|Higchem|2024|Benjamin Odiwuor Mboya||||||||
-98218|Higchem|2024|George Wanderi Simon||||||||
-99222|Antonia|2024|Elvis Emmanuel Shikuku||||||||
-99227|Antonia|2024|Peurity Musebe Luseka||||||||
-99228|Antonia|2024|Joseph Odhiambo||||||||
-99231|Antonia|2024|Merselline Awuor Okode||||||||
-99237|Antonia|2024|Kevin Kipkurui||||||||
-99240|Antonia|2024|LYDIA NJOKI DAMARIAN||||||||
+SEED_TXT='''202731|Pwani Oil Products|2025|Angela Nyaguthii Gathege|Philip Gathege|Elizabeth Wanjiru||||||
+202863|Pwani Oil Products|2025|Peter Olonde|6600561|0745115734||41572317|67272316||||
+202656|Pwani Oil Products|2025|Patrick Sifuna Wanjala||4396984||31939216|151468||||
+202679|Pwani Oil Products|2016|Jack Omondi Juma|||||9927L79|3300789|26057L7|9999788|
+202680|Pwani Oil Products|2016|Marlon Ang'undu Kikuyu|||1951498||6879175||||
+202712|Pwani Oil Products|Nov.2022|Laura Imali|NA|NA|0327707|37982161|112409612||||
+202710|Pwani Oil Products|Dec.2020|Edith Kabera|NA|NA|23740423|23965879|10700481|112152616|11250650||
+202677|Pwani Oil Products|October.2024|Phoebe Anyango|1014509|2266278|NA|NA|NA|NA|NA|NA|NA
+202706|Pwani Oil Products|Aug.2021|Cynthia Awuor|NA|9892352|NA||1231202182||||
+202707|Pwani Oil Products|Nov.2021|Maureen Owino|2859205|4313510|28254592|24675501|9927L79|3300789|26057L7|9999788|
+202721|Pwani Oil Products|March .2023|Merceline Adhiambo|4026148|13199939|NA|27472316|3271828||||
+202705|Pwani Oil Products|Marh 2019|Odiembo Yvonne|NA|8351397|NA|NA|will  give  later||||
+202722|Pwani Oil Products|Dec.2023|Linet oduor|2828431|14479498|NA|NA|NA|NA|NA|NA|NA
+202746|Pwani Oil Products|Nov.2025|Divyan Dorcas|NA|13603542|NA|NA|||||
+202708|Pwani Oil Products|Jan. 2020|Lilian muchuma|NA|261270|||110707451||||
+202711|Pwani Oil Products|Sept.2021|John Adiel||1329824|28565804|32190036|||||
+292932|Pwani Oil Products|May.2026|Milcah Otiende|8232129|7861021||32624856|4094626||||
+280370|Pwani Oil Products|Sept. 2026|Lucy Mwende Mbatha|2991561|2965465|NA|NA|0852106551|NA|NA|NA|NA
+202697|Pwani Oil Products|Sept.2017|Naomi Mwango Abenga|1658833|NA|NA|22188003|121032026|121622654|112220451||
+202696|Pwani Oil Products|2015|Lydiah Nyaanga Osengo|1649626|1637770||10020853|160900879|168706540/19|||
+202693|Pwani Oil Products|May.2022|Meggiling Abuga Nyakerario|||8647005|||160900879||
+202695|Pwani Oil Products|2022|Gorrety Adhiambo Otieno|9807667|26810228||30257258|2348625|2350080|3743676||
+202699|Pwani Oil Products|14/12/2022|Sophia Nyamoita Mokaya|-|6541570||27233755|||||
+202751|Pwani Oil Products|02/10/2023|Benjamin Odiwuor Mboya|10596034|20015894||466468971|7893744||||
+202730|Pwani Oil Products|4.8.2025|Orwa Diana Atieno|96811362|21136615||36519946|||will provide later||
+202694|Pwani Oil Products|02/01/2020|Charles Adika|8837595|11833576|||||||
+282000|Pwani Oil Products|01/05/2026|Hyphine chepkoech Mutai|10383876|28240917||26261936|||||
+202750|Pwani Oil Products|May.2025|Priscah Anjemo Injili|-|21842168|-|32990585|795787|978435|||
+202698|Pwani Oil Products|14/02/2022|Postine Atieno|7921446|8398928||38801320|122318007||||
+202744|Pwani Oil Products|01/03/2024|Anthony Manyara Chania|21022712|86260659||923456988|||||
+202683|Pwani Oil Products|01/03/2013|Eunice Makona|-|4722288|N/A|210327239|7575163|7575161|7575162||
+202700|Pwani Oil Products|01/03/2025|Charles kimutai Kirui|3872261|3872429|N/A|31045698|612112010|N/A|N/A|N/A|N/A
+202709|Pwani Oil Products|01/03/2025|Oyoyo Yvonne Bentar|N/A|11801824|N/A|27464418|N/A|N/A|N/A|N/A|N/A
+202678|Pwani Oil Products|01/03/2025|Owen Muthee Waithaka|21217575|22555615|N/A|N/A|N/A|N/A|N/A|N/A|N/A
+202733|Pwani Oil Products|01/03/2025|Sharon Cherono|N/A|11635405|N/A|N/A|N/A|N/A|N/A|N/A|N/A
+202529|Pwani Oil Products|01/03/2025|Alex Shangala|4176764|7956390|N/A|33313078|692102029|691828162|N/A|N/A|N/A
+202729|Pwani Oil Products|01/03/2025|ROSE LUMONYA SAIDI|N/A|4252080|N/A|N/A|N/A|N/A|N/A|N/A|N/A
+202747|Pwani Oil Products|01/07/2025|BRENDA NELIMA WAFULA|N/A|133101|N/A|N/A|N/A|N/A|N/A|N/A|N/A
+10405|Pwani Oil Products|01/03/2025|Diana Atieno Oduor|NA|4722494|757617564|28078423- Ben Kitui|N/A|N/A|370702896 -Dennis Adams|21506184- Joy Nelima|Samantha  malia Achieng
+202749|Pwani Oil Products|01/03/2025|Celine Nasimiyu Wamalwa|N/A|8784757|NA|28990208|William  Musungu|Moses  Musungu|Bryton Musungu|N/A|N/A
+292976|Pwani Oil Products|01/04/2026|Belinda chemtai|N/A|4722288|N/A|N/A|372315084|182018971|N/A|N/A|N/A
+202702|Pwani Oil Products|01/05/2025|Betty Akinyi Namamba|Fabians  Namamba|Janet  Atieno|N/A|N/A|N/A|N/A|N/A|N/A|N/A
+202723|Pwani Oil Products|01/03/2025|Metrine Cherop Chumo|N/A|N/A|N/A|29934624|411700883|411506469|N/A|N/A|N/A
+50516|Pwani Oil Products|01/05/2025|SHEILA ADISA VOLEMI|VOLEMI|TERESIA|HUDSON IMBAYI|22175541|NA|NA|NA|N/A|N/A
+202701|Pwani Oil Products|01/03/2025|Everlyne mukoya Stephen|NA|N/A|N/A|23600368|N/A|671767|395330|N/A|N/A
+202703|Pwani Oil Products|01/03/2025|Caren Nanjala Chonge|NA|5639451|Later|22086206|364057|6090663|N/A|N/A|N/A
+202704|Pwani Oil Products|01/03/2025|Hellen Achieng Onyango|711723882|726994852|N/A|722618476|N/A|N/A|N/A|N/A|N/A
+202724|Pwani Oil Products|01/03/2025|BENTA ACHIENG MURUKA|CHRISTOPHER MURUKA|JANE MAGENGA|N/A|28687282|1311214785|21910561|N/A|||
+202989|SC Johnson|01/02/2026|Bonface Nzuki|13592548|20001605|||||||
+202774|SC Johnson|01/08/2024|Oscar kipkoech Ruto|8715105|25972243|N/A|643055126|604533||||
+90117|SC Johnson|01/08/2022|Hilda Esende Lugangi|22499361|22546698|Nil|22499361|330400075|370207832|371929483||
+Lena Cherono|SC Johnson|01/10/2026|Lena Cherono|N/A|6013139|6013139||||||
+202788|SC Johnson|01/08/2023|Afline Anyango Onyango|N/A|N/A|25083427|N/A|538317|538318|538342|880993|8908622
+202786|SC Johnson|01/08/2022|Judith Oweya Lukale|6308832|1232343|||7281845|8355678|||
+202784|SC Johnson|01/07/2025|Farida Olesi|N/A|21667279|||4164247||||
+Phesial Jaramogi Ooyi|SC Johnson|01/08/2022|Phesial Jaramogi Ooyi|2631938|21217207|N/A|38946763|7493054|3486480|||
+201743|SC Johnson|25/04/2026|Zachary Joel Moriasi|N/A|31295653|N/A||||||
+202976|SC Johnson|01/02/2026|Winfred mwende john|N/A|8966707|N/A|28782624||261287576|||
+202782|SC Johnson|01/12/2025|Victoria wangechi Mugwe|5988617|11032615|||||1512406016||
+202775|SC Johnson|01/02/2023|Milka Wawuda Mwang'ombe|N/A|58719|||||||
+202780|SC Johnson|2022|Mokua Frankline|23751234|24351022||37120961|||||
+202765|SC Johnson|01/08/2025|Hannah Warukira Mwangi|3582703|N/A|||0071503182||||
+202977|SC Johnson|26 Jan,2026|Emily Mueni Mutua|N/A|N/A|3545974||212327285|212303274|||
+202764|SC Johnson|August,2025|Agnes Wangu Mwangi|9263345|20409743|||201192||||
+202769|SC Johnson|01/08/2025|Joshua mwangi iguna|10380353|31107389||511795193|||||
+202761|SC Johnson|Apr_25|Hannah wanjiku|N/A|N/A|N/A|N/A|2384950||||
+202777|SC Johnson|,Sept 2022|Caroline Kathomi Njebiu|N/A|N/A|||||||
+202757|SC Johnson|2024|Fedinand Kafwa|N/A|N/A|||||||
+202772|SC Johnson|,Feb 2025|Maureen Njeri|N/A|N/A|||||||
+280267|SC Johnson|,July 2026|Patrick Kabiu Waweru|N/A|N/A|||||||
+202766|SC Johnson|,April 2025|Veronica Mukolwe|N/A|21000046|N/A|N/A|265075567||||
+202789|SC Johnson|,Aug 2022|Celestine Auma Ouko|25837011|8212095||21166739|6658291||||
+202641|Higchem|18/05/2026|Irene Waeni Mwangangi|9638105|12583212|NA|NA|210865865|2616122654|||
+202657|Higchem|16/06/2026|Isaac Ombati Rioba|NA|23630642|NA|31939473|371923347||||
+202787|Higchem|18/05/2026|Emily Nanjala Wafula||||||||||
+202998|Higchem|18/05/2026|Millianna Anyango Sadaka||||||||||
+280005|Higchem|18/05/2026|Faith Njeri Kibungi|3121603|3589023|NA|N/A|A8858040||||
+280007|Higchem|18/05/2026|Collins Ofula Mabwa|7421158|36301081||37416617|1442312021||||
+280008|Higchem|18/05/2026|Wanga Atieno Beryl|||||2633392||||
+280009|Higchem|18/05/2026|Nelson Miruka Kiyondi|8578391|21133401|NA|NA|||||
+280012|Higchem|18/05/2026|Robert Kariuki Macharia||||||||||
+280013|Higchem|18/05/2026|Thomas Felix Mwatu|7808718|BK758118||34661148|||||
+280014|Higchem|18/05/2026|Mercy Nabulo Khabala|1431857|9216359|NA|26142738|392118249||||
+280078|Higchem|28/05/2026|Joan Anyango Otewa||||||||||
+280266|Higchem|08/07/2026|Anna Mbinya Kalia||||||||||
+280325|Higchem|19/08/2026|Marion Waheto|||32175829|36914920|||||
+280326|Higchem|03/08/2026|Maureen Wanjiru Kiarie|9745295|11241637|||CA001474219||||
+280349|Higchem|01/09/2026|Wicklife Okemwa Nyangaresi|1593749|10468950||308049405|4713214||||
+Sherine Atieno|Antonia|2025|Sherine Atieno Otieno|N/A|23333405|N/A|N/A|N/A|N/A|N/A|N/A|N/A
+280225|Antonia|2026|Stepheny Keziah Wambui Mwangi|10452983|10166506||34439485|1463604|2498854|||
+202640|Java House|06/01/2024|Samuel Njeru Njiru|NA|12402044|NA|NA|NA|NA|NA||
+202642|Java House|02/01/2023|Eugene Daudi Aura|12684478|22143892|NA|NA|NA|NA|NA||
+202643|Java House|16/06/2023|Wamuyu Irene Wairimu|NA|NA|NA|NA|NA|NA|NA||
+280226|Java House|22/06/2026|Alice Maina|21154721|5925331|NA|NA|NA|NA|NA||
+292965|Java House|05/05/2026|Sylvia Agosa|NA|27589904|NA|NA|NA|NA|NA||
+202648|Java House|08/01/2022|Esther Wangari Karanja|NA|2947799|NA|28442445|661711470|131927789|NA||
+202649|Java House|08/01/2023|Emily Waithera Njenga|12679084|29681293|NA|31609269|74506389|NA|NA||
+280372|Java House|09/09/2026|Joan Ensha Wairimu|7178165|10271736|NA|NA|27163167|NA|NA||
+202651|Java House|15/04/2024|Edwin Ondieki Kiyaka|6925315|25820458|NA|36314446|272309733|NA|NA||
+202652|Java House|23/11/2023|Gladys Kinuthia|730157|NA|NA|NA|721471|B750670|NA||
+280507|Java House|16/09/2026|Purity mukami|NA|21461686|NA|NA|207735072|NA|NA||
+202654|Java House|17/05/2025|Samwel Erick Odhiambo|NA|11705391|NA|NA|NA|NA|NA||
+202655|Java House|04/01/2025|Felister Gatwiri Muriithi|8601366|21461686|NA|27924521|1752770|NA|NA||
+202666|Java House|21/07/2026|Charity Moraa Juma|12696585|NA|NA|NA|NA|NA|NA||
+202660|Java House|01/01/2026|Brian Mwenda Njue|NA|11326767|NA|NA|NA|NA|NA||
+202661|Java House|11/11/2025|Emmanuel Mike Ochieng|NA|20465576|NA|NA|NA|NA|NA||
+202662|Java House|11/11/2025|Caroline Muthoni Mugo|NA|9410131|NA|NA|447404|NA|NA||
+202664|Java House|13/03/2026|Jeniffer Wanjira Ndung'u|3081426|NA|NA|NA|4694621|NA|NA||
+202670|Java House|06/06/2025|Maureen Gathiru Mwaniki|8949712|9484232|NA|NA|NA|NA|NA||
+202671|Java House|01/01/2025|Lilian Adhiambo Randa|NA|NA|22175755|28042042|4363793|6390498|NA||
+202673|Java House|05/05/2024|Pauline Wambui Masila|NA|4872231|NA|28587029|6097147|A3489654|NA||
+202674|Java House|29/11/2023|Anne Kamonya Mulema|NA|NA|1881637|29867375|9746194|7016764|NA||
+202675|Java House|06/06/2025|Daniel Ombui Mayaka|6925939|5825881|NA|29893290|7090003|9105030|NA||
+202934|Java House|01/01/2026|Jeff Otieno Maina|NA|NA|33964654|NA|NA|NA|NA||
+202935|Java House|01/01/2026|Jedida Njoki Kinyanjui|NA|4244441|NA|NA|NA|NA|NA||
+202937|Java House|02/02/2026|Clifton Kelvin Makokha|NA|NA|NA|NA|NA|NA|NA||
+202952|Java House|01/01/2026|Collen Elizabeth Ojiambo|NA|NA|NA|NA|7072542|7515539|7135442||
+202978|Java House|02/02/2026|Jackline Wanza Muthoka|NA|13796649|NA|NA|NA|NA|NA||
+292915|Java House|05/05/2026|Francis Omari|NA|21065823|NA|NA|NA|NA|NA||
+202686|Java House|16/04/2026|Evaperpetual Wambui Maina|NA|13542413|NA|NA|NA|NA|NA||
+202603|Java House|01/09/2026|Mariam Juma|NA|NA|NA|NA|41335956|260828238|608994032||
+280528|Java House|11/01/2026|Hydrick Kipkorir|NA|NA|NA|620201|NA|NA|NA||
+Kendy Njeri|Java House|01/11/2026|Kendy Njeri|NA|26001602|NA|NA|NA|NA|NA||
+Joseph Chege|Java House|01/11/2026|Joseph Chege|3054830|NA|NA|38220338|NA|NA|NA||
+Specioza Matitsa|Java House|01/11/2026|Specioza Matitsa|NA|NA|NA|NA|NA|NA|NA||
+202607 Mary ngotah|GCB-MT|1st Dec 2019|Mary ngotah|||6514355  Gideon|5647988  Johnson|5029251  Shantel|821770  Ryan|||
+202602Hillary nzive|GCB-MT|19th Dec|Hillary nzive kasiva|mumo|Christabel||33080053|5523041707|552304792|giana sage||
+202609 Joan Atieno Odhiambo|GCB-MT|11th Nov|Joan Atieno Odhiambo||Roseline|9007625||710552151||||
+202612 purity ndunda|GCB-MT|2025 November|purity ndunda|ndunda|Jemima|20451178|56342190||3820546|||
+280322|GCB-MT|01/08/2021|Nelson karani|Patrick|Martha|20035038|35833677|||||
+292916|GCB-MT|1st Aug 2026|Grace muthoni chege|Benson|Elizabeth||31744265|3820546 Jayden||||
+202606 peter omondi|GCB-MT|11th Nov 2022|peter omondi|maurice|Teressa|||||||
+202613|GCB-MT|1st jan 2026|Joan wambui|none|hannah njeri|6431600||tracy njeri 3954756|Israel Githuku 4681696|||
+292962|GCB-MT|1st September 2026|Stephen Mwose|Antony|Magdaline|4916541|37679067|Brielle Mbithe|-|||
+280265|GCB-MT|1st July 2026|Caroline Maina|Maina|Jane|8812236||||||
+202610|GCB-MT|15th November 2025|Mercy Wambui Njer|none|none|21785795 Grace Lucy||shalomlynnnjeri  2739159||||
+292964|GCB-MT|1st june 2026|Mary Mbinya|Musyoka|Ruth|9224221|34123070|0212336591 Jayden||||
+280315|GCB-MT|1st Aug 2026|Dorcas Mukenyi|Mwanzia|Joyce||22228902|Geoffrey||||
+202926|GCB-MT|1st Jan ,2026|Stephen Mwalimu|Mwalimu|Damaris|21 459928|N/A|||||
+202604|GCB-MT|14th September 2020|Dennis Mbindyo Mwamuli|Alfred Mwamuli|Catherine Monica|||||||
+280321 Geoffery Matata Mbeva|GCB-MT|19th August 2026|Geoffrey Matata Mbeva||Rosina Beth Mbeva 73696420||32512477 Faith Mwende|Nathan Musyoki Matata 0262718439|Ethan Mbeva Matata 0262718432|Carlos Mwendwa Matata 0265294261||
+202611|GCB-MT|1st Dec 2025|Robert Muthui Matheka|Julius Matheka|Jedidah Matheka|||||||
+202601|GCB-MT|1st Feb 2011|Evelyne Mpinda Kinyua|||Sophia Mbiriga 8351177||Rordrique Kimathi - 481336|Imani Raylen - 5167251|||
+280322|GCB-MT|15th Aug 2026|Nelson karani||Martha adisa-20035038||N/A|Teddy khainza|N/A|N/A||
+202615|GCB-MT|4th April 2019|Emiliana mwanaidi||Diana mwandisha, 8464065||marvin cassiano 22582763|Gybies 0572301813|Asaph 5170301|||
+202628|HQ|2015|JANEDRIX AKINYI SADAKA|N/A|JOYCE SAKAKA||N/A|JAMES SADAKSA|JOYBLESSING|||
+CELESTINE ATIENO SADAKA|HQ|2015|CELESTINE ATIENO SADAKA|N/A|JOYCE SAKAKA||N/A|LINCOL|IAN|ANDREY||
+280314|HQ|AUGUST 1ST 2026|LAZARUS OKECHI|NICODEMUS OGOTI|MARY AJIAMBO||PURITY KABATI|AZARIA  AJIAMBO||||
+PATRIC TITO|HQ|2020|PATRIC TITO|TITO NZONGA|FELISTERS TITO||FRIDAH KARIMI|TIFFANY TITO|BARAKA TITO|||
+292930|HQ|AUGUST 1ST 2026|EDDY  NYANGORI|JOHN  NYANGORI|HELLENE ACHIENG||N/A|||||
 '''
 SEED_DATA=[tuple((l.split('|')+['']*13)[:13]) for l in SEED_TXT.strip().splitlines() if l.strip()]
 def clean(v):
@@ -450,9 +324,17 @@ def init_db():
    continue
   if add_user(c,staff,names,project,month,father,mother,guardian,spouse,k1,k2,k3,k4,k5):
    added+=1
+ # SYNC TO 1ST DATA ONLY - remove old simplified 10009 etc members not in this list
+ seed_staffs=set([clean(r[0]) for r in SEED_DATA if clean(r[0])])
+ seed_names=set([clean(r[3]).lower() for r in SEED_DATA if clean(r[3])])
+ for row in c.execute("SELECT id, staff_no, full_names, email FROM users").fetchall():
+  if row["email"]==ADMIN_EMAIL:
+   continue
+  if (row["staff_no"] or "") not in seed_staffs and (row["full_names"] or "").lower() not in seed_names:
+   c.execute("DELETE FROM users WHERE id=?",(row["id"],))
  c.commit()
  c.close()
- print(f"v123 seeded {added}")
+ print(f"v124 seeded {added}")
 init_db()
 @app.after_request
 def after(r):
