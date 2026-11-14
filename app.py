@@ -183,6 +183,9 @@ PATRIC TITO|HQ|2020|PATRIC TITO|TITO NZONGA|FELISTERS TITO||FRIDAH KARIMI|TIFFAN
 292930|HQ|AUGUST 1ST 2026|EDDY  NYANGORI|JOHN  NYANGORI|HELLENE ACHIENG||N/A|||||
 '''
 SEED_DATA=[tuple((l.split('|')+['']*13)[:13]) for l in SEED_TXT.strip().splitlines() if l.strip()]
+ADD_TXT='''280472|Pwani Oil Products|01/09/2026|Samuel Kikweo Nthenya|Kikweo|Nthenya|N/A|42804535|5986912
+'''
+ADD_DATA=[tuple((l.split('|')+['']*13)[:13]) for l in ADD_TXT.strip().splitlines() if l.strip()]
 def clean(v):
  if v is None:
   return ""
@@ -324,16 +327,22 @@ def init_db():
    continue
   if add_user(c,staff,names,project,month,father,mother,guardian,spouse,k1,k2,k3,k4,k5):
    added+=1
- seed_staffs=set([clean(r[0]) for r in SEED_DATA if clean(r[0])])
- seed_names=set([clean(r[3]).lower() for r in SEED_DATA if clean(r[3])])
+ added2=0
+ for r in ADD_DATA:
+  staff,proj_raw,month,names,father,mother,guardian,spouse,k1,k2,k3,k4,k5=r
+  if add_user(c,staff,names,norm_project(proj_raw),month,father,mother,guardian,spouse,k1,k2,k3,k4,k5):
+   added2+=1
+ # ONLY SEED + THIS ONE - remove any v127 file members if they were deployed
+ keep_staffs=set([clean(r[0]) for r in SEED_DATA+ADD_DATA if clean(r[0])])
+ keep_names=set([clean(r[3]).lower() for r in SEED_DATA+ADD_DATA if clean(r[3])])
  for row in c.execute("SELECT id, staff_no, full_names, email FROM users").fetchall():
   if row["email"]==ADMIN_EMAIL:
    continue
-  if (row["staff_no"] or "") not in seed_staffs and (row["full_names"] or "").lower() not in seed_names:
+  if (row["staff_no"] or "") not in keep_staffs and (row["full_names"] or "").lower() not in keep_names:
    c.execute("DELETE FROM users WHERE id=?",(row["id"],))
  c.commit()
  c.close()
- print(f"v126 seeded {added}")
+ print(f"v128 seeded {added} added {added2}")
 init_db()
 @app.after_request
 def after(r):
