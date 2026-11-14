@@ -150,8 +150,8 @@ Sherine Atieno|Antonia|2025|Sherine Atieno Otieno|N/A|23333405|N/A|N/A|N/A|N/A|N
 202952|Java House|01/01/2026|Collen Elizabeth Ojiambo|NA|NA|NA|NA|7072542|7515539|7135442||
 202978|Java House|02/02/2026|Jackline Wanza Muthoka|NA|13796649|NA|NA|NA|NA|NA||
 292915|Java House|05/05/2026|Francis Omari|NA|21065823|NA|NA|NA|NA|NA||
-202686|Java House|16/04/2026|Evaperpetual Wambui Maina|NA|13542413|NA|NA|NA|NA|NA||
-202603|Java House|01/09/2026|Mariam Juma|NA|NA|NA|NA|41335956|260828238|608994032||
+202686|Java House|16/04/2017|Evaperpetual Wambui Maina|NA|13542413|NA|NA|NA|NA|NA||
+202603|Java House|01/09/2020|Mariam Juma|NA|NA|NA|NA|41335956|260828238|608994032||
 280528|Java House|11/01/2026|Hydrick Kipkorir|NA|NA|NA|620201|NA|NA|NA||
 Kendy Njeri|Java House|01/11/2026|Kendy Njeri|NA|26001602|NA|NA|NA|NA|NA||
 Joseph Chege|Java House|01/11/2026|Joseph Chege|3054830|NA|NA|38220338|NA|NA|NA||
@@ -332,7 +332,6 @@ def init_db():
   staff,proj_raw,month,names,father,mother,guardian,spouse,k1,k2,k3,k4,k5=r
   if add_user(c,staff,names,norm_project(proj_raw),month,father,mother,guardian,spouse,k1,k2,k3,k4,k5):
    added2+=1
- # ONLY SEED + THIS ONE - remove any v127 file members if they were deployed
  keep_staffs=set([clean(r[0]) for r in SEED_DATA+ADD_DATA if clean(r[0])])
  keep_names=set([clean(r[3]).lower() for r in SEED_DATA+ADD_DATA if clean(r[3])])
  for row in c.execute("SELECT id, staff_no, full_names, email FROM users").fetchall():
@@ -342,7 +341,7 @@ def init_db():
    c.execute("DELETE FROM users WHERE id=?",(row["id"],))
  c.commit()
  c.close()
- print(f"v128 seeded {added} added {added2}")
+ print(f"v129 seeded {added} added {added2}")
 init_db()
 @app.after_request
 def after(r):
