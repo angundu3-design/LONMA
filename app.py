@@ -427,7 +427,8 @@ def shell(title,body):
 <script>
 function openDrawer(){document.getElementById('slideDrawer').classList.add('open');document.getElementById('slideOverlay').classList.add('open');document.body.style.overflow='hidden';}
 function closeDrawer(){document.getElementById('slideDrawer').classList.remove('open');document.getElementById('slideOverlay').classList.remove('open');document.body.style.overflow='';}
-function applyTheme(){var t=localStorage.getItem('lonma_theme')||'light';var dark=(t=='dark')||(t=='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('dark',dark);['btnLight','btnDark','btnSystem'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('active');});var active=t=='dark'?'btnDark':t=='system'?'btnSystem':'btnLight';var a=document.getElementById(active);if(a)a.classList.add('active');}
+function app
+~lyTheme(){var t=localStorage.getItem('lonma_theme')||'light';var dark=(t=='dark')||(t=='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('dark',dark);['btnLight','btnDark','btnSystem'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('active');});var active=t=='dark'?'btnDark':t=='system'?'btnSystem':'btnLight';var a=document.getElementById(active);if(a)a.classList.add('active');}
 function setTheme(t){localStorage.setItem('lonma_theme',t);applyTheme();}
 applyTheme();
 var _startX=null;document.addEventListener('touchstart',function(e){_startX=e.touches[0].clientX;},{passive:true});document.addEventListener('touchend',function(e){if(_startX===null)return;var dx=e.changedTouches[0].clientX-_startX;if(_startX<30&&dx>60)openDrawer();if(dx<-60)closeDrawer();_startX=null;},{passive:true});
@@ -642,8 +643,6 @@ def nf(e):
 if __name__=="__main__":
  port=int(os.environ.get("PORT",10000))
  app.run(host="0.0.0.0",port=port)
-DB="lonma.db"
-PROJECTS=["Antonia","GCB-MT","GCB-TDs","Higchem","HQ","Java House","Kanji","Pwani Oil Products","SC Johnson","TF-LM","TF-MT"]
 PWANI_LOGO="https://africasustainabilitymatters.com/wp-content/uploads/2020/03/Pwani-logo-585x390.png"
 JAVA_LOGO="https://files.startupranking.com/startup/thumb/63544_1f9d3a70b8f51acd40ff73fd3e16bdefdfa00adc_java-house_l.jpg"
 SCJ_LOGO="https://bhp-plus.pl/usr/s.c.-johnson-logo.png"
