@@ -642,7 +642,6 @@ def nf(e):
 if __name__=="__main__":
  port=int(os.environ.get("PORT",10000))
  app.run(host="0.0.0.0",port=port)
-
 DB="lonma.db"
 PROJECTS=["Antonia","GCB-MT","GCB-TDs","Higchem","HQ","Java House","Kanji","Pwani Oil Products","SC Johnson","TF-LM","TF-MT"]
 PWANI_LOGO="https://africasustainabilitymatters.com/wp-content/uploads/2020/03/Pwani-logo-585x390.png"
