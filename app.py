@@ -452,7 +452,7 @@ def init_db():
    added+=1
  c.commit()
  c.close()
- print(f"v121 seeded {added}")
+ print(f"v122 seeded {added}")
 init_db()
 @app.after_request
 def after(r):
@@ -498,14 +498,12 @@ setCompanyUI();
 def shell(title,body):
  full=COMPANY_BAR+body
  return render_template_string('''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>'''+title+''' - F.I.G BRANDS</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;700&display=swap" rel="stylesheet"><script>if(!localStorage.getItem('fig_user')&&location.pathname!='/login'&&location.pathname!='/register'){location.href='/login'}</script><style>*{box-sizing:border-box}body{font-family:Inter,sans-serif;background:#F8F9FA;margin:0;padding-bottom:80px;color:#111827;overflow-x:hidden}body.dark{background:#000;color:#E7E9EA}body.dark .card,body.dark .top,body.dark .toplinks,body.dark #slideDrawer,body.dark .nav{background:#000!important;color:#E7E9EA!important;border-color:#2F3336!important}body.dark .input{background:#000!important;color:#fff!important;border-color:#2F3336!important}.card{background:#fff;border:1px solid #E5E7EB;border-radius:20px;padding:20px;margin-bottom:14px}.input{width:100%;height:48px;border:1px solid #D1D5DB;border-radius:999px;padding:0 14px;background:#fff}.btn-dark{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#0F2A44;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px;border:0}.btn-gold{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#C9A86A;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px;border:0}.top{height:64px;background:#fff;display:flex;align-items:center;gap:12px;padding:0 14px;position:sticky;top:0;z-index:20;border-bottom:1px solid #E5E7EB}.logo{width:52px;height:52px;border-radius:14px;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}.toplinks{background:#fff;border-bottom:1px solid #E5E7EB;padding:10px 14px;display:flex;gap:24px;overflow-x:auto;white-space:nowrap;position:sticky;top:64px;z-index:15;flex-wrap:wrap}.toplinks a{color:#111827;text-decoration:none;font-size:15px;font-weight:600}.page{max-width:1080px;margin:auto;padding:18px 14px 180px}.dark{background:#0F2A44;color:#fff;border-radius:20px;padding:22px;margin-bottom:14px}.gold{color:#C9A86A;letter-spacing:2px;font-size:12px;font-weight:700}h1,h2{font-family:Fraunces,Georgia,serif}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid #F3F4F6;text-align:left}.nav{position:fixed;left:10px;right:10px;bottom:8px;height:60px;background:#fff;border:1px solid #E5E7EB;border-radius:24px;display:flex;z-index:30;box-shadow:0 4px 20px rgba(0,0,0,.08)}.nav a{flex:1;color:#6B7280;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}.xbtn{border:0;background:#F3F4F6;border-radius:999px;padding:8px 12px;font-size:13px;cursor:pointer}.xbtn.liked{background:#FEE2E2;color:#DC2626}.xbtn.saved{background:#FEF3C7;color:#92400E}.avatar{width:40px;height:40px;border-radius:50%;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}.projlogo{width:32px;height:32px;border-radius:8px;object-fit:cover;background:#F3F4F6}
-/* SLIDE DRAWER - LIKE YOUR PHOTO */
 #slideOverlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
 #slideOverlay.open{opacity:1;pointer-events:auto}
 #slideDrawer{position:fixed;top:0;left:0;bottom:0;width:320px;max-width:88vw;background:#fff;z-index:101;transform:translateX(-105%);transition:transform .32s ease;overflow-y:auto;border-right:1px solid #E5E7EB;box-shadow:20px 0 40px rgba(0,0,0,.2);padding:14px 14px 30px}
 #slideDrawer.open{transform:translateX(0)}
 .drawer-row{display:flex;align-items:center;gap:14px;padding:14px 8px;text-decoration:none;color:#111827;border-radius:14px}
 .drawer-row:active{background:#F3F4F6}
-.drawer-badge{width:48px;height:48px;border-radius:14px;background:#EEF2F5;color:#0F2A44;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex-shrink:0}
 .drawer-label{font-size:19px;font-weight:600;flex:1}
 .drawer-arrow{color:#9CA3AF;font-size:18px}
 .section-title{color:#6B7280;letter-spacing:2px;font-size:13px;font-weight:700;margin:22px 8px 10px}
@@ -516,21 +514,21 @@ def shell(title,body):
 </style></head><body>
 <div id="slideOverlay" onclick="closeDrawer()"></div>
 <aside id="slideDrawer">
-<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px"><div class="avatar" style="width:48px;height:48px;font-size:18px" id="drawerAvatar">MA</div><button onclick="closeDrawer()" style="background:none;border:0;font-size:22px;cursor:pointer">✕</button></div>
-<div style="padding:10px 8px 0"><div style="font-size:21px;font-weight:800" id="menuName">Marlon K.</div><div style="color:#6B7280" id="menuHandle">@Mongela_h</div><div style="display:flex;gap:16px;margin-top:10px;font-size:15px"><span><b>8,493</b> <span style="color:#6B7280">Following</span></span><span><b>8,618</b> <span style="color:#6B7280">Followers</span></span></div></div>
-<a class="drawer-row" href="/register" onclick="closeDrawer()"><span class="drawer-badge">RG</span><span class="drawer-label">Register Member</span><span class="drawer-arrow">›</span></a>
-<a class="drawer-row" href="/shareout" onclick="closeDrawer()"><span class="drawer-badge">SO</span><span class="drawer-label">Share-Out</span><span class="drawer-arrow">›</span></a>
-<a class="drawer-row" href="/breakdown2" onclick="closeDrawer()"><span class="drawer-badge">HS</span><span class="drawer-label">History</span><span class="drawer-arrow">›</span></a>
-<a class="drawer-row" href="/terms" onclick="closeDrawer()"><span class="drawer-badge">TP</span><span class="drawer-label">Terms &amp; Policies</span><span class="drawer-arrow">›</span></a>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px"><div class="avatar" style="width:48px;height:48px;font-size:18px" id="drawerAvatar">M</div><button onclick="closeDrawer()" style="background:none;border:0;font-size:22px;cursor:pointer">✕</button></div>
+<div style="padding:10px 8px 0"><div style="font-size:21px;font-weight:800" id="menuName">Marlon Ang'undu Kikuyu</div><div style="color:#6B7280" id="menuHandle">@marlon</div></div>
+<a class="drawer-row" href="/register" onclick="closeDrawer()"><span class="drawer-label">Register Member</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/shareout" onclick="closeDrawer()"><span class="drawer-label">Share-Out</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/breakdown2" onclick="closeDrawer()"><span class="drawer-label">History</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/terms" onclick="closeDrawer()"><span class="drawer-label">Terms &amp; Policies</span><span class="drawer-arrow">›</span></a>
 <div class="section-title">APPEARANCE</div>
 <div class="appear-row"><button class="appear-btn active" id="btnLight" onclick="setTheme('light')">Light</button><button class="appear-btn" id="btnDark" onclick="setTheme('dark')">Dark</button><button class="appear-btn" id="btnSystem" onclick="setTheme('system')">System</button></div>
 <div class="section-title">NOTIFICATIONS &amp; SETTINGS</div>
-<a class="drawer-row" href="/community" onclick="closeDrawer()"><span class="drawer-badge">NT</span><span class="drawer-label">Notifications</span><span class="drawer-arrow">›</span></a>
-<a class="drawer-row" href="/admin" onclick="closeDrawer()"><span class="drawer-badge">AD</span><span class="drawer-label">Admin / Settings</span><span class="drawer-arrow">›</span></a>
-<a class="drawer-row" href="/terms" onclick="closeDrawer()"><span class="drawer-badge">HP</span><span class="drawer-label">Help Centre</span><span class="drawer-arrow">›</span></a>
-<a class="drawer-row" href="/download/excel" onclick="closeDrawer()"><span class="drawer-badge">XL</span><span class="drawer-label">Download Excel</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/community" onclick="closeDrawer()"><span class="drawer-label">Notifications</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/admin" onclick="closeDrawer()"><span class="drawer-label">Admin / Settings</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/terms" onclick="closeDrawer()"><span class="drawer-label">Help Centre</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/download/excel" onclick="closeDrawer()"><span class="drawer-label">Download Excel</span><span class="drawer-arrow">›</span></a>
 <div class="section-title">ACCOUNT</div>
-<a class="drawer-row" href="/login" onclick="closeDrawer()"><span class="drawer-badge">LG</span><span class="drawer-label">Login as Admin</span><span class="drawer-arrow">›</span></a>
+<a class="drawer-row" href="/login" onclick="closeDrawer()"><span class="drawer-label">Login as Admin</span><span class="drawer-arrow">›</span></a>
 <div class="drawer-footer">F.I.G BRANDS Welfare · v100<br>marlonkikuyu@gmail.com · +254 707 780 807</div>
 </aside>
 <div class="top"><button onclick="openDrawer()" style="background:none;border:0;color:#111827;font-size:24px;cursor:pointer;padding:6px">☰</button><div class="logo">FIG</div><div><b style="font-size:17px;letter-spacing:.5px">F.I.G BRANDS</b><div style="color:#6B7280;letter-spacing:2px;font-size:11px">WELFARE SYSTEM</div></div><div style="margin-left:auto;display:flex;gap:8px;align-items:center"><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">◐</span><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">○</span><button onclick="openDrawer()" style="background:none;border:0;cursor:pointer;padding:0"><span style="width:38px;height:38px;border-radius:50%;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">MA</span></button></div></div><div class="toplinks"><a href="/">Overview</a><a href="/members">Members</a><a href="/community">Community</a><a href="/register">Register</a><a href="/shareout">Share-Out</a><a href="/breakdown2">History</a><a href="/terms">Terms &amp; Policies</a><a href="/admin">Admin</a></div><div class="page">'''+full+'''</div><nav class="nav"><a href="/">Home</a><a href="/members">Members</a><a href="/community">Community</a><a href="/shareout">Share-Out</a><a href="/terms">Terms</a><a href="/register">Add</a></nav>
