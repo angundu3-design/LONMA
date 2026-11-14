@@ -526,11 +526,6 @@ def api_support():
     c=get_db(); c.execute("INSERT INTO support_msgs (name, msg, created) VALUES (?,?,?)", (d.get("name") or "", d.get("msg") or "", _dt.datetime.now().strftime("%d %b %Y %H:%M")))
     c.commit(); c.close(); return jsonify({"message": "Message sent. We will reply on WhatsApp 0707 780 807"})
 @app.route("/download/excel")
-def download_excel():
-    shares, tc, tm, rate = calc_shares()
-    from openpyxl import Workbook
-    ,"Full Names","Project","Email","Date Joined","Months","Contribution","ShareContinuing from where it stopped - paste this **at the end** of the file you already pasted, replacing the cut-off last line:
-
 `
 @app.route("/download/excel")
 def download_excel():
