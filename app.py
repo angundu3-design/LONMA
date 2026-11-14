@@ -1,5 +1,5 @@
 from flask import Flask,request,jsonify,render_template_string,redirect,send_file
-import sqlite3,os,secrets,io,re
+import sqlite3,os,secrets,io,re,datetime
 from werkzeug.security import generate_password_hash,check_password_hash
 app=Flask(__name__)
 DB="lonma.db"
@@ -124,9 +124,9 @@ def add_user(c,staff,names,project,month,father="",mother="",guardian="",spouse=
 def init_db():
     c=get_db()
     c.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, staff_no TEXT, full_names TEXT, project TEXT, email TEXT UNIQUE, password TEXT, role TEXT, phone TEXT, api_key TEXT, is_protected INTEGER DEFAULT 0, month_joined TEXT, father_id TEXT, mother_id TEXT, guardian_id TEXT, spouse_id TEXT, kid1 TEXT, kid2 TEXT, kid3 TEXT, kid4 TEXT, kid5 TEXT, photo TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, msg TEXT, created TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, msg TEXT, created TEXT, target TEXT, is_read INTEGER DEFAULT 0)')
     c.execute('CREATE TABLE IF NOT EXISTS support_msgs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, msg TEXT, created TEXT)')
-    c.execute('CREATE TABLE IF NOT EXISTS community_posts (id INTEGER PRIMARY KEY AUTOINCREMENT, author_name TEXT, author_email TEXT, project TEXT, msg TEXT, created TEXT)')
+    c.execute('CREATE TABLE IF NOT EXISTS community_posts (id INTEGER PRIMARY KEY AUTOINCREMENT, author_name TEXT, author_email TEXT, project TEXT, msg TEXT, created TEXT, media_type TEXT, media_data TEXT, repost_of TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS community_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, author_name TEXT, author_email TEXT, msg TEXT, created TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS community_likes (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, email TEXT, UNIQUE(post_id,email))')
     c.execute('CREATE TABLE IF NOT EXISTS community_bookmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, email TEXT, UNIQUE(post_id,email))')
@@ -138,11 +138,6 @@ def init_db():
     for col in ["media_type","media_data","repost_of"]:
         try:
             c.execute(f"ALTER TABLE community_posts ADD COLUMN {col} TEXT")
-        except:
-            pass
-    for col,typ in [("target","TEXT"),("is_read","INTEGER DEFAULT 0")]:
-        try:
-            c.execute(f"ALTER TABLE notifications ADD COLUMN {col} {typ}")
         except:
             pass
     for r in c.execute("SELECT id, project FROM users").fetchall():
@@ -175,7 +170,7 @@ def init_db():
             added+=1
     c.commit()
     c.close()
-    print(f"v113 seeded {added}")
+    print(f"v115 seeded {added}")
 init_db()
 @app.after_request
 def after(r):
@@ -190,7 +185,7 @@ YEAR_BAR='''
 <div style="background:#fff;border-bottom:1px solid #E5E7EB;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
 <label style="font-weight:700;font-size:13px;color:#0F2A44">Filter Year:</label>
 <select id="yearFilter" onchange="onYearChange()" style="height:42px;border:1px solid #D1D5DB;border-radius:10px;padding:0 10px;min-width:130px;font-size:14px">
-<option value="">All Years</option>
+<option value="">All Years - All 240</option>
 <option value="2011">2011</option><option value="2013">2013</option><option value="2014">2014</option>
 <option value="2015">2015</option><option value="2016">2016</option><option value="2017">2017</option>
 <option value="2019">2019</option><option value="2020">2020</option><option value="2021">2021</option>
@@ -206,23 +201,25 @@ function setYearUI(){var y=getYear();var el=document.getElementById('yearFilter'
 function onYearChange(){localStorage.setItem('lonma_year',document.getElementById('yearFilter').value);setYearUI();location.reload();}
 function clearYear(){localStorage.setItem('lonma_year','');setYearUI();location.reload();}
 function yearQuery(){var y=getYear();return y?'?year='+y:'';}
+function getEmail(){return localStorage.getItem('fig_email')||'guest@figbrands.co.ke';}
+function getName(){return localStorage.getItem('fig_name')||'Member';}
 setYearUI();
 </script>
 '''
 def shell(title,body):
     full=YEAR_BAR+body
-    return render_template_string('''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>'''+title+''' - F.I.G BRANDS</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;700&display=swap" rel="stylesheet"><script>if(!localStorage.getItem('fig_user')&&location.pathname!='/login'&&location.pathname!='/register'){location.href='/login'}function figLogout(){['fig_user','fig_role','fig_name','fig_email'].forEach(k=>localStorage.removeItem(k));location.href='/login'}</script><style>body{font-family:Inter,sans-serif;background:#F8F9FA;margin:0;padding-bottom:80px;color:#111827}.card{background:#fff;border:1px solid #E5E7EB;border-radius:20px;padding:20px;margin-bottom:14px}.input{width:100%;height:48px;border:1px solid #D1D5DB;border-radius:12px;padding:0 14px;box-sizing:border-box}.btn-dark{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#0F2A44;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px;border:0}.btn-gold{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#C9A86A;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px;border:0}.top{height:64px;background:#fff;display:flex;align-items:center;gap:12px;padding:0 14px;position:sticky;top:0;z-index:20;border-bottom:1px solid #E5E7EB}.logo{width:52px;height:52px;border-radius:14px;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}.toplinks{background:#fff;border-bottom:1px solid #E5E7EB;padding:10px 14px;display:flex;gap:24px;overflow-x:auto;white-space:nowrap;position:sticky;top:64px;z-index:15;flex-wrap:wrap}.toplinks a{color:#111827;text-decoration:none;font-size:15px;font-weight:600}.page{max-width:1080px;margin:auto;padding:18px 14px 180px}.dark{background:#0F2A44;color:#fff;border-radius:20px;padding:22px;margin-bottom:14px}.gold{color:#C9A86A;letter-spacing:2px;font-size:12px;font-weight:700}h1,h2{font-family:Fraunces,Georgia,serif}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid #F3F4F6;text-align:left}.nav{position:fixed;left:10px;right:10px;bottom:8px;height:60px;background:#fff;border:1px solid #E5E7EB;border-radius:24px;display:flex;z-index:30;box-shadow:0 4px 20px rgba(0,0,0,.08)}.nav a{flex:1;color:#6B7280;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}</style></head><body><div class="top"><div class="logo">FIG</div><div><b style="font-size:17px;letter-spacing:.5px">F.I.G BRANDS</b><div style="color:#6B7280;letter-spacing:2px;font-size:11px">WELFARE SYSTEM</div></div><div style="margin-left:auto;display:flex;gap:8px;align-items:center"><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">◐</span><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">○</span><span style="width:38px;height:38px;border-radius:50%;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">MA</span></div></div><div class="toplinks"><a href="/">Overview</a><a href="/members">Members</a><a href="/community">Community</a><a href="/register">Register</a><a href="/shareout">Share-Out</a><a href="/breakdown2">History</a><a href="/terms">Terms &amp; Policies</a><a href="/admin">Admin</a></div><div class="page">'''+full+'''</div><nav class="nav"><a href="/">Home</a><a href="/members">Members</a><a href="/community">Community</a><a href="/shareout">Share-Out</a><a href="/terms">Terms</a><a href="/register">Add</a></nav></body></html>''')
+    return render_template_string('''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>'''+title+''' - F.I.G BRANDS</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;700&display=swap" rel="stylesheet"><script>if(!localStorage.getItem('fig_user')&&location.pathname!='/login'&&location.pathname!='/register'){location.href='/login'}</script><style>body{font-family:Inter,sans-serif;background:#F8F9FA;margin:0;padding-bottom:80px;color:#111827}.card{background:#fff;border:1px solid #E5E7EB;border-radius:20px;padding:20px;margin-bottom:14px}.input{width:100%;height:48px;border:1px solid #D1D5DB;border-radius:12px;padding:0 14px;box-sizing:border-box}.btn-dark{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#0F2A44;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px;border:0}.btn-gold{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#C9A86A;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px;border:0}.top{height:64px;background:#fff;display:flex;align-items:center;gap:12px;padding:0 14px;position:sticky;top:0;z-index:20;border-bottom:1px solid #E5E7EB}.logo{width:52px;height:52px;border-radius:14px;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}.toplinks{background:#fff;border-bottom:1px solid #E5E7EB;padding:10px 14px;display:flex;gap:24px;overflow-x:auto;white-space:nowrap;position:sticky;top:64px;z-index:15;flex-wrap:wrap}.toplinks a{color:#111827;text-decoration:none;font-size:15px;font-weight:600}.page{max-width:1080px;margin:auto;padding:18px 14px 180px}.dark{background:#0F2A44;color:#fff;border-radius:20px;padding:22px;margin-bottom:14px}.gold{color:#C9A86A;letter-spacing:2px;font-size:12px;font-weight:700}h1,h2{font-family:Fraunces,Georgia,serif}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid #F3F4F6;text-align:left}.nav{position:fixed;left:10px;right:10px;bottom:8px;height:60px;background:#fff;border:1px solid #E5E7EB;border-radius:24px;display:flex;z-index:30;box-shadow:0 4px 20px rgba(0,0,0,.08)}.nav a{flex:1;color:#6B7280;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}.xbtn{border:0;background:#F3F4F6;border-radius:999px;padding:8px 12px;font-size:13px;cursor:pointer}.xbtn.liked{background:#FEE2E2;color:#DC2626}.xbtn.saved{background:#FEF3C7;color:#92400E}.avatar{width:40px;height:40px;border-radius:50%;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}</style></head><body><div class="top"><div class="logo">FIG</div><div><b style="font-size:17px;letter-spacing:.5px">F.I.G BRANDS</b><div style="color:#6B7280;letter-spacing:2px;font-size:11px">WELFARE SYSTEM</div></div><div style="margin-left:auto;display:flex;gap:8px;align-items:center"><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">◐</span><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">○</span><span style="width:38px;height:38px;border-radius:50%;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">MA</span></div></div><div class="toplinks"><a href="/">Overview</a><a href="/members">Members</a><a href="/community">Community</a><a href="/register">Register</a><a href="/shareout">Share-Out</a><a href="/breakdown2">History</a><a href="/terms">Terms &amp; Policies</a><a href="/admin">Admin</a></div><div class="page">'''+full+'''</div><nav class="nav"><a href="/">Home</a><a href="/members">Members</a><a href="/community">Community</a><a href="/shareout">Share-Out</a><a href="/terms">Terms</a><a href="/register">Add</a></nav></body></html>''')
 @app.route("/")
 def index():
-    body='''<div class="card"><div class="gold">WELFARE CLAUSES 2026</div><h1 style="font-size:34px;line-height:1.2">Death Benefit: Member 100,000 &middot; Spouse 50,000 &middot; Child 40,000 &middot; Parents 40,000</h1><p style="color:#4B5563;line-height:1.6">Loss of Earning: 50% of basic pay, up to KES 20,000, after 10 days unable to work due to injury at work. Contribution: KES 300 monthly.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn-dark" href="/terms">Read Full Terms</a><a class="btn-gold" href="/community">Join Community Chat</a></div></div><div class="card"><div class="gold">DISTRIBUTION</div><h2 style="font-size:30px;margin:8px 0">Project Distribution <span id="bdYear" style="font-size:16px"></span></h2><div id="breakdown" style="margin-top:12px"></div><div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px"><div><div style="color:#6B7280;font-size:12px">Total Members</div><h2 id="total" style="margin:0">0</h2></div></div></div><script>async function load(){let q=yearQuery();let r=await fetch('/api/stats'+q);let d=await r.json();document.getElementById('total').textContent=d.total_members;document.getElementById('bdYear').textContent=getYear()? '('+getYear()+')':'(All Years)';let h='';Object.keys(d.projects_breakdown).sort((a,b)=>d.projects_breakdown[b]-d.projects_breakdown[a]).forEach(k=>{h+='<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee"><span style="font-size:18px;font-weight:600">'+k+'</span><b style="font-size:18px;font-weight:500">'+d.projects_breakdown[k]+'</b></div>'});document.getElementById('breakdown').innerHTML=h;}load();</script>'''
+    body='''<div class="card"><div class="gold">WELFARE CLAUSES 2026</div><h1 style="font-size:34px;line-height:1.2">Death Benefit: Member 100,000 &middot; Spouse 50,000 &middot; Child 40,000 &middot; Parents 40,000</h1><p style="color:#4B5563;line-height:1.6">Loss of Earning: 50% of basic pay, up to KES 20,000, after 10 days unable to work due to injury at work. Contribution: KES 300 monthly.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn-dark" href="/terms">Read Full Terms</a><a class="btn-gold" href="/community">Join Community Chat</a></div></div><div class="card"><div class="gold">DISTRIBUTION</div><h2 style="font-size:30px;margin:8px 0">Project Distribution <span id="bdYear" style="font-size:16px"></span></h2><div id="breakdown"></div><div style="margin-top:14px">Total Members: <b id="total">0</b></div></div><script>async function load(){let q=yearQuery();let r=await fetch('/api/stats'+q);let d=await r.json();document.getElementById('total').textContent=d.total_members;document.getElementById('bdYear').textContent=getYear()? '('+getYear()+')':'(All Years)';let h='';Object.keys(d.projects_breakdown).sort((a,b)=>d.projects_breakdown[b]-d.projects_breakdown[a]).forEach(k=>{h+='<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee"><span style="font-size:18px;font-weight:600">'+k+'</span><b style="font-size:18px">'+d.projects_breakdown[k]+'</b></div>'});document.getElementById('breakdown').innerHTML=h;}load();</script>'''
     return shell("Overview",body)
 @app.route("/members")
 def members_page():
-    body='''<h1>Members <span id="mYear" style="font-size:18px"></span></h1><input class="input" id="search" placeholder="Search name / staff no / project..." oninput="filterM()"><div class="card"><div id="list">Loading...</div></div><script>let ALL=[];async function load(){let q=yearQuery();document.getElementById('mYear').textContent=getYear()? '('+getYear()+')':'(All Years)';let r=await fetch('/api/members'+q);ALL=await r.json();render();}function render(){let q=(document.getElementById('search').value||'').toLowerCase();let f=ALL.filter(x=>(x.full_names+' '+x.staff_no+' '+x.project).toLowerCase().includes(q));let h='<table><tr><th>Staff</th><th>Name</th><th>Project</th><th>Joined</th><th>Year</th><th>Months</th><th>Share</th></tr>';f.forEach(x=>{h+='<tr><td>'+x.staff_no+'</td><td><b>'+x.full_names+'</b></td><td>'+x.project+'</td><td>'+x.month_joined+'</td><td>'+x.join_year+'</td><td>'+x.months+'</td><td>KES '+x.share.toLocaleString()+'</td></tr>'});h+='</table><p>'+f.length+' members shown</p>';document.getElementById('list').innerHTML=h;}function filterM(){render();}load();</script>'''
+    body='''<h1>Members <span id="mYear" style="font-size:18px"></span></h1><p>Total: <b id="mTotal">0</b> members</p><input class="input" id="search" placeholder="Search name / staff no / project..." oninput="filterM()"><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0" id="projChips"></div><div class="card"><div id="list">Loading...</div></div><script>let ALL=[];let CUR='All';async function load(){let q=yearQuery();document.getElementById('mYear').textContent=getYear()? '('+getYear()+')':'(All 240)';let r=await fetch('/api/members'+q);ALL=await r.json();document.getElementById('mTotal').textContent=ALL.length;let chips='<button class="xbtn" onclick="setProj(\\'All\\')">All</button>';['Antonia','GCB-MT','GCB-TDs','Higchem','HQ','Java House','Kanji','Pwani Oil Products','SC Johnson','TF WSL','TF-LM','TF-MT'].forEach(p=>{chips+='<button class="xbtn" onclick="setProj(\\''+p+'\\')">'+p+'</button>'});document.getElementById('projChips').innerHTML=chips;render();}function setProj(p){CUR=p;render();}function render(){let q=(document.getElementById('search').value||'').toLowerCase();let f=ALL.filter(x=>(CUR=='All'||x.project==CUR)&&(x.full_names+' '+x.staff_no+' '+x.project).toLowerCase().includes(q));let h='<table><tr><th>Staff</th><th>Name</th><th>Project</th><th>Joined</th><th>Year</th><th>Months</th><th>Share</th></tr>';f.forEach(x=>{h+='<tr><td>'+x.staff_no+'</td><td><b>'+x.full_names+'</b></td><td>'+x.project+'</td><td>'+x.month_joined+'</td><td>'+x.join_year+'</td><td>'+x.months+'</td><td>KES '+x.share.toLocaleString()+'</td></tr>'});h+='</table><p>'+f.length+' members shown - '+CUR+'</p>';document.getElementById('list').innerHTML=h;}function filterM(){render();}load();</script>'''
     return shell("Members",body)
 @app.route("/shareout")
 def shareout_page():
-    body='''<h1>Share-Out <span id="sYear" style="font-size:18px"></span></h1><div class="dark"><div>Total to Share: <b>KES 605,759</b></div><div style="opacity:.8">KES 250,000 retained</div></div><div class="card"><div id="share">Loading...</div></div><script>async function load(){let q=yearQuery();document.getElementById('sYear').textContent=getYear()? '('+getYear()+')':'(All Years)';let r=await fetch('/api/shareout'+q);let d=await r.json();document.getElementById('share').innerHTML='Members (filtered): '+d.total_members+'<br>Total Months: '+d.total_months+'<br>Per Month: KES '+d.per_month_rate.toFixed(2)+'<br>Year: '+(d.year||'All');}load();</script>'''
+    body='''<h1>Share-Out <span id="sYear" style="font-size:18px"></span></h1><div class="dark"><div>Total to Share: <b>KES 605,759</b></div><div style="opacity:.8">KES 250,000 retained - 240 members</div></div><div class="card"><div id="share">Loading...</div></div><script>async function load(){let q=yearQuery();document.getElementById('sYear').textContent=getYear()? '('+getYear()+')':'(All 240)';let r=await fetch('/api/shareout'+q);let d=await r.json();document.getElementById('share').innerHTML='Members: '+d.total_members+'<br>Total Months: '+d.total_months+'<br>Per Month: KES '+d.per_month_rate.toFixed(2)+'<br>Year: '+(d.year||'All');}load();</script>'''
     return shell("Share-Out",body)
 @app.route("/breakdown2")
 def breakdown2_page():
@@ -232,14 +229,14 @@ def breakdown2_page():
     return shell("History",h)
 @app.route("/terms")
 def terms_page():
-    return shell("Terms","<div class='card'><div class='gold'>WELFARE CLAUSES 2026</div><h1>Terms & Policies</h1><h2>Death Benefits</h2><p>Member KES 100,000 | Spouse KES 50,000 | Child KES 40,000 | Parents KES 40,000</p><p>Contribution: KES 300 monthly</p><p>Loss of Earning: 50% of basic pay up to KES 20,000 after 10 days unable to work due to injury at work.</p></div>")
+    return shell("Terms","<div class='card'><div class='gold'>WELFARE CLAUSES 2026</div><h1>Terms & Policies</h1><p>Member KES 100,000 | Spouse KES 50,000 | Child KES 40,000 | Parents KES 40,000</p><p>Contribution: KES 300 monthly</p><p>Loss of Earning: 50% of basic pay up to KES 20,000 after 10 days unable to work due to injury at work.</p></div>")
 @app.route("/community")
 def community_page():
-    body='''<h1>Community Chat <span id="cYear" style="font-size:18px"></span></h1><div class="card"><textarea id="comMsg" class="input" style="height:90px;padding:12px" placeholder="What is on your mind?"></textarea><button class="btn-dark" onclick="postMsg()" style="margin-top:10px">Post to Community</button><p id="comStatus"></p></div><div id="comFeed"></div><script>async function loadCom(){let q=yearQuery();document.getElementById('cYear').textContent=getYear()? '('+getYear()+')':'(All Years)';let r=await fetch('/api/community'+q);let d=await r.json();let h='';(d.posts||[]).forEach(p=>{h+='<div class="card"><b>'+p.author_name+'</b> <span style="color:#888">'+p.project+' - '+p.created+'</span><div>'+p.msg+'</div></div>'});document.getElementById('comFeed').innerHTML=h||'No posts for this year';}async function postMsg(){let m=document.getElementById('comMsg').value;if(!m)return alert('Write message');await fetch('/api/community',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:localStorage.getItem('fig_name')||'Member',email:localStorage.getItem('fig_email')||'',msg:m,project:'HQ'})});document.getElementById('comStatus').textContent='Posted!';loadCom();}loadCom();</script>'''
+    body='''<h1 style="font-size:32px">Community <span style="font-size:14px;background:#0F2A44;color:#fff;padding:4px 10px;border-radius:999px">Twitter-like</span></h1><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="xbtn" onclick="setFeed('all')">All Posts</button><button class="xbtn" onclick="setFeed('liked')">❤️ My Likes</button><button class="xbtn" onclick="setFeed('saved')">🔖 Saved</button><input id="comSearch" class="input" style="flex:1;min-width:160px" placeholder="Search posts..." oninput="loadCom()"><select id="comProj" class="input" style="width:140px" onchange="loadCom()"><option value="">All Projects</option><option>Antonia</option><option>GCB-MT</option><option>GCB-TDs</option><option>Higchem</option><option>HQ</option><option>Java House</option><option>Kanji</option><option>Pwani Oil Products</option><option>SC Johnson</option><option>TF WSL</option><option>TF-LM</option><option>TF-MT</option></select></div><div class="card"><div style="display:flex;gap:12px"><div class="avatar" id="myAvatar">M</div><div style="flex:1"><textarea id="comMsg" class="input" style="height:80px;padding:12px;border:0;border-bottom:1px solid #eee;border-radius:0" placeholder="What is happening?"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><span style="color:#6B7280;font-size:13px">Posting as <b id="myName">Member</b></span><button class="btn-dark" onclick="postMsg()">Post</button></div><p id="comStatus"></p></div></div></div><div id="comFeed">Loading...</div><script>let FEED='all';document.getElementById('myName').textContent=getName();document.getElementById('myAvatar').textContent=getName().charAt(0);function setFeed(f){FEED=f;loadCom();}async function loadCom(){let r=await fetch('/api/community?email='+encodeURIComponent(getEmail())+'&feed='+FEED+'&search='+encodeURIComponent(document.getElementById('comSearch').value||'')+'&project='+encodeURIComponent(document.getElementById('comProj').value||''));let d=await r.json();let h='';(d.posts||[]).forEach(p=>{let init=p.author_name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();let com='';(p.comments||[]).forEach(cm=>{com+='<div style="display:flex;gap:8px;padding:8px 0;border-top:1px solid #f3f4f6"><div class="avatar" style="width:28px;height:28px;font-size:11px">'+cm.author_name.charAt(0)+'</div><div><b>'+cm.author_name+'</b> <span style="color:#888;font-size:12px">'+cm.created+'</span><div>'+cm.msg+'</div></div></div>'});h+='<div class="card"><div style="display:flex;gap:12px"><div class="avatar">'+init+'</div><div style="flex:1;min-width:0"><div style="display:flex;gap:8px;flex-wrap:wrap"><b>'+p.author_name+'</b><span style="color:#6B7280">@'+p.author_email.split('@')[0]+' - '+p.project+' - '+p.created+'</span></div>'+(p.repost_of?'<div style="background:#F9FAFB;border-radius:12px;padding:10px;margin:8px 0;color:#4B5563;font-size:13px">🔁 Reposted: '+p.repost_of+'</div>':'')+'<div style="font-size:15px;line-height:1.5;margin:6px 0">'+p.msg+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="xbtn '+(p.liked?'liked':'')+'" onclick="act('+p.id+',\\'like\\')">❤️ '+p.likes+'</button><button class="xbtn" onclick="toggleCom('+p.id+')">💬 '+(p.comments?p.comments.length:0)+'</button><button class="xbtn" onclick="act('+p.id+',\\'repost\\')">🔁 '+p.reposts+'</button><button class="xbtn '+(p.saved?'saved':'')+'" onclick="act('+p.id+',\\'bookmark\\')">🔖 '+(p.saved?'Saved':'Save')+'</button><button class="xbtn" onclick="delPost('+p.id+')">🗑️</button></div><div id="comBox'+p.id+'" style="display:none;margin-top:10px"><input id="comIn'+p.id+'" class="input" placeholder="Write a reply..."><button class="btn-dark" style="margin-top:8px" onclick="sendComment('+p.id+')">Reply</button></div><div id="comList'+p.id+'">'+com+'</div></div></div></div>'});document.getElementById('comFeed').innerHTML=h||'No posts yet - be the first to post!';}function toggleCom(id){let el=document.getElementById('comBox'+id);el.style.display=el.style.display=='none'?'block':'none';}async function act(id,action){await fetch('/api/community/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:getEmail(),name:getName(),post_id:id})});loadCom();}async function sendComment(id){let m=document.getElementById('comIn'+id).value;if(!m)return;await fetch('/api/community/comment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:getEmail(),name:getName(),post_id:id,msg:m})});loadCom();}async function postMsg(){let m=document.getElementById('comMsg').value;if(!m)return alert('Write something');await fetch('/api/community',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:getName(),email:getEmail(),msg:m,project:localStorage.getItem('fig_project')||'HQ'})});document.getElementById('comMsg').value='';document.getElementById('comStatus').textContent='Posted!';loadCom();}async function delPost(id){if(!confirm('Delete this post?'))return;await fetch('/api/community/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:id,email:getEmail()})});loadCom();}loadCom();</script>'''
     return shell("Community",body)
 @app.route("/login")
 def login_page():
-    return shell("Login","<h1>Login</h1><input class='input' id='em' placeholder='Email'><input class='input' id='pw' type='password' placeholder='Password' style='margin-top:10px'><button class='btn-dark' style='margin-top:10px' onclick='doLogin()'>Login</button><script>async function doLogin(){let r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('em').value,password:document.getElementById('pw').value})});let d=await r.json();if(d.ok){localStorage.setItem('fig_user',d.user.email);localStorage.setItem('fig_role',d.user.role);localStorage.setItem('fig_name',d.user.full_names);localStorage.setItem('fig_email',d.user.email);location.href='/';}else alert(d.error);}</script>")
+    return shell("Login","<h1>Login</h1><input class='input' id='em' placeholder='Email'><input class='input' id='pw' type='password' placeholder='Password' style='margin-top:10px'><button class='btn-dark' style='margin-top:10px' onclick='doLogin()'>Login</button><script>async function doLogin(){let r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('em').value,password:document.getElementById('pw').value})});let d=await r.json();if(d.ok){localStorage.setItem('fig_user',d.user.email);localStorage.setItem('fig_role',d.user.role);localStorage.setItem('fig_name',d.user.full_names);localStorage.setItem('fig_email',d.user.email);localStorage.setItem('fig_project',d.user.project);location.href='/';}else alert(d.error);}</script>")
 @app.route("/register")
 def register_page():
     return shell("Register","<h1>Register Member</h1><p>Admin only.</p>")
@@ -256,7 +253,7 @@ def api_stats():
         rows=[r for r in rows if get_join_year(r["month_joined"])==str(year)]
     from collections import Counter
     bc=dict(Counter([norm_project(r["project"]) for r in rows]))
-    return jsonify({"total_members":len(rows),"projects_total":len(bc),"projects_breakdown":bc,"year":year})
+    return jsonify({"total_members":len(rows),"projects_total":len(bc),"projects_breakdown":bc,"year":year,"projects":PROJECTS})
 @app.route("/api/members")
 def api_members():
     year=request.args.get("year","")
@@ -274,24 +271,97 @@ def api_years():
     c.close()
     ys=sorted(set([get_join_year(r["month_joined"]) for r in rows if get_join_year(r["month_joined"])]))
     return jsonify(ys)
+def community_posts(email,feed,search,project):
+    c=get_db()
+    rows=c.execute("SELECT * FROM community_posts ORDER BY id DESC LIMIT 200").fetchall()
+    out=[]
+    for p in rows:
+        likes=c.execute("SELECT COUNT(*) FROM community_likes WHERE post_id=?",(p["id"],)).fetchone()[0]
+        liked=c.execute("SELECT id FROM community_likes WHERE post_id=? AND email=?",(p["id"],email)).fetchone() is not None
+        saved=c.execute("SELECT id FROM community_bookmarks WHERE post_id=? AND email=?",(p["id"],email)).fetchone() is not None
+        reposts=c.execute("SELECT COUNT(*) FROM community_posts WHERE repost_of=?",(str(p["id"]),)).fetchone()[0]
+        comments=[dict(x) for x in c.execute("SELECT * FROM community_comments WHERE post_id=? ORDER BY id ASC",(p["id"],)).fetchall()]
+        item={"id":p["id"],"author_name":p["author_name"],"author_email":p["author_email"],"project":p["project"],"msg":p["msg"],"created":p["created"],"likes":likes,"liked":liked,"saved":saved,"reposts":reposts,"comments":comments,"repost_of":p["repost_of"] or ""}
+        if project and item["project"]!=project:
+            continue
+        if search and search.lower() not in (item["msg"]+item["author_name"]+item["project"]).lower():
+            continue
+        if feed=="liked" and not liked:
+            continue
+        if feed=="saved" and not saved:
+            continue
+        out.append(item)
+    c.close()
+    return out
 @app.route("/api/community", methods=["GET","POST"])
 def api_community():
     c=get_db()
     if request.method=="POST":
         d=request.get_json(silent=True) or {}
-        c.execute("INSERT INTO community_posts (author_name,author_email,project,msg,created) VALUES (?,?,?,?,datetime('now'))",(d.get("name","Member"),d.get("email",""),d.get("project","HQ"),d.get("msg","")))
+        c.execute("INSERT INTO community_posts (author_name,author_email,project,msg,created) VALUES (?,?,?,?,?)",(d.get("name","Member"),d.get("email",""),d.get("project","HQ"),d.get("msg",""),str(datetime.datetime.now())[:19]))
         c.commit()
         c.close()
         return jsonify({"message":"Posted"}),201
-    year=request.args.get("year","")
-    rows=c.execute("SELECT * FROM community_posts ORDER BY id DESC LIMIT 100").fetchall()
-    out=[]
-    for p in rows:
-        if year and p["created"] and str(year) not in str(p["created"]):
-            continue
-        out.append({"id":p["id"],"author_name":p["author_name"],"author_email":p["author_email"],"project":p["project"],"msg":p["msg"],"created":p["created"],"likes":0,"comments":[],"reposts":0})
+    email=request.args.get("email","")
+    feed=request.args.get("feed","all")
+    search=request.args.get("search","")
+    project=request.args.get("project","")
+    return jsonify({"posts":community_posts(email,feed,search,project)})
+@app.route("/api/community/like", methods=["POST"])
+def api_like():
+    d=request.get_json(silent=True) or {}
+    c=get_db()
+    ex=c.execute("SELECT id FROM community_likes WHERE post_id=? AND email=?",(d.get("post_id"),d.get("email"))).fetchone()
+    if ex:
+        c.execute("DELETE FROM community_likes WHERE id=?",(ex["id"],))
+    else:
+        c.execute("INSERT INTO community_likes (post_id,email) VALUES (?,?)",(d.get("post_id"),d.get("email")))
+    c.commit()
     c.close()
-    return jsonify({"posts":out})
+    return jsonify({"ok":True})
+@app.route("/api/community/bookmark", methods=["POST"])
+def api_bookmark():
+    d=request.get_json(silent=True) or {}
+    c=get_db()
+    ex=c.execute("SELECT id FROM community_bookmarks WHERE post_id=? AND email=?",(d.get("post_id"),d.get("email"))).fetchone()
+    if ex:
+        c.execute("DELETE FROM community_bookmarks WHERE id=?",(ex["id"],))
+    else:
+        c.execute("INSERT INTO community_bookmarks (post_id,email) VALUES (?,?)",(d.get("post_id"),d.get("email")))
+    c.commit()
+    c.close()
+    return jsonify({"ok":True})
+@app.route("/api/community/repost", methods=["POST"])
+def api_repost():
+    d=request.get_json(silent=True) or {}
+    c=get_db()
+    orig=c.execute("SELECT * FROM community_posts WHERE id=?",(d.get("post_id"),)).fetchone()
+    if not orig:
+        c.close()
+        return jsonify({"error":"Not found"}),404
+    c.execute("INSERT INTO community_posts (author_name,author_email,project,msg,created,repost_of) VALUES (?,?,?,?,?,?)",(d.get("name","Member"),d.get("email",""),orig["project"],"Reposted: "+(orig["msg"] or "")[:200],str(datetime.datetime.now())[:19],str(orig["id"])))
+    c.commit()
+    c.close()
+    return jsonify({"ok":True})
+@app.route("/api/community/comment", methods=["POST"])
+def api_comment():
+    d=request.get_json(silent=True) or {}
+    c=get_db()
+    c.execute("INSERT INTO community_comments (post_id,author_name,author_email,msg,created) VALUES (?,?,?,?,?)",(d.get("post_id"),d.get("name","Member"),d.get("email",""),d.get("msg",""),str(datetime.datetime.now())[:19]))
+    c.commit()
+    c.close()
+    return jsonify({"ok":True})
+@app.route("/api/community/delete", methods=["POST"])
+def api_delete_post():
+    d=request.get_json(silent=True) or {}
+    c=get_db()
+    c.execute("DELETE FROM community_posts WHERE id=?",(d.get("post_id"),))
+    c.execute("DELETE FROM community_comments WHERE post_id=?",(d.get("post_id"),))
+    c.execute("DELETE FROM community_likes WHERE post_id=?",(d.get("post_id"),))
+    c.execute("DELETE FROM community_bookmarks WHERE post_id=?",(d.get("post_id"),))
+    c.commit()
+    c.close()
+    return jsonify({"ok":True})
 @app.route("/api/notifications")
 def api_notif():
     c=get_db()
@@ -327,9 +397,8 @@ def download_excel():
 @app.route("/api/support", methods=["POST"])
 def api_support():
     d=request.get_json(force=True) or {}
-    import datetime as _dt
     c=get_db()
-    c.execute("INSERT INTO support_msgs (name, msg, created) VALUES (?,?,?)",(d.get("name") or "",d.get("msg") or "",str(_dt.datetime.now())))
+    c.execute("INSERT INTO support_msgs (name, msg, created) VALUES (?,?,?)",(d.get("name") or "",d.get("msg") or "",str(datetime.datetime.now())))
     c.commit()
     c.close()
     return jsonify({"message":"Message sent. We will reply on WhatsApp 0707 780 807"})
