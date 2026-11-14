@@ -452,7 +452,7 @@ def init_db():
    added+=1
  c.commit()
  c.close()
- print(f"v122 seeded {added}")
+ print(f"v123 seeded {added}")
 init_db()
 @app.after_request
 def after(r):
@@ -514,8 +514,8 @@ def shell(title,body):
 </style></head><body>
 <div id="slideOverlay" onclick="closeDrawer()"></div>
 <aside id="slideDrawer">
-<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px"><div class="avatar" style="width:48px;height:48px;font-size:18px" id="drawerAvatar">M</div><button onclick="closeDrawer()" style="background:none;border:0;font-size:22px;cursor:pointer">✕</button></div>
-<div style="padding:10px 8px 0"><div style="font-size:21px;font-weight:800" id="menuName">Marlon Ang'undu Kikuyu</div><div style="color:#6B7280" id="menuHandle">@marlon</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px"><div class="avatar" style="width:48px;height:48px;font-size:18px">W</div><button onclick="closeDrawer()" style="background:none;border:0;font-size:22px;cursor:pointer">✕</button></div>
+<div style="padding:10px 8px 0"><div style="font-size:21px;font-weight:800">Welfare</div></div>
 <a class="drawer-row" href="/register" onclick="closeDrawer()"><span class="drawer-label">Register Member</span><span class="drawer-arrow">›</span></a>
 <a class="drawer-row" href="/shareout" onclick="closeDrawer()"><span class="drawer-label">Share-Out</span><span class="drawer-arrow">›</span></a>
 <a class="drawer-row" href="/breakdown2" onclick="closeDrawer()"><span class="drawer-label">History</span><span class="drawer-arrow">›</span></a>
@@ -531,7 +531,7 @@ def shell(title,body):
 <a class="drawer-row" href="/login" onclick="closeDrawer()"><span class="drawer-label">Login as Admin</span><span class="drawer-arrow">›</span></a>
 <div class="drawer-footer">F.I.G BRANDS Welfare · v100<br>marlonkikuyu@gmail.com · +254 707 780 807</div>
 </aside>
-<div class="top"><button onclick="openDrawer()" style="background:none;border:0;color:#111827;font-size:24px;cursor:pointer;padding:6px">☰</button><div class="logo">FIG</div><div><b style="font-size:17px;letter-spacing:.5px">F.I.G BRANDS</b><div style="color:#6B7280;letter-spacing:2px;font-size:11px">WELFARE SYSTEM</div></div><div style="margin-left:auto;display:flex;gap:8px;align-items:center"><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">◐</span><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">○</span><button onclick="openDrawer()" style="background:none;border:0;cursor:pointer;padding:0"><span style="width:38px;height:38px;border-radius:50%;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">MA</span></button></div></div><div class="toplinks"><a href="/">Overview</a><a href="/members">Members</a><a href="/community">Community</a><a href="/register">Register</a><a href="/shareout">Share-Out</a><a href="/breakdown2">History</a><a href="/terms">Terms &amp; Policies</a><a href="/admin">Admin</a></div><div class="page">'''+full+'''</div><nav class="nav"><a href="/">Home</a><a href="/members">Members</a><a href="/community">Community</a><a href="/shareout">Share-Out</a><a href="/terms">Terms</a><a href="/register">Add</a></nav>
+<div class="top"><button onclick="openDrawer()" style="background:none;border:0;color:#111827;font-size:24px;cursor:pointer;padding:6px">☰</button><div class="logo">FIG</div><div><b style="font-size:17px;letter-spacing:.5px">F.I.G BRANDS</b><div style="color:#6B7280;letter-spacing:2px;font-size:11px">WELFARE SYSTEM</div></div><div style="margin-left:auto;display:flex;gap:8px;align-items:center"><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">◐</span><span style="width:38px;height:38px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center">○</span><button onclick="openDrawer()" style="background:none;border:0;cursor:pointer;padding:0"><span style="width:38px;height:38px;border-radius:50%;background:#0F2A44;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">W</span></button></div></div><div class="toplinks"><a href="/">Overview</a><a href="/members">Members</a><a href="/community">Community</a><a href="/register">Register</a><a href="/shareout">Share-Out</a><a href="/breakdown2">History</a><a href="/terms">Terms &amp; Policies</a><a href="/admin">Admin</a></div><div class="page">'''+full+'''</div><nav class="nav"><a href="/">Home</a><a href="/members">Members</a><a href="/community">Community</a><a href="/shareout">Share-Out</a><a href="/terms">Terms</a><a href="/register">Add</a></nav>
 <script>
 function openDrawer(){document.getElementById('slideDrawer').classList.add('open');document.getElementById('slideOverlay').classList.add('open');document.body.style.overflow='hidden';}
 function closeDrawer(){document.getElementById('slideDrawer').classList.remove('open');document.getElementById('slideOverlay').classList.remove('open');document.body.style.overflow='';}
@@ -539,7 +539,6 @@ function applyTheme(){var t=localStorage.getItem('lonma_theme')||'light';var dar
 function setTheme(t){localStorage.setItem('lonma_theme',t);applyTheme();}
 applyTheme();
 var _startX=null;document.addEventListener('touchstart',function(e){_startX=e.touches[0].clientX;},{passive:true});document.addEventListener('touchend',function(e){if(_startX===null)return;var dx=e.changedTouches[0].clientX-_startX;if(_startX<30&&dx>60)openDrawer();if(dx<-60)closeDrawer();_startX=null;},{passive:true});
-var _n=localStorage.getItem('fig_name');if(_n){document.getElementById('menuName').textContent=_n;document.getElementById('menuHandle').textContent='@'+_n.split(' ')[0].toLowerCase();document.getElementById('drawerAvatar').textContent=_n.charAt(0);}
 </script></body></html>''')
 @app.route("/")
 def index():
