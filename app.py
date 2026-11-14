@@ -529,13 +529,23 @@ def api_support():
 def download_excel():
     shares, tc, tm, rate = calc_shares()
     from openpyxl import Workbook
-    wb=Workbook(); ws=wb.active; ws.title="Members"; ws.append(["ID","Staff No","Full Names","Project","Email","Date Joined","Months","Contribution","ShareContinuing from where it stopped - paste this **at the end** of the file you already pasted, replacing the cut-off last line:
+    ,"Full Names","Project","Email","Date Joined","Months","Contribution","ShareContinuing from where it stopped - paste this **at the end** of the file you already pasted, replacing the cut-off last line:
 
-```python
-    for x in shares: ws.append([x["id"],x["staff_no"], x["full_names"], x["project"], x["email"], x["month_joined"], x["months"], x["contribution"], round(x["share"],2),x["father_id"],x["mother_id"],x["guardian_id"],x["spouse_id"],x["kid1"],x["kid2"],x["kid3"],x["kid4"],x["kid5"]])
-    out=io.BytesIO(); wb.save(out); out.seek(0)
-    return send_file(out, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="FIG_Members.xlsx")
-@app.route("/health")
+`
+@app.route("/download/excel")
+def download_excel():
+    from openpyxl import Workbook
+    shares, tc, tm, rate = calc_shares()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Members"
+    ws.append(["ID", "Staff No", "Full Names", "Project", "Email", "Date Joined", "Months", "Contribution", "Share"])
+    for x in shares:
+        ws.append([x["id"], x["staff_no"], x["full_names"], x["project"], x["email"], x["month_joined"], x["months"], x["contribution"], x["share"]])
+    out = io.BytesIO()
+    wb.save(out)
+    out.seek(0)
+    return send_file(out, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="lonma_members.xlsx")
 def health(): return jsonify({"ok": True, "version": "v113-fixed"})
 if __name__=="__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
