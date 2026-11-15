@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template_string, redirect, send_file
 import sqlite3, os, secrets, io, re
 from werkzeug.security import generate_password_hash, check_password_hash
-app=Flask(__name__);DB="lonma.db";VERSION="v166";BF=855759;RESERVE=250000;DISTRIBUTABLE=BF-RESERVE;MONTHLY_RATE=300
+app=Flask(__name__);DB="lonma.db";VERSION="v167";BF=855759;RESERVE=250000;DISTRIBUTABLE=BF-RESERVE;MONTHLY_RATE=300
 SHARE_TABLE_2026={1:11,2:10,3:9,4:8,5:7,6:6,7:5,8:4,9:3,10:2,11:1}
 ADMIN_EMAIL="admin@lonma.com";ADMIN_PASS="admin123";ADMIN_KEY="lonma_api_key_12345"
 PROJ={"P":"Pwani Oil Products","S":"SC Johnson","H":"Higchem","A":"Antonia","J":"Java House","G":"GCB-MT","D":"GCB-TDs","Q":"HQ","M":"TF-MT","W":"TF WSL"}
@@ -401,7 +401,7 @@ def shareout():
  for i,x in enumerate(shares,1): h+=f"<tr data-search='{(x['full_names']+' '+x['staff_no']+' '+x['project']).lower()}'><td>{i}</td><td><b>{x['full_names']}</b><div style='font-size:12px;color:#667085'>{x['staff_no']} {x['email']}</div></td><td>{badge(x['project'])}</td><td>{x['month_joined'] or '-'}</td><td style='font-size:12px'>{x['basis']}</td><td class='num'>{x['months']}</td><td class='num'>KES {x['contribution']:,}</td><td class='num'><b>KES {x['share']:,.2f}</b></td></tr>"
  h+="</tbody></table></div></div><script>function fil(){let q=document.getElementById('q').value.toLowerCase();document.querySelectorAll('#shareBody tr').forEach(function(r){r.style.display=r.getAttribute('data-search').includes(q)?'':'none'})}</script>"
  return shell("Share-Out",h)
-    @app.route("/members")
+ @app.route("/members")
 def members():
  p="<h1>Members</h1><p id=\"memberCountLabel\"></p><div class=\"card\"><div style=\"display:flex;gap:10px;flex-wrap:wrap\"><input class=\"input\" id=\"q\" placeholder=\"Search by name, staff, project\" oninput=\"fil()\" style=\"flex:2;min-width:200px\"><select class=\"input\" id=\"projFilter\" onchange=\"fil()\" style=\"flex:1;min-width:160px\"><option value=\"All Projects\">All Projects</option></select></div><div id=\"list\" style=\"margin-top:14px\"></div><a class=\"btn2\" href=\"/download/excel\">Download Excel</a></div>"
  p+="<script>let all=[];async function load(){try{let r=await fetch('/api/stats');let d=await r.json();document.getElementById('memberCountLabel').textContent=d.total_members+' members';let sel=document.getElementById('projFilter');sel.innerHTML='<option value=\"All Projects\">All Projects ('+d.total_members+')</option>';(d.projects||[]).forEach(function(pp){let o=document.createElement('option');o.value=pp;o.textContent=pp+' ('+(d.projects_breakdown[pp]||0)+')';sel.appendChild(o)});}catch(e){}try{let r2=await fetch('/api/members');let dd=await r2.json();all=dd.members;render(all);}catch(e){}}"
