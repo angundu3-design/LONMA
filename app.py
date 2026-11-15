@@ -608,10 +608,10 @@ def api_admin_login():
 def api_register():
     if request.method=="OPTIONS": return "",200
     d=request.get_json(silent=True)
-       if not d or not d.get("email") or not d.get("password"): return jsonify({"error":"Email and password required"}),400
-    c=get_db()
+       c=get_db()
     try:
-        if c.execute("SELECT id FROM users WHERE email=?",(d["email"],)).fetchone(): return jsonify({"error":"Email exists"}),400
+    if c.execute("SELECT id FROM users WHERE email=?",(d["email"],)).fetchone(): return jsonify({"error":"Email exists"}),400
+        proj=norm_project(d.get("project","HQ"))
         proj=norm_project(d.get("project","HQ"))
         if c.execute("SELECT id FROM users WHERE lower(full_names)=lower(?)",(d.get("full_names",""),)).fetchone(): return jsonify({"error":"Name exists"}),400
         vals=(d.get("staff_no",""),d.get("full_names",""),proj,d["email"],generate_password_hash(d["password"]),"fig_"+secrets.token_hex(12),d.get("month_joined",""),d.get("father_id",""),d.get("mother_id",""),d.get("guardian_id",""),d.get("spouse_id",""),d.get("kid1",""),d.get("kid2",""),d.get("kid3",""),d.get("kid4",""),d.get("kid5",""),d.get("photo",""))
