@@ -479,221 +479,70 @@ def members_page():
     return shell("Members",body)
 @app.route("/community")
 def community_page():
-    body="<h1>Community</h1><div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px\"><button class=\"chip on\" id=\"chipAll\" onclick=\"setFilter('all')\">All Posts</button><button class=\"chip\" id=\"chipPhoto\" onclick=\"setFilter('photo')\">Photos</button><button class=\"chip\" id=\"chipVideo\" onclick=\"setFilter('video')\">Videos</button><a class=\"chip\" href=\"/friends\" style=\"text-decoration:none\">Friends</a></div><div class=\"card\"><label>Your name</label><input class=\"input\" id=\"cName\" placeholder=\"Your name\"><div style=\"margin-top:12px\"><label>Message</label><textarea id=\"cMsg\" class=\"input\" style=\"height:96px\" placeholder=\"Share something...\"></textarea></div><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px\"><label class=\"chip\" style=\"text-align:center;padding:13px\">Add Photo<input type=\"file\" id=\"photoInput\" accept=\"image/*\" style=\"display:none\" onchange=\"handlePhoto(event)\"></label><label class=\"chip\" style=\"text-align:center;padding:13px\">Add Video<input type=\"file\" id=\"videoInput\" accept=\"video/*\" style=\"display:none\" onchange=\"handleVideo(event)\"></label></div><div id=\"preview\"></div><button class=\"btn\" onclick=\"sendC()\" style=\"margin-top:14px\">Post</button><p id=\"cStatus\"></p></div><div class=\"card\"><h2>Posts</h2><div id=\"cList\">Loading...</div></div><script>let mediaType=\"\";let mediaData=\"\";let curFilter=\"all\";function setFilter(f){curFilter=f;document.getElementById(\"chipAll\").classList.toggle(\"on\",f==\"all\");document.getElementById(\"chipPhoto\").classList.toggle(\"on\",f==\"photo\");document.getElementById(\"chipVideo\").classList.toggle(\"on\",f==\"video\");loadC()}function handlePhoto(e){let f=e.target.files[0```python
-;if(!f)return;let r=new FileReader();r.onload=function(){mediaType="photo";mediaData=r.result;document.getElementById("preview").innerHTML="<img src="+mediaData+" class=\"postimg\">"};r.readAsDataURL(f)}function handleVideo(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=function(){mediaType="video";mediaData=r.result;document.getElementById("preview").innerHTML="<video src="+mediaData+" class=\"postvideo\" controls></video>"};r.readAsDataURL(f)}async function sendC(){let r=await fetch("/api/community",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:document.getElementById("cName").value,msg:document.getElementById("cMsg").value,media_type:mediaType,media:mediaData})});let j=await r.json();document.getElementById("cStatus").textContent=j.message||j.error;if(j.ok){document.getElementById("cMsg").value="";mediaType="";mediaData="";document.getElementById("preview").innerHTML="";loadC()}}async function loadC(){let r=await fetch("/api/community");let d=await r.json();let posts=d.posts.filter(function(p){return curFilter=="all"||p.media_type==curFilter});document.getElementById("cList").innerHTML=posts.map(function(p){let q=String.fromCharCode(39);let safe=p.name.split(q).join("");let m="";if(p.media_type=="photo"){m="<img src="+p.media+" class=\"postimg\">"}if(p.media_type=="video"){m="<video src="+p.media+" class=\"postvideo\" controls></video>"}return "<div style=\"padding:14px 0;border-bottom:1px solid #eee\"><b>"+p.name+"</b><div style=\"color:#667085;font-size:12px\">"+p.created+"</div><div style=\"margin-top:6px;white-space:pre-wrap\">"+p.msg+"</div>"+m+"<div style=\"margin-top:10px;display:flex;gap:8px\"><button class=\"chip\" onclick=\"likeC("+p.id+",this)\">Like "+p.likes+"</button><button class=\"chip\" onclick=\"addFriendFromPost("+q+safe+q+")\">+ Add Friend</button></div></div>"}).join("")||"No posts yet"}async function likeC(id,el){let r=await fetch("/api/community/like/"+id,{method:"POST"});let j=await r.json();if(j.ok)loadC()}async function addFriendFromPost(to){let me=prompt("Your name to send friend request as:");if(!me)return;let r=await fetch("/api/friends/add",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({from_name:me,to_name:to})});let j=await r.json();alert(j.message||j.error)}loadC();</script>"
+    p=[]
+    p.append("<h1>Community</h1>")
+    p.append("<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px\">")
+    p.append("<button class=\"chip on\" id=\"chipAll\" onclick=\"setFilter('all')\">All Posts</button>")
+    p.append("<button class=\"chip\" id=\"chipPhoto\" onclick=\"setFilter('photo')\">Photos</button>")
+    p.append("<button class=\"chip\" id=\"chipVideo\" onclick=\"setFilter('video')\">Videos</button>")
+    p.append("<a class=\"chip\" href=\"/friends\" style=\"text-decoration:none\">Friends</a></div>")
+    p.append("<div class=\"card\"><label>Your name</label>")
+    p.append("<input class=\"input\" id=\"cName\" placeholder=\"Your name\">")
+    p.append("<div style=\"margin-top:12px\"><label>Message</label>")
+    p.append("<textarea id=\"cMsg\" class=\"input\" style=\"height:96px\" placeholder=\"Share something...\"></textarea></div>")
+    p.append("<div style=\"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px\">")
+    p.append("<label class=\"chip\" style=\"text-align:center;padding:13px\">Add Photo")
+    p.append("<input type=\"file\" id=\"photoInput\" accept=\"image/*\" style=\"display:none\" onchange=\"handlePhoto(event)\"></label>")
+    p.append("<label class=\"chip\" style=\"text-align:center;padding:13px\">Add Video")
+    p.append("<input type=\"file\" id=\"videoInput\" accept=\"video/*\" style=\"display:none\" onchange=\"handleVideo(event)\"></label></div>")
+    p.append("<div id=\"preview\"></div>")
+    p.append("<button class=\"btn\" onclick=\"sendC()\" style=\"margin-top:14px\">Post</button><p id=\"cStatus\"></p></div>")
+    p.append("<div class=\"card\"><h2>Posts</h2><div id=\"cList\">Loading...</div></div>")
+    p.append("<script>")
+    p.append("let mediaType='';let mediaData='';let curFilter='all';")
+    p.append("function setFilter(f){curFilter=f;")
+    p.append("document.getElementById('chipAll').classList.toggle('on',f=='all');")
+    p.append("document.getElementById('chipPhoto').classList.toggle('on',f=='photo');")
+    p.append("document.getElementById('chipVideo').classList.toggle('on',f=='video');loadC()}")
+    p.append("function handlePhoto(e){let f=e.target.files[0];if(!f)return;")
+    p.append("let r=new FileReader();")
+    p.append("r.onload=function(){mediaType='photo';mediaData=r.result;")
+    p.append("document.getElementById('preview').innerHTML='<img src='+mediaData+' class=\"postimg\">'};")
+    p.append("r.readAsDataURL(f)}")
+    p.append("function handleVideo(e){let f=e.target.files[0];if(!f)return;")
+    p.append("let r=new FileReader();")
+    p.append("r.onload=function(){mediaType='video';mediaData=r.result;")
+    p.append("document.getElementById('preview').innerHTML='<video src='+mediaData+' class=\"postvideo\" controls></video>'};")
+    p.append("r.readAsDataURL(f)}")
+    p.append("async function sendC(){")
+    p.append("let r=await fetch('/api/community',{method:'POST',headers:{'Content-Type':'application/json'},")
+    p.append("body:JSON.stringify({name:document.getElementById('cName').value,")
+    p.append("msg:document.getElementById('cMsg').value,media_type:mediaType,media:mediaData})});")
+    p.append("let j=await r.json();document.getElementById('cStatus').textContent=j.message||j.error;")
+    p.append("if(j.ok){document.getElementById('cMsg').value='';mediaType='';mediaData='';")
+    p.append("document.getElementById('preview').innerHTML='';loadC()}}")
+    p.append("async function loadC(){")
+    p.append("let r=await fetch('/api/community');let d=await r.json();")
+    p.append("let posts=d.posts.filter(function(p){return curFilter=='all'||p.media_type==curFilter});")
+    p.append("document.getElementById('cList').innerHTML=posts.map(function(p){")
+    p.append("let q=String.fromCharCode(39);let safe=p.name.split(q).join('');let m='';")
+    p.append("if(p.media_type=='photo'){m='<img src='+p.media+' class=\"postimg\">'}")
+    p.append("if(p.media_type=='video'){m='<video src='+p.media+' class=\"postvideo\" controls></video>'}")
+    p.append("return '<div style=\"padding:14px 0;border-bottom:1px solid #eee\"><b>'+p.name+'</b>'")
+    p.append("+'<div style=\"color:#667085;font-size:12px\">'+p.created+'</div>'")
+    p.append("+'<div style=\"margin-top:6px;white-space:pre-wrap\">'+p.msg+'</div>'+m")
+    p.append("+'<div style=\"margin-top:10px;display:flex;gap:8px\">'")
+    p.append("+'<button class=\"chip\" onclick=\"likeC('+p.id+',this)\">Like '+p.likes+'</button>'")
+    p.append("+'<button class=\"chip\" onclick=\"addFriendFromPost('+q+safe+q+')\">+ Add Friend</button></div></div>'}).join('')||'No posts yet'}")
+    p.append("async function likeC(id,el){")
+    p.append("let r=await fetch('/api/community/like/'+id,{method:'POST'});")
+    p.append("let j=await r.json();if(j.ok)loadC()}")
+    p.append("async function addFriendFromPost(to){")
+    p.append("let me=prompt('Your name to send friend request as:');if(!me)return;")
+    p.append("let r=await fetch('/api/friends/add',{method:'POST',headers:{'Content-Type':'application/json'},")
+    p.append("body:JSON.stringify({from_name:me,to_name:to})});")
+    p.append("let j=await r.json();alert(j.message||j.error)}")
+    p.append("loadC();")
+    p.append("</script>")
+    body="".join(p)
     return shell("Community",body)
-@app.route("/friends")
-def friends_page():
-    body="<h1>Friends</h1><p style=\"color:#475467\">Find members and send friend requests.</p><div class=\"card\"><label>Your name</label><input class=\"input\" id=\"myName\" placeholder=\"Your name\"><div style=\"margin-top:12px\"><label>Search members</label><input class=\"input\" id=\"fq\" placeholder=\"Search by name\" oninput=\"renderF()\"></div><div id=\"findList\" style=\"margin-top:14px\"></div></div><div class=\"card\"><h2>Friend Requests</h2><div id=\"reqList\">Loading...</div></div><div class=\"card\"><h2>My Friends</h2><div id=\"myFriends\">Loading...</div></div><script>let allF=[];async function loadF(){let r=await fetch(\"/api/members\");let d=await r.json();allF=d.members;renderF();loadReq()}function renderF(){let q=document.getElementById(\"fq\").value.toLowerCase();let list=allF.filter(function(m){return m.full_names.toLowerCase().includes(q)}).slice(0,30);document.getElementById(\"findList\").innerHTML=list.map(function(m){let qq=String.fromCharCode(39);let safe=m.full_names.split(qq).join(\"\");return \"<div class=\\\"row\\\"><span><b>\"+m.full_names+\"</b><div style=\\\"font-size:12px;color:#667085\\\">\"+m.project+\"</div></span><button class=\\\"btn2 gold\\\" onclick=\\\"sendReq(\"+qq+safe+qq+\")\\\">+ Add Friend</button></div>\"}).join(\"\")||\"No members\"}async function sendReq(to){let me=document.getElementById(\"myName\").value;if(!me){alert(\"Enter your name first\");return}let r=await fetch(\"/api/friends/add\",{method:\"POST\",headers:{\"Content-Type\":\"application/json\"},body:JSON.stringify({from_name:me,to_name:to})});let j=await r.json();alert(j.message||j.error);loadReq()}async function loadReq(){let me=document.getElementById(\"myName\").value;let r=await fetch(\"/api/friends?me=\"+encodeURIComponent(me));let d=await r.json();document.getElementById(\"reqList\").innerHTML=(d.requests||[]).map(function(f){return \"<div class=\\\"row\\\"><span><b>\"+f.from_name+\"</b> wants to be your friend</span><span><button class=\\\"btn2\\\" onclick=\\\"actReq(\"+f.id+\",\"+String.fromCharCode(34)+\"accept\"+String.fromCharCode(34)+\")\\\">Accept</button> <button class=\\\"btn2 gold\\\" onclick=\\\"actReq(\"+f.id+\",\"+String.fromCharCode(34)+\"reject\"+String.fromCharCode(34)+\")\\\">Reject</button></span></div>\"}).join(\"\")||\"No requests\";document.getElementById(\"myFriends\").innerHTML=(d.friends||[]).map(function(f){return \"<div class=\\\"row\\\"><b>\"+f+\"</b><span>Friend</span></div>\"}).join(\"\")||\"No friends yet\"}async function actReq(id,action){let r=await fetch(\"/api/friends/\"+action+\"/\"+id,{method:\"POST\"});let j=await r.json();alert(j.message||j.error);loadReq()}document.getElementById(\"myName\").addEventListener(\"change\",loadReq);loadF();</script>"
-    return shell("Friends",body)
-@app.route("/register", methods=["GET","POST"])
-def register_page():
-    if request.method=="POST":
-        staff=request.form.get("staff_no","").strip(); names=request.form.get("full_names","").strip(); project=norm_project(request.form.get("project","")); month=request.form.get("month_joined","").strip()
-        father=request.form.get("father_id",""); mother=request.form.get("mother_id",""); guardian=request.form.get("guardian_id",""); spouse=request.form.get("spouse_id",""); k1=request.form.get("kid1",""); k2=request.form.get("kid2",""); k3=request.form.get("kid3",""); k4=request.form.get("kid4",""); k5=request.form.get("kid5","")
-        c=get_db()
-        try:
-            ok=add_user(c,staff,names,project,month,father,mother,guardian,spouse,k1,k2,k3,k4,k5)
-            if ok: c.commit()
-            else: c.rollback()
-        finally: c.close()
-        if ok: return redirect("/members")
-        body="<div class=\"card\"><h2>Could not register</h2><p>Staff number or name already exists.</p><a class=\"btn2\" href=\"/register\">Try again</a></div>"
-        return shell("Register",body)
-    opts="".join(f"<option value=\"{p}\">{p}</option>" for p in PROJECTS)
-    body="<h1>Register Member</h1><p style=\"color:#475467\">Add a new welfare member. Staff number is the password.</p><form class=\"card\" method=\"POST\" action=\"/register\"><label>Staff Number</label><input class=\"input\" name=\"staff_no\" required><div style=\"margin-top:12px\"><label>Full Names</label><input class=\"input\" name=\"full_names\" required></div><div style=\"margin-top:12px\"><label>Project</label><select class=\"input\" name=\"project\">"+opts+"</select></div><div style=\"margin-top:12px\"><label>Date Joined</label><input class=\"input\" name=\"month_joined\" placeholder=\"e.g. Jan 2026 or 01/03/2025\" required></div><div style=\"margin-top:12px\"><label>Father ID</label><input class=\"input\" name=\"father_id\"></div><div style=\"margin-top:12px\"><label>Mother ID</label><input class=\"input\" name=\"mother_id\"></div><div style=\"margin-top:12px\"><label>Guardian ID</label><input class=\"input\" name=\"guardian_id\"></div><div style=\"margin-top:12px\"><label>Spouse ID</label><input class=\"input\" name=\"spouse_id\"></div><div style=\"margin-top:12px\"><label>Kid 1 Birth Cert</label><input class=\"input\" name=\"kid1\"></div><div style=\"margin-top:12px\"><label>Kid 2 Birth Cert</label><input class=\"input\" name=\"kid2\"></div><div style=\"margin-top:12px\"><label>Kid 3 Birth Cert</label><input class=\"input\" name=\"kid3\"></div><div style=\"margin-top:12px\"><label>Kid 4 Birth Cert</label><input class=\"input\" name=\"kid4\"></div><div style=\"margin-top:12px\"><label>Kid 5 Birth Cert</label><input class=\"input\" name=\"kid5\"></div><button class=\"btn\" type=\"submit\" style=\"margin-top:16px\">Register Member</button></form>"
-    return shell("Register",body)
-@app.route("/admin", methods=["GET","POST"])
-def admin_page():
-    if request.method=="POST":
-        email=request.form.get("email","").strip(); password=request.form.get("password","")
-        c=get_db()
-        try: u=c.execute("SELECT * FROM users WHERE email=?",(email,)).fetchone()
-        finally: c.close()
-        if u and check_password_hash(u["password"],password):
-            return redirect("/admin?ok=1&email="+email)
-        body="<div class=\"card\"><h2>Login failed</h2><p>Wrong email or password.</p><a class=\"btn2\" href=\"/admin\">Try again</a></div>"
-        return shell("Admin",body)
-    ok=request.args.get("ok")
-    if ok:
-        c=get_db()
-        try:
-            msgs=c.execute("SELECT * FROM support_msgs ORDER BY id DESC LIMIT 20").fetchall()
-            notifs=c.execute("SELECT * FROM notifications ORDER BY id DESC LIMIT 20").fetchall()
-        finally: c.close()
-        h="<h1>Admin</h1><p style=\"color:#475467\">Logged in as admin.</p>"
-        h+="<div class=\"card\"><h2>Send Notification</h2><form method=\"POST\" action=\"/api/admin/notify\"><input class=\"input\" name=\"title\" placeholder=\"Title\" required><input class=\"input\" name=\"msg\" placeholder=\"Message\" style=\"margin-top:10px\" required><input class=\"input\" name=\"target\" placeholder=\"Target - leave blank for all\" style=\"margin-top:10px\"><button class=\"btn\" type=\"submit\" style=\"margin-top:12px\">Send Notification</button></form></div>"
-        h+="<div class=\"card\"><h2>Add Member</h2><a class=\"btn2\" href=\"/register\">Register Member</a> <a class=\"btn2 gold\" href=\"/download/excel\">Download Excel</a> <a class=\"btn2 gold\" href=\"/download/shareout\">Download Share-Out</a></div>"
-        h+="<div class=\"card\"><h2>Support Messages</h2>"
-        for m in msgs: h+=f"<div class=\"row\"><span><b>{m['name']}</b><div>{m['msg']}</div></span><span>{m['created']}</span></div>"
-        h+="</div><div class=\"card\"><h2>Notifications Sent</h2>"
-        for n in notifs: h+=f"<div class=\"row\"><span><b>{n['title']}</b><div>{n['msg']}</div></span><span>{n['created']}</span></div>"
-        h+="</div>"
-        return shell("Admin",h)
-    body="<h1>Admin Login</h1><div class=\"card\"><form method=\"POST\" action=\"/admin\"><label>Email</label><input class=\"input\" name=\"email\" value=\"admin@lonma.com\" required><div style=\"margin-top:12px\"><label>Password</label><input class=\"input\" name=\"password\" type=\"password\" value=\"admin123\" required></div><button class=\"btn\" type=\"submit\" style=\"margin-top:14px\">Login</button></form><p style=\"font-size:13px;color:#475467\">Default: admin@lonma.com / admin123</p></div>"
-    return shell("Admin",body)
-@app.route("/download/excel")
-def download_excel():
-    try:
-        import openpyxl
-        wb=openpyxl.Workbook(); ws=wb.active; ws.title="Members"
-        ws.append(["Staff No","Full Names","Project","Email","Date Joined","Father ID","Mother ID","Guardian ID","Spouse ID","Kid1","Kid2","Kid3","Kid4","Kid5"])
-        c=get_db()
-        try: rows=c.execute("SELECT * FROM users ORDER BY full_names").fetchall()
-        finally: c.close()
-        for r in rows: ws.append([r["staff_no"],r["full_names"],r["project"],r["email"],r["month_joined"],r["father_id"],r["mother_id"],r["guardian_id"],r["spouse_id"],r["kid1"],r["kid2"],r["kid3"],r["kid4"],r["kid5"]])
-        ws2=wb.create_sheet("Share-Out"); ws2.append(["Staff No","Full Names","Project","Date Joined","Basis","Months","Contribution","Share"])
-        shares,_,_,_=calc_shares()
-        for x in shares: ws2.append([x["staff_no"],x["full_names"],x["project"],x["month_joined"],x["basis"],x["months"],x["contribution"],x["share"]])
-        ws3=wb.create_sheet("Combined Expenses"); ws3.append(["Expense line","Period 1","Period 2","Combined"])
-        ws3.append(["Fares paid",30000,30000,60000]); ws3.append(["Fares transactions",1625,2100,3725]); ws3.append(["Fares total",31625,32100,63725]); ws3.append(["Beneficiaries paid",461000,379075,840075]); ws3.append(["Beneficiaries transactions",2000,1300,3300]); ws3.append(["Beneficiaries total",463000,380375,843375]); ws3.append(["Bank charges",0,14400,14400]); ws3.append(["Transfer charges",0,466,466]); ws3.append(["Bank / Transfer total",0,14866,14866]); ws3.append(["TOTAL EXPENSES COMBINED",494625,427341,921966])
-        ws4=wb.create_sheet("Fares ALL"); ws4.append(["Period","Name","Phone","Amount","Trans","Total"])
-        for per,n,ph,a,t in FARES: ws4.append([per,n,ph,a,t,a+t])
-        ws5=wb.create_sheet("Beneficiaries ALL"); ws5.append(["Period","Name","Project","Reason","Date","Amount","Trans","Total"])
-        for per,n,pr,reason,date,a,t in BENEF: ws5.append([per,n,pr,reason,date,a,t,a+t])
-        bio=io.BytesIO(); wb.save(bio); bio.seek(0)
-        return send_file(bio,as_attachment=True,download_name="FIG_Members.xlsx",mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    except Exception as e:
-        return jsonify({"error":str(e)}),500
-@app.route("/download/shareout")
-def download_shareout():
-    try:
-        import openpyxl
-        wb=openpyxl.Workbook(); ws=wb.active; ws.title="Share-Out"
-        ws.append(["#","Staff No","Full Names","Project","Date Joined","Basis","Months","Contribution","Share"])
-        shares,_,_,_=calc_shares()
-        for i,x in enumerate(shares,1): ws.append([i,x["staff_no"],x["full_names"],x["project"],x["month_joined"],x["basis"],x["months"],x["contribution"],x["share"]])
-        bio=io.BytesIO(); wb.save(bio); bio.seek(0)
-        return send_file(bio,as_attachment=True,download_name="FIG_ShareOut.xlsx",mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    except Exception as e:
-        return jsonify({"error":str(e)}),500
-@app.route("/api/stats")
-def api_stats():
-    c=get_db()
-    try:
-        rows=c.execute("SELECT project, COUNT(*) as n FROM users WHERE email != ? GROUP BY project ORDER BY project",(ADMIN_EMAIL,)).fetchall()
-        total=c.execute("SELECT COUNT(*) as n FROM users WHERE email != ?",(ADMIN_EMAIL,)).fetchone()["n"]
-    finally: c.close()
-    bd={}; plist=[]
-    for r in rows:
-        p=norm_project(r["project"]); bd[p]=bd.get(p,0)+r["n"]
-        if p not in plist: plist.append(p)
-    return jsonify({"total_members":total,"projects_total":len(plist),"projects":sorted(plist),"projects_breakdown":bd,"version":VERSION})
-@app.route("/api/members")
-def api_members():
-    c=get_db()
-    try: rows=c.execute("SELECT * FROM users WHERE email != ? ORDER BY full_names",(ADMIN_EMAIL,)).fetchall()
-    finally: c.close()
-    out=[]
-    for r in rows: out.append({"id":r["id"],"staff_no":r["staff_no"] or "","full_names":r["full_names"] or "","project":norm_project(r["project"]),"email":r["email"] or "","month_joined":r["month_joined"] or "","father_id":r["father_id"] or "","mother_id":r["mother_id"] or "","guardian_id":r["guardian_id"] or "","spouse_id":r["spouse_id"] or "","kid1":r["kid1"] or "","kid2":r["kid2"] or "","kid3":r["kid3"] or "","kid4":r["kid4"] or "","kid5":r["kid5"] or "","photo":r["photo"] or ""})
-    return jsonify({"members":out})
-@app.route("/api/shareout")
-def api_shareout():
-    shares,tc,tm,rate=calc_shares()
-    return jsonify({"members":shares,"total_contribution":tc,"total_months":tm,"per_month_rate":rate,"distributable":DISTRIBUTABLE,"retained":RESERVE,"bf":BF,"version":VERSION})
-@app.route("/api/expenses")
-def api_expenses():
-    fares_p1=sum(a for per,n,ph,a,t in FARES if per=="P1"); fares_p1_t=sum(t for per,n,ph,a,t in FARES if per=="P1")
-    fares_p2=sum(a for per,n,ph,a,t in FARES if per=="P2"); fares_p2_t=sum(t for per,n,ph,a,t in FARES if per=="P2")
-    ben_p1=sum(a for per,n,pr,reason,date,a,t in BENEF if per=="P1"); ben_p1_t=sum(t for per,n,pr,reason,date,a,t in BENEF if per=="P1")
-    ben_p2=sum(a for per,n,pr,reason,date,a,t in BENEF if per=="P2"); ben_p2_t=sum(t for per,n,pr,reason,date,a,t in BENEF if per=="P2")
-    return jsonify({"fares":{"period1":{"principal":fares_p1,"transactions":fares_p1_t,"total":fares_p1+fares_p1_t},"period2":{"principal":fares_p2,"transactions":fares_p2_t,"total":fares_p2+fares_p2_t},"combined":fares_p1+fares_p1_t+fares_p2+fares_p2_t},"beneficiaries":{"period1":{"principal":ben_p1,"transactions":ben_p1_t,"total":ben_p1+ben_p1_t},"period2":{"principal":ben_p2,"transactions":ben_p2_t,"total":ben_p2+ben_p2_t},"combined":ben_p1+ben_p1_t+ben_p2+ben_p2_t},"bank":{"period1":0,"period2":14866,"combined":14866},"total_expenses":{"period1":494625,"period2":427341,"combined":921966},"contributions":{"period1":1404000,"period2":991100,"combined":2395100},"version":VERSION})
-@app.route("/api/fares")
-def api_fares():
-    return jsonify({"fares":[{"period":per,"name":n,"phone":ph,"amount":a,"transaction":t,"total":a+t} for per,n,ph,a,t in FARES]})
-@app.route("/api/beneficiaries")
-def api_beneficiaries():
-    return jsonify({"beneficiaries":[{"period":per,"name":n,"project":pr,"reason":reason,"date":date,"amount":a,"transaction":t,"total":a+t} for per,n,pr,reason,date,a,t in BENEF]})
-@app.route("/api/notifications")
-def api_notifications():
-    c=get_db()
-    try: rows=c.execute("SELECT * FROM notifications ORDER BY id DESC LIMIT 20").fetchall()
-    finally: c.close()
-    return jsonify({"notifications":[{"id":r["id"],"title":r["title"],"msg":r["msg"],"created":r["created"]} for r in rows]})
-@app.route("/api/notifications/read", methods=["POST"])
-def api_notifications_read():
-    return jsonify({"ok":True})
-@app.route("/api/support", methods=["POST"])
-def api_support():
-    d=request.get_json(silent=True) or {}
-    name=(d.get("name") or "").strip(); msg=(d.get("msg") or "").strip()
-    if not name or not msg: return jsonify({"error":"Name and message required"}),400
-    c=get_db()
-    try: c.execute("INSERT INTO support_msgs (name,msg,created) VALUES (?,?,datetime('now'))",(name,msg,)); c.commit()
-    finally: c.close()
-    return jsonify({"ok":True,"message":"Message sent. We will reply on WhatsApp 0707 780 807."})
-@app.route("/api/admin/notify", methods=["POST"])
-def api_admin_notify():
-    title=request.form.get("title","").strip(); msg=request.form.get("msg","").strip(); target=request.form.get("target","").strip()
-    if not title or not msg: return jsonify({"error":"Title and message required"}),400
-    c=get_db()
-    try: c.execute("INSERT INTO notifications (title,msg,created,target) VALUES (?,?,datetime('now'),?)",(title,msg,target)); c.commit()
-    finally: c.close()
-    return redirect("/admin?ok=1")
-@app.route("/api/community", methods=["GET","POST"])
-def api_community():
-    if request.method=="POST":
-        d=request.get_json(silent=True) or {}
-        name=(d.get("name") or "").strip(); msg=(d.get("msg") or "").strip()
-        if not name or not msg: return jsonify({"error":"Name and message required"}),400
-        c=get_db()
-        try: c.execute("INSERT INTO community (name,msg,created,media_type,media,likes) VALUES (?,?,datetime('now'),?,?,0)",(name,msg,d.get("media_type") or "",d.get("media") or "")); c.commit()
-        finally: c.close()
-        return jsonify({"ok":True,"message":"Posted"})
-    c=get_db()
-    try: rows=c.execute("SELECT * FROM community ORDER BY id DESC LIMIT 100").fetchall()
-    finally: c.close()
-    return jsonify({"posts":[{"id":r["id"],"name":r["name"],"msg":r["msg"],"created":r["created"],"media_type":r["media_type"] or "","media":r["media"] or "","likes":r["likes"] or 0} for r in rows]})
-@app.route("/api/community/like/<int:pid>", methods=["POST"])
-def api_community_like(pid):
-    c=get_db()
-    try:
-        r=c.execute("SELECT likes FROM community WHERE id=?",(pid,)).fetchone()
-        if not r: return jsonify({"error":"Not found"}),404
-        c.execute("UPDATE community SET likes=? WHERE id=?",((r["likes"] or 0)+1,pid)); c.commit()
-    finally: c.close()
-    return jsonify({"ok":True})
-@app.route("/api/friends")
-def api_friends():
-    me=(request.args.get("me") or "").strip()
-    c=get_db()
-    try:
-        reqs=c.execute("SELECT * FROM friends WHERE lower(to_name)=lower(?) AND status='pending' ORDER BY id DESC",(me,)).fetchall() if me else []
-        allf=c.execute("SELECT * FROM friends WHERE status='accepted' AND (lower(from_name)=lower(?) OR lower(to_name)=lower(?))",(me,me)).fetchall() if me else []
-    finally: c.close()
-    friends=[]
-    for f in allf:
-        other=f["to_name"] if f["from_name"].lower()==me.lower() else f["from_name"]
-        if other not in friends: friends.append(other)
-    return jsonify({"requests":[{"id":r["id"],"from_name":r["from_name"],"to_name":r["to_name"]} for r in reqs],"friends":friends})
-@app.route("/api/friends/add", methods=["POST"])
-def api_friends_add():
-    d=request.get_json(silent=True) or {}
-    frm=(d.get("from_name") or "").strip(); to=(d.get("to_name") or "").strip()
-    if not frm or not to: return jsonify({"error":"Both names required"}),400
-    if frm.lower()==to.lower(): return jsonify({"error":"Cannot add yourself"}),400
-    c=get_db()
-    try:
-        ex=c.execute("SELECT id FROM friends WHERE (lower(from_name)=lower(?) AND lower(to_name)=lower(?)) OR (lower(from_name)=lower(?) AND lower(to_name)=lower(?))",(frm,to,to,frm)).fetchone()
-        if ex: return jsonify({"message":"Request already exists"})
-        c.execute("INSERT INTO friends (from_name,to_name,status,created) VALUES (?,?,?,datetime('now'))",(frm,to,"pending")); c.commit()
-    finally: c.close()
-    return jsonify({"ok":True,"message":"Friend request sent to "+to})
-@app.route("/api/friends/accept/<int:fid>", methods=["POST"])
-def api_friends_accept(fid):
-    c=get_db()
-    try: c.execute("UPDATE friends SET status='accepted' WHERE id=?",(fid,)); c.commit()
-    finally: c.close()
-    return jsonify({"ok":True,"message":"Friend accepted"})
-@app.route("/api/friends/reject/<int:fid>", methods=["POST"])
-def api_friends_reject(fid):
-    c=get_db()
-    try: c.execute("UPDATE friends SET status='rejected' WHERE id=?",(fid,)); c.commit()
-    finally: c.close()
-    return jsonify({"ok":True,"message":"Friend rejected"})
-@app.route("/api/health")
-def api_health():
-    return jsonify({"ok":True,"version":VERSION})
-if __name__=="__main__":
-    port=int(os.environ.get("PORT",5000))
-    app.run(host="0.0.0.0",port=port,debug=False)
