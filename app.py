@@ -3,7 +3,7 @@ import sqlite3, os, secrets, io, re
 from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 DB = "lonma.db"
-VERSION = "v145"
+VERSION = "v148"
 PROJECTS = ["Antonia","GCB-MT","GCB-TDs","Higchem","HQ","Java House","Kanji","Pwani Oil Products","SC Johnson","TF WSL","TF-LM","TF-MT"]
 PMAP = {"Antonio":"Antonia","ANTONIA":"Antonia","Antonia":"Antonia","GCB-MT":"GCB-MT","GCB MT":"GCB-MT","GCB":"GCB-MT","GCB-Ws":"GCB-TDs","GCB Ws":"GCB-TDs","GCB TDS":"GCB-TDs","GCB-TDs":"GCB-TDs","GCB-TDS":"GCB-TDs","GCB WS":"GCB-TDs","Higchem":"Higchem","HIGHCHEM":"Higchem","HQ":"HQ","Kanji":"Kanji","KHS":"Kanji","Kaysalt":"Kanji","Kenafric":"Kanji","LAB":"Kanji","Java House":"Java House","JAVA":"Java House","Java":"Java House","Pwani Oil Products":"Pwani Oil Products","PWANI":"Pwani Oil Products","Pwani":"Pwani Oil Products","SC Johnson":"SC Johnson","SJ Johnson":"SC Johnson","JOHNSON":"SC Johnson","Johnson":"SC Johnson","SJ":"SC Johnson","SCJohnson":"SC Johnson","TF WSL":"TF WSL","TF WS":"TF WSL","TF-WS":"TF WSL","TF":"TF WSL","TF-LM":"TF-LM","TF LM":"TF-LM","TF-MT":"TF-MT","TF MT":"TF-MT"}
 def norm_project(p):
@@ -19,14 +19,27 @@ BF = 855759
 RESERVE = 250000
 DISTRIBUTABLE = BF - RESERVE
 MONTHLY_RATE = 300
-PERIOD_START = (2025, 12)
-PERIOD_END = (2026, 11)
 FULL_MONTHS = 12
 SHARE_TABLE_2026 = {1:11,2:10,3:9,4:8,5:7,6:6,7:5,8:4,9:3,10:2,11:1}
-PROJECT_META = {"GCB-MT":{"short":"KG","label":"Kericho Gold","bg":"#1E4D2B","fg":"#FFFFFF"},"GCB-TDs":{"short":"KG","label":"Kericho Gold","bg":"#1E4D2B","fg":"#FFFFFF"},"SC Johnson":{"short":"SC","label":"SC Johnson","bg":"#E23A3A","fg":"#FFFFFF"},"Java House":{"short":"JH","label":"Java House","bg":"#C1272D","fg":"#FFFFFF"},"Pwani Oil Products":{"short":"P","label":"Pwani","bg":"#E23A3A","fg":"#FFFFFF"},"TF-MT":{"short":"TF","label":"Trufoods","bg":"#1B7A3D","fg":"#FFFFFF"},"TF-LM":{"short":"TF","label":"Trufoods","bg":"#1B7A3D","fg":"#FFFFFF"},"TF WSL":{"short":"TF","label":"Trufoods","bg":"#1B7A3D","fg":"#FFFFFF"},"Antonia":{"short":"A","label":"Antonia","bg":"#0F2233","fg":"#FFFFFF"},"Higchem":{"short":"H","label":"Higchem","bg":"#0F2233","fg":"#FFFFFF"},"HQ":{"short":"HQ","label":"HQ","bg":"#0F2233","fg":"#B9975B"},"Kanji":{"short":"K","label":"Kanji","bg":"#0F2233","fg":"#FFFFFF"}}
 def project_badge(p):
-    m=PROJECT_META.get(p,{"short":(p[:2] if p else "?").upper(),"bg":"#0F2233","fg":"#fff"})
-    return f"<span style='display:inline-flex;align-items:center;gap:8px'><span style='width:32px;height:32px;border-radius:9px;background:{m['bg']};color:{m['fg']};display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none'>{m['short']}</span><span>{p}</span></span>"
+    if p in ("GCB-MT","GCB-TDs"):
+        svg='<svg width="46" height="32" viewBox="0 0 46 32"><rect width="46" height="32" rx="7" fill="#fff" stroke="#E5E7EB"/><text x="23" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#1E3A2A" font-family="Georgia">Kericho</text><text x="23" y="26" text-anchor="middle" font-size="8" font-weight="700" fill="#1E3A2A" font-family="Georgia">Gold</text><path d="M32 2 Q35 6 32 10 Q29 6 32 2" fill="#1E4D2B"/></svg>'
+        label="Kericho Gold"
+    elif p=="SC Johnson":
+        svg='<svg width="46" height="32" viewBox="0 0 46 32"><rect width="46" height="32" rx="7" fill="#fff" stroke="#E5E7EB"/><text x="23" y="21" text-anchor="middle" font-size="17" font-weight="900" fill="#E23A3A" font-family="Arial">SC</text><path d="M8 28 Q23 36 38 8" stroke="#E23A3A" stroke-width="5" fill="none" stroke-linecap="round"/></svg>'
+        label="SC Johnson"
+    elif p=="Java House":
+        svg='<svg width="46" height="32" viewBox="0 0 46 32"><rect width="46" height="32" rx="7" fill="#C1272D"/><circle cx="23" cy="16" r="10" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="19" cy="15" r="1.2" fill="#fff"/><circle cx="27" cy="15" r="1.2" fill="#fff"/><path d="M19 21 Q23 24 27 21" stroke="#fff" fill="none"/></svg>'
+        label="Java House"
+    elif p=="Pwani Oil Products":
+        svg='<svg width="46" height="32" viewBox="0 0 46 32"><rect width="46" height="32" rx="7" fill="#fff" stroke="#E5E7EB"/><circle cx="23" cy="13" r="9" fill="#E23A3A"/><path d="M14 16 Q23 8 32 14 Q23 18 14 16" fill="#fff"/><text x="23" y="29" text-anchor="middle" font-size="7" font-weight="700" fill="#333">Pwani</text></svg>'
+        label="Pwani"
+    elif p in ("TF-MT","TF-LM","TF WSL"):
+        svg='<svg width="46" height="32" viewBox="0 0 46 32"><rect width="46" height="32" rx="7" fill="#fff" stroke="#E5E7EB"/><text x="23" y="11" text-anchor="middle" font-size="6" font-weight="800" fill="#1B5AA6">TRUFOODS</text><path d="M10 14 H36 L33 18 H26 V28 H20 V18 H13 Z" fill="#7AB648"/></svg>'
+        label="Trufoods"
+    else:
+        return f"<span style='display:inline-flex;align-items:center;gap:8px'><span style='width:36px;height:36px;border-radius:10px;background:#0F2233;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800'>{p[:2].upper()}</span><span>{p}</span></span>"
+    return f"<span style='display:inline-flex;align-items:center;gap:8px'>{svg}<span><b>{label}</b><div style='font-size:11px;color:#667085'>{p}</div></span></span>"
 SEED_TXT = '''202731|Pwani Oil Products|2025|Angela Nyaguthii Gathege|Philip Gathege|Elizabeth Wanjiru||||||
 202863|Pwani Oil Products|2025|Peter Olonde|6600561|0745115734||41572317|67272316||||
 202656|Pwani Oil Products|2025|Patrick Sifuna Wanjala||4396984||31939216|151468||||
@@ -277,7 +290,6 @@ Rachael Gathoni wangigi|TF-MT|Oct-26|Rachael Gathoni wangigi|8846144|N/A|N/A|N/A
 PERIODS = [{"label":"Oct 2024 - Dec 2025","total":1404000,"beneficiaries":463000,"fares":31625,"detail":"Pwani 310,500 | Java 123,600 | SC Johnson 139,200"},{"label":"Dec 2025 - Nov 2026","total":991100,"beneficiaries":379075,"fares":32100,"expenditures":427341,"detail":"Pwani 220,200 | Java House 106,200 | SC Johnson 101,400"}]
 BENEFICIARIES2 = [("Oct 2024 - Dec 2025","Mary Ngota","GCB","Dad-Death","01/11/2024",30000),("Dec 2025 - Nov 2026","ROSE Lumonya SAIDI","POPL","Death-Father","01/12/2025",40000),("Dec 2025 - Nov 2026","Sherine Atieno Otieno","Antonia","Mother-Death","Nov 2026",40000)]
 FARES2 = [("Oct 2024 - Dec 2025","Peter Ikegu","0704886421",1000),("Dec 2025 - Nov 2026","EUNICE MAKONA","0714910135",1200)]
-MONTHLY_INDIVIDUAL = []
 SEED_DATA = [tuple((l.split('|')+['']*13)[:13]) for l in SEED_TXT.strip().splitlines()]
 def clean(v):
     if v is None: return ""
@@ -327,7 +339,6 @@ def share_basis(join_str):
         mo=SHARE_TABLE_2026[m]
         return (mo,f"Joined {m:02d}/2026 - Pro-rated {mo} months")
     return (0,"Joined after Nov 2026 - No share this period")
-def months_active(j): return share_basis(j)[0]
 def get_db():
     c=sqlite3.connect(DB,timeout=10,check_same_thread=False,isolation_level=None); c.row_factory=sqlite3.Row
     try: c.execute("PRAGMA journal_mode=WAL;"); c.execute("PRAGMA busy_timeout=10000;")
@@ -402,7 +413,7 @@ def favicon():
     svg='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="14" fill="#0A1F33"/><text x="32" y="42" font-family="Georgia, serif" font-size="24" font-weight="700" fill="#C9A86A" text-anchor="middle">FIG</text></svg>'
     return svg,200,{"Content-Type":"image/svg+xml"}
 def shell(title,body):
-    return render_template_string('''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>'''+title+''' | F.I.G Brands Welfare</title><style>:root{--navy:#0F2233;--gold:#B9975B;--muted:#667085;--bg:#F4F5F7}*{box-sizing:border-box}body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#1A2332;margin:0;padding-bottom:92px;font-size:15px;line-height:1.55}h1{font-size:28px;letter-spacing:-.02em;margin:0 0 8px;color:var(--navy)}h2{font-size:18px;margin:0 0 8px;color:var(--navy)}h3{font-size:15px;margin:14px 0 8px}.top{height:60px;background:#fff;display:flex;align-items:center;gap:12px;padding:0 16px;position:sticky;top:0;z-index:20;border-bottom:1px solid #E7E7E7}.brandmark{width:38px;height:38px;background:var(--navy);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;cursor:pointer;flex:none}.brandmark i{font-style:normal;color:var(--gold)}.top b{font-size:16px;color:var(--navy)}.top small{display:block;font-size:10px;letter-spacing:.16em;color:var(--muted);font-weight:600}.iconbtn{width:38px;height:38px;border:1px solid #E7E7E7;background:#fff;border-radius:999px;cursor:pointer}.toplinks{background:#fff;border-bottom:1px solid #E7E7E7;padding:10px 16px;display:flex;gap:18px;flex-wrap:wrap;position:sticky;top:60px;z-index:15}.toplinks a{color:#344054;text-decoration:none;font-size:13px;font-weight:600}.page{max-width:1040px;margin:auto;padding:20px 16px}.card{background:#fff;border:1px solid #EDEDED;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(16,24,40,.04)}.input{width:100%;height:46px;border:1px solid #D0D5DD;border-radius:10px;padding:0 13px;background:#fff;font-size:14px}.btn{width:100%;height:46px;background:var(--navy);color:#fff;border:0;border-radius:10px;font-weight:600;cursor:pointer}.btn2{display:inline-block;background:var(--navy);color:#fff;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px}.btn2.gold{background:var(--gold);color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.kpi{background:#fff;border:1px solid #EDEDED;border-radius:14px;padding:18px}.kpi div:first-child{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}.kpi h2{font-size:30px;margin:8px 0 2px}.hero{background:var(--navy);color:#fff;border-radius:16px;padding:24px}.hero h1{color:#fff;font-size:34px}.hero p{color:#D0D5DD}.nav{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid #E7E7E7;display:flex;z-index:30;padding:6px 8px}.nav a{flex:1;color:#667085;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:600}.row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #F2F4F7}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid #F2F4F7;text-align:left}th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.num{text-align:right;white-space:nowrap}.pill{display:inline-block;background:#F2F4F7;color:#344054;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600}.chip{display:inline-block;border:1px solid #D0D5DD;background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#344054}.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}.postimg{width:100%;border-radius:12px;margin-top:10px;max-height:420px;object-fit:cover}.postvideo{width:100%;border-radius:12px;margin-top:10px;max-height:420px;background:#000}.side{position:fixed;inset:0;background:rgba(15,34,51,.45);display:none;z-index:99}.side.show{display:block}.sidepanel{position:absolute;left:0;top:0;bottom:0;width:300px;max-width:86vw;background:var(--navy);color:#fff;padding:22px 16px;overflow-y:auto;animation:slideIn .22s ease}.sidepanel a{display:flex;align-items:center;gap:12px;color:#E7EAF0;text-decoration:none;font-weight:500;font-size:14.5px;padding:11px 12px;border-radius:10px}.sidepanel a:hover{background:rgba(255,255,255,.08);color:#fff}.sidepanel a span{width:30px;height:30px;background:rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}.sidehead{font-size:11px;letter-spacing:.14em;color:#B9975B;font-weight:700;margin:20px 0 6px 12px}.popup{position:fixed;inset:0;background:rgba(15,34,51,.45);display:none;align-items:flex-end;justify-content:center;z-index:99}.popup.show{display:flex}.pop{background:#fff;width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:20px;max-height:86vh;overflow:auto}@keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}@media(max-width:640px){.grid{grid-template-columns:1fr}.hero h1{font-size:28px}}/* APPEARANCE - Light/Dark/System */.themebtn{flex:1;height:44px;border:1px solid #E7E7E7;background:#fff;color:#1A2332;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer}.themebtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}body[data-theme="dark"]{--bg:#0B1420;--muted:#98A2B3;color:#E7EAF0}body[data-theme="dark"] .top,body[data-theme="dark"] .toplinks,body[data-theme="dark"] .card,body[data-theme="dark"] .kpi,body[data-theme="dark"] .nav,body[data-theme="dark"] .pop{ background:#142233 !important;border-color:#24344D !important;color:#E7EAF0}body[data-theme="dark"] h1,body[data-theme="dark"] h2,body[data-theme="dark"] h3,body[data-theme="dark"] .top b{color:#fff !important}body[data-theme="dark"] .toplinks a,body[data-theme="dark"] .nav a{color:#CBD5E1 !important}body[data-theme="dark"] .input,body[data-theme="dark"] .themebtn{background:#1A2C44 !important;border-color:#2A3A52 !important;color:#E7EAF0}body[data-theme="dark"] .themebtn.on{background:var(--navy) !important}body[data-theme="dark"] th,body[data-theme="dark"] td{border-color:#24344D !important}body[data-theme="dark"] .row{border-color:#24344D !important}</style></head><body><div class="top"><div class="brandmark" onclick="openSide()">F<i>I</i>G</div><div><b>F.I.G Brands</b><small>WELFARE SYSTEM</small></div><div style="margin-left:auto;display:flex;gap:8px"><button class="iconbtn" onclick="openBell()">🔔</button><button class="iconbtn" onclick="openSupport()">💬</button></div></div><div class="toplinks"><a href="/">Overview</a><a href="/members">Members</a><a href="/register">Register</a><a href="/shareout">Share-Out</a><a href="/breakdown2">History</a><a href="/community">Community</a><a href="/friends">Friends</a><a href="/terms">Terms</a><a href="/admin">Admin</a></div><div class="page">'''+body+'''<div style="text-align:center;color:#98A2B3;font-size:12px;padding:18px 0 4px">F.I.G Brands Welfare · Secure member portal · marlonkikuyu@gmail.com · 0707 780 807</div></div><div class="side" id="sideMenu" onclick="if(event.target===this)closeSide()"><div class="sidepanel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px"><div class="brandmark">F<i>I</i>G</div><div><b style="font-size:16px">F.I.G Brands</b><div style="font-size:10px;letter-spacing:.16em;color:#B9975B;font-weight:700">WELFARE SYSTEM</div></div></div><button onclick="closeSide()" style="border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;border-radius:999px;width:32px;height:32px;cursor:pointer">✕</button></div><a href="/"><span>⌂</span>Overview</a><a href="/members"><span>◉</span>Members</a><a href="/register"><span>+</span>Register Member</a><a href="/shareout"><span>◈</span>Share-Out</a><a href="/breakdown2"><span>▦</span>History</a><a href="/terms"><span>§</span>Terms &amp; Policies</a><a href="/community"><span>◍</span>Community</a><a href="/friends"><span>♥</span>Friends</a><div class="sidehead">APPEARANCE</div><div style="display:flex;gap:8px;padding:0 4px"><button class="themebtn" data-t="light" onclick="setTheme('light')">Light</button><button class="themebtn" data-t="dark" onclick="setTheme('dark')">Dark</button><button class="themebtn" data-t="system" onclick="setTheme('system')">System</button></div><div class="sidehead">NOTIFICATIONS &amp; SETTINGS</div><a href="#" onclick="closeSide();openBell();return false"><span>🔔</span>Notifications</a><a href="/admin"><span>⚙</span>Admin / Settings</a><a href="#" onclick="closeSide();openSupport();return false"><span>?</span>Help Centre</a><a href="/download/excel"><span>↓</span>Download Excel</a><div class="sidehead">ACCOUNT</div><a href="/admin"><span>◈</span>Login as Admin</a></div></div><div class="popup" id="bellPopup" onclick="if(event.target===this)closeBell()"><div class="pop"><b>Notifications</b><div id="notifList"></div><button class="btn" onclick="markRead()" style="margin-top:12px">Mark all as read</button></div></div><div class="popup" id="supportPopup" onclick="if(event.target===this)closeSupport()"><div class="pop"><b>Contact Support</b><p><a href="https://wa.me/254707780807" target="_blank">WhatsApp 0707 780 807</a> · <a href="mailto:info@figbrands.co.ke">info@figbrands.co.ke</a></p><input class="input" id="supName" placeholder="Your name"><textarea id="supMsg" class="input" style="height:96px;margin-top:12px" placeholder="Message"></textarea><button class="btn" onclick="sendSupport()" style="margin-top:14px">Send</button><p id="supStatus"></p></div></div><nav class="nav"><a href="/">Home</a><a href="/members">Members</a><a href="/community">Community</a><a href="/friends">Friends</a><a href="/register">Add</a></nav><script>const PMETA={"GCB-MT":{s:"KG",bg:"#1E4D2B",fg:"#fff"},"GCB-TDs":{s:"KG",bg:"#1E4D2B",fg:"#fff"},"SC Johnson":{s:"SC",bg:"#E23A3A",fg:"#fff"},"Java House":{s:"JH",bg:"#C1272D",fg:"#fff"},"Pwani Oil Products":{s:"P",bg:"#E23A3A",fg:"#fff"},"TF-MT":{s:"TF",bg:"#1B7A3D",fg:"#fff"},"TF-LM":{s:"TF",bg:"#1B7A3D",fg:"#fff"},"TF WSL":{s:"TF",bg:"#1B7A3D",fg:"#fff"},"Antonia":{s:"A",bg:"#0F2233",fg:"#fff"},"Higchem":{s:"H",bg:"#0F2233",fg:"#fff"},"HQ":{s:"HQ",bg:"#0F2233",fg:"#B9975B"},"Kanji":{s:"K",bg:"#0F2233",fg:"#fff"}};function badge(p){let m=PMETA[p]||{s:p.slice(0,2).toUpperCase(),bg:"#0F2233",fg:"#fff"};return '<span style="display:inline-flex;align-items:center;gap:8px"><span style="width:32px;height:32px;border-radius:9px;background:'+m.bg+';color:'+m.fg+';display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none">'+m.s+'</span><span>'+p+'</span></span>'}function setTheme(t){try{localStorage.setItem('fig-theme',t)}catch(e){}applyTheme()}function applyTheme(){let t='light';try{t=localStorage.getItem('fig-theme')||'light'}catch(e){}let eff=t==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;document.body.setAttribute('data-theme',eff);document.querySelectorAll('.themebtn').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}applyTheme();if(window.matchMedia){try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}}function openSide(){document.getElementById('sideMenu').classList.add('show')}function closeSide(){document.getElementById('sideMenu').classList.remove('show')}async function openBell(){document.getElementById('bellPopup').classList.add('show');let r=await fetch('/api/notifications');let d=await r.json();document.getElementById('notifList').innerHTML=d.notifications.map(n=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+n.title+'</b><div>'+n.msg+'</div></div>').join('')||'No notifications'}function closeBell(){document.getElementById('bellPopup').classList.remove('show')}async function markRead(){await fetch('/api/notifications/read',{method:'POST'});closeBell()}function openSupport(){document.getElementById('supportPopup').classList.add('show')}function closeSupport(){document.getElementById('supportPopup').classList.remove('show')}async function sendSupport(){let r=await fetch('/api/support',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('supName').value,msg:document.getElementById('supMsg').value})});let j=await r.json();document.getElementById('supStatus').textContent=j.message}</script></body></html>''')
+    return render_template_string('''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>'''+title+''' | F.I.G Brands Welfare</title><style>:root{--navy:#0F2233;--gold:#B9975B;--muted:#667085;--bg:#F4F5F7}*{box-sizing:border-box}body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#1A2332;margin:0;padding-bottom:92px;font-size:15px;line-height:1.55}h1{font-size:28px;letter-spacing:-.02em;margin:0 0 8px;color:var(--navy)}h2{font-size:18px;margin:0 0 8px;color:var(--navy)}h3{font-size:15px;margin:14px 0 8px}.top{height:60px;background:#fff;display:flex;align-items:center;gap:12px;padding:0 16px;position:sticky;top:0;z-index:20;border-bottom:1px solid #E7E7E7}.brandmark{width:38px;height:38px;background:var(--navy);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;cursor:pointer;flex:none}.brandmark i{font-style:normal;color:var(--gold)}.top b{font-size:16px;color:var(--navy)}.top small{display:block;font-size:10px;letter-spacing:.16em;color:var(--muted);font-weight:600}.iconbtn{width:38px;height:38px;border:1px solid #E7E7E7;background:#fff;border-radius:999px;cursor:pointer}.toplinks{background:#fff;border-bottom:1px solid #E7E7E7;padding:10px 16px;display:flex;gap:18px;flex-wrap:wrap;position:sticky;top:60px;z-index:15}.toplinks a{color:#344054;text-decoration:none;font-size:13px;font-weight:600}.page{max-width:1040px;margin:auto;padding:20px 16px}.card{background:#fff;border:1px solid #EDEDED;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(16,24,40,.04)}.input{width:100%;height:46px;border:1px solid #D0D5DD;border-radius:10px;padding:0 13px;background:#fff;font-size:14px}.btn{width:100%;height:46px;background:var(--navy);color:#fff;border:0;border-radius:10px;font-weight:600;cursor:pointer}.btn2{display:inline-block;background:var(--navy);color:#fff;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px}.btn2.gold{background:var(--gold);color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.kpi{background:#fff;border:1px solid #EDEDED;border-radius:14px;padding:18px}.kpi div:first-child{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}.kpi h2{font-size:30px;margin:8px 0 2px}.hero{background:var(--navy);color:#fff;border-radius:16px;padding:24px}.hero h1{color:#fff;font-size:34px}.hero p{color:#D0D5DD}.nav{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid #E7E7E7;display:flex;z-index:30;padding:6px 8px}.nav a{flex:1;color:#667085;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:600}.row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #F2F4F7}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid #F2F4F7;text-align:left}th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.num{text-align:right;white-space:nowrap}.pill{display:inline-block;background:#F2F4F7;color:#344054;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600}.chip{display:inline-block;border:1px solid #D0D5DD;background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;color:#344054}.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}.postimg{width:100%;border-radius:12px;margin-top:10px;max-height:420px;object-fit:cover}.postvideo{width:100%;border-radius:12px;margin-top:10px;max-height:420px;background:#000}.side{position:fixed;inset:0;background:rgba(15,34,51,.45);display:none;z-index:99}.side.show{display:block}.sidepanel{position:absolute;left:0;top:0;bottom:0;width:300px;max-width:86vw;background:var(--navy);color:#fff;padding:22px 16px;overflow-y:auto;animation:slideIn .22s ease}.sidepanel a{display:flex;align-items:center;gap:12px;color:#E7EAF0;text-decoration:none;font-weight:500;font-size:14.5px;padding:11px 12px;border-radius:10px}.sidepanel a:hover{background:rgba(255,255,255,.08);color:#fff}.sidepanel a span{width:30px;height:30px;background:rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}.sidehead{font-size:11px;letter-spacing:.14em;color:#B9975B;font-weight:700;margin:20px 0 6px 12px}.popup{position:fixed;inset:0;background:rgba(15,34,51,.45);display:none;align-items:flex-end;justify-content:center;z-index:99}.popup.show{display:flex}.pop{background:#fff;width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:20px;max-height:86vh;overflow:auto}@keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}@media(max-width:640px){.grid{grid-template-columns:1fr}.hero h1{font-size:28px}}.themebtn{flex:1;height:44px;border:1px solid #E7E7E7;background:#fff;color:#1A2332;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer}.themebtn.on{background:var(--navy);color:#fff;border-color:var(--navy)}body[data-theme="dark"]{--bg:#0B1420;--muted:#98A2B3;color:#E7EAF0}body[data-theme="dark"] .top,body[data-theme="dark"] .toplinks,body[data-theme="dark"] .card,body[data-theme="dark"] .kpi,body[data-theme="dark"] .nav,body[data-theme="dark"] .pop{background:#142233 !important;border-color:#24344D !important;color:#E7EAF0}body[data-theme="dark"] h1,body[data-theme="dark"] h2,body[data-theme="dark"] h3,body[data-theme="dark"] .top b{color:#fff !important}body[data-theme="dark"] .toplinks a,body[data-theme="dark"] .nav a{color:#CBD5E1 !important}body[data-theme="dark"] .input,body[data-theme="dark"] .themebtn{background:#1A2C44 !important;border-color:#2A3A52 !important;color:#E7EAF0}body[data-theme="dark"] th,body[data-theme="dark"] td{border-color:#24344D !important}body[data-theme="dark"] .row{border-color:#24344D !important}</style></head><body><div class="top"><div class="brandmark" onclick="openSide()">F<i>I</i>G</div><div><b>F.I.G Brands</b><small>WELFARE SYSTEM</small></div><div style="margin-left:auto;display:flex;gap:8px"><button class="iconbtn" onclick="openBell()">🔔</button><button class="iconbtn" onclick="openSupport()">💬</button></div></div><div class="toplinks"><a href="/">Overview</a><a href="/members">Members</a><a href="/register">Register</a><a href="/shareout">Share-Out</a><a href="/breakdown2">History</a><a href="/community">Community</a><a href="/friends">Friends</a><a href="/terms">Terms</a><a href="/admin">Admin</a></div><div class="page">'''+body+'''<div style="text-align:center;color:#98A2B3;font-size:12px;padding:18px 0 4px">F.I.G Brands Welfare · Secure member portal · marlonkikuyu@gmail.com · 0707 780 807</div></div><div class="side" id="sideMenu" onclick="if(event.target===this)closeSide()"><div class="sidepanel"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px"><div class="brandmark">F<i>I</i>G</div><div><b style="font-size:16px">F.I.G Brands</b><div style="font-size:10px;letter-spacing:.16em;color:#B9975B;font-weight:700">WELFARE SYSTEM</div></div></div><button onclick="closeSide()" style="border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;border-radius:999px;width:32px;height:32px;cursor:pointer">✕</button></div><a href="/"><span>⌂</span>Overview</a><a href="/members"><span>◉</span>Members</a><a href="/register"><span>+</span>Register Member</a><a href="/shareout"><span>◈</span>Share-Out</a><a href="/breakdown2"><span>▦</span>History</a><a href="/terms"><span>§</span>Terms &amp; Policies</a><a href="/community"><span>◍</span>Community</a><a href="/friends"><span>♥</span>Friends</a><div class="sidehead">APPEARANCE</div><div style="display:flex;gap:8px;padding:0 4px"><button class="themebtn" data-t="light" onclick="setTheme('light')">Light</button><button class="themebtn" data-t="dark" onclick="setTheme('dark')">Dark</button><button class="themebtn" data-t="system" onclick="setTheme('system')">System</button></div><div class="sidehead">NOTIFICATIONS &amp; SETTINGS</div><a href="#" onclick="closeSide();openBell();return false"><span>🔔</span>Notifications</a><a href="/admin"><span>⚙</span>Admin / Settings</a><a href="#" onclick="closeSide();openSupport();return false"><span>?</span>Help Centre</a><a href="/download/excel"><span>↓</span>Download Excel</a><div class="sidehead">ACCOUNT</div><a href="/admin"><span>◈</span>Login as Admin</a></div></div><div class="popup" id="bellPopup" onclick="if(event.target===this)closeBell()"><div class="pop"><b>Notifications</b><div id="notifList"></div><button class="btn" onclick="markRead()" style="margin-top:12px">Mark all as read</button></div></div><div class="popup" id="supportPopup" onclick="if(event.target===this)closeSupport()"><div class="pop"><b>Contact Support</b><p><a href="https://wa.me/254707780807" target="_blank">WhatsApp 0707 780 807</a> · <a href="mailto:info@figbrands.co.ke">info@figbrands.co.ke</a></p><input class="input" id="supName" placeholder="Your name"><textarea id="supMsg" class="input" style="height:96px;margin-top:12px" placeholder="Message"></textarea><button class="btn" onclick="sendSupport()" style="margin-top:14px">Send</button><p id="supStatus"></p></div></div><nav class="nav"><a href="/">Home</a><a href="/members">Members</a><a href="/community">Community</a><a href="/friends">Friends</a><a href="/register">Add</a></nav><script>function badge(p){let m={"GCB-MT":["Kericho Gold","#1E4D2B","KG"],"GCB-TDs":["Kericho Gold","#1E4D2B","KG"],"SC Johnson":["SC Johnson","#E23A3A","SC"],"Java House":["Java House","#C1272D","JH"],"Pwani Oil Products":["Pwani","#E23A3A","P"],"TF-MT":["Trufoods","#1B7A3D","TF"],"TF-LM":["Trufoods","#1B7A3D","TF"],"TF WSL":["Trufoods","#1B7A3D","TF"]}[p];if(!m)return '<span>'+p+'</span>';return '<span style="display:inline-flex;align-items:center;gap:8px"><span style="width:36px;height:36px;border-radius:10px;background:'+m[1]+';color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none">'+m[2]+'</span><span><b>'+m[0]+'</b><div style="font-size:11px;color:#667085">'+p+'</div></span></span>'}function setTheme(t){try{localStorage.setItem('fig-theme',t)}catch(e){}applyTheme()}function applyTheme(){let t='light';try{t=localStorage.getItem('fig-theme')||'light'}catch(e){}let eff=t==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;document.body.setAttribute('data-theme',eff);document.querySelectorAll('.themebtn').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}applyTheme();if(window.matchMedia){try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}}function openSide(){document.getElementById('sideMenu').classList.add('show')}function closeSide(){document.getElementById('sideMenu').classList.remove('show')}async function openBell(){document.getElementById('bellPopup').classList.add('show');let r=await fetch('/api/notifications');let d=await r.json();document.getElementById('notifList').innerHTML=d.notifications.map(n=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+n.title+'</b><div>'+n.msg+'</div></div>').join('')||'No notifications'}function closeBell(){document.getElementById('bellPopup').classList.remove('show')}async function markRead(){await fetch('/api/notifications/read',{method:'POST'});closeBell()}function openSupport(){document.getElementById('supportPopup').classList.add('show')}function closeSupport(){document.getElementById('supportPopup').classList.remove('show')}async function sendSupport(){let r=await fetch('/api/support',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('supName').value,msg:document.getElementById('supMsg').value})});let j=await r.json();document.getElementById('supStatus').textContent=j.message}</script></body></html>''')
 @app.route("/")
 def home():
     body='''<div style="font-size:11px;letter-spacing:.14em;color:#B9975B;font-weight:700;margin-bottom:6px">F.I.G BRANDS · WELFARE</div><h1>Overview</h1><p style="color:#475467">Balance brought forward, less KES 250,000 retained — shared fairly, per month of contributions. Period Dec 2025 - Nov 2026.</p><div class="grid"><div class="kpi"><div>Total Members</div><h2 id="total">0</h2><div style="color:#667085;font-size:13px">Active welfare members</div></div><div class="kpi"><div>Projects</div><h2 id="projCount">0</h2><div style="color:#667085;font-size:13px">Projects with members</div></div></div><div class="hero" style="margin-top:14px"><div style="font-size:11px;letter-spacing:.14em;color:#B9975B;font-weight:700">BALANCE BROUGHT FORWARD</div><h1>KES 855,759</h1><p>KES 605,759 to share · KES 250,000 retained</p></div><div class="grid" style="margin-top:14px"><div class="kpi"><div>Amount to Share</div><h2>KES 605,759</h2></div><div class="kpi"><div>Retained</div><h2>KES 250,000</h2></div><div class="kpi"><div>Value of One Month</div><h2 id="oneMonth" style="font-size:24px">-</h2><div id="oneMonthNote" style="color:#667085;font-size:13px"></div></div></div><div class="card" style="margin-top:14px"><h2>Fair Share-Out Rule</h2><p style="color:#475467"><b>Joined before 2025 = Full 12 months, same amount.</b> Joined 2025 = Full 12 months. Joined 2026 = Pro-rated to Nov: Jan 11, Feb 10, Mar 9, Apr 8, May 7, Jun 6, Jul 5, Aug 4, Sep 3, Oct 2, Nov 1.</p><a class="btn2" href="/shareout">View Share-Out Schedule</a></div><div class="card"><h2>Project Distribution</h2><div id="breakdown"></div></div><script>async function load(){let r=await fetch('/api/stats');let d=await r.json();document.getElementById('total').textContent=d.total_members;document.getElementById('projCount').textContent=d.projects_total;let h='';Object.keys(d.projects_breakdown).sort().forEach(k=>{h+='<div class="row"><b>'+badge(k)+'</b><span>'+d.projects_breakdown[k]+'</span></div>'});document.getElementById('breakdown').innerHTML=h;let r2=await fetch('/api/shareout');let s=await r2.json();document.getElementById('oneMonth').textContent='KES '+s.per_month_rate.toFixed(2);document.getElementById('oneMonthNote').textContent='605,759 / '+s.total_months+' months';}load();</script>'''
@@ -411,10 +422,6 @@ def home():
 def terms_page():
     body='''<h1>Terms &amp; Policies</h1><p style="color:#475467">F.I.G Brands Welfare — presented by Marlon.</p><div class="card"><h2>Death Benefits</h2><table><tr><th>Beneficiary</th><th>Death Benefit</th></tr><tr><td>Member</td><td>KES 100,000</td></tr><tr><td>Spouse</td><td>KES 50,000</td></tr><tr><td>Child</td><td>KES 40,000</td></tr><tr><td>Parents</td><td>KES 40,000</td></tr></table><p>Spouse must be registered. Child: birth certificate required. Parents: cover applies only to principal member. Birth certificate + parent ID required. No biological parents: may nominate one guardian. Payment upon proof of demise.</p></div><div class="card"><h2>Loss of Earning</h2><p>50% of basic pay, max KES 20,000, after 10 days unable to work due to injury at work. Paid at end of month.</p></div><div class="card"><h2>Contribution</h2><p>KES 300 monthly, deducted from pay.</p></div><div class="card"><h2>Management</h2><p>Committee elected by all members. Every project must have at least one member on board.</p></div><div class="card"><h2>Disbursement</h2><p>Death: within 2 days upon death notification. Incapacitation: end of month.</p></div><div class="card"><h2>Year-End</h2><p>Minimum balance KES 250,000 at year end. Excess shared only among current active members. FIG Year-End 30 November. Audited accounts in FACES family group by 20 December.</p></div><div class="card"><h2>Officials</h2><p>Marlon K. Ang'undu - Chairman - 0707 780 807 - marlonkikuyu@gmail.com<br>Mary Ngotah - Gold Crown Beverage - 0719 203 286<br>Celestine Ouko - SC Johnsons - 0725 543 224<br>Irene Wamuyu - Nairobi Java - 0719 606 834<br>Jonathan Mutunga - Last Mile Trufoods - 0719 555 326</p></div>'''
     return shell("Terms",body)
-@app.route("/policies")
-def policies_page(): return redirect("/terms")
-@app.route("/breakdown")
-def breakdown_page(): return redirect("/breakdown2")
 @app.route("/breakdown2")
 def breakdown2_page():
     h="<h1>Full History</h1>"
@@ -435,22 +442,6 @@ def shareout_page():
     for i,x in enumerate(shares,1): h+=f"<tr data-search='{(x['full_names']+' '+x['staff_no']+' '+x['project']).lower()}'><td>{i}</td><td><b>{x['full_names']}</b><div style='font-size:12px;color:#667085'>{x['staff_no']} {x['email']}</div></td><td>{x['badge']}</td><td>{x['month_joined'] or '-'}</td><td style='font-size:12px'>{x['basis']}</td><td class='num'>{x['months']}</td><td class='num'>KES {x['contribution']:,}</td><td class='num'><b>KES {x['share']:,.2f}</b></td></tr>"
     h+="</tbody></table></div></div><script>function fil(){let q=document.getElementById('q').value.toLowerCase();document.querySelectorAll('#shareBody tr').forEach(r=>{r.style.display=r.getAttribute('data-search').includes(q)?'':'none'})}</script>"
     return shell("Share-Out",h)
-@app.route("/download/shareout")
-def download_shareout():
-    shares,total_contrib,total_months,per_month_rate=calc_shares()
-    from openpyxl import Workbook
-    from openpyxl.styles import Font,PatternFill,Alignment
-    wb=Workbook(); ws=wb.active; ws.title="Share-Out"
-    ws.append(["F.I.G BRANDS WELFARE - SHARE-OUT SCHEDULE"]); ws.append(["Fair Rule: Joined before 2025 = Full 12 months same amount. Joined 2026 = Pro-rated to Nov: Jan 11, Feb 10, Mar 9, Apr 8, May 7, Jun 6, Jul 5, Aug 4, Sep 3, Oct 2, Nov 1"])
-    ws.append([f"BF: {BF:,} | Retained: {RESERVE:,} | To Share: {DISTRIBUTABLE:,} | Total Months: {total_months} | Value of One Month: {per_month_rate:,.2f} | Total Contributions: {total_contrib:,}"]); ws.append([])
-    ws.append(["#","Staff No","Full Names","Project","Date Joined","Basis","Months Counted","Contribution (Months x 300)","Share Payable"])
-    for c in ws[5]: c.font=Font(bold=True,color="FFFFFF"); c.fill=PatternFill("solid",fgColor="0A1F33"); c.alignment=Alignment(horizontal="center",vertical="center")
-    for i,x in enumerate(shares,1): ws.append([i,x["staff_no"],x["full_names"],x["project"],x["month_joined"],x["basis"],x["months"],x["contribution"],round(x["share"],2)])
-    ws.append([]); ws.append(["","","","","","","TOTAL",total_contrib,round(sum(x["share"] for x in shares),2)]); ws.append(["","","","","","","RETAINED","",RESERVE]); ws.append(["","","","","","","BF","",round(sum(x["share"] for x in shares),2)+RESERVE])
-    ws.freeze_panes="A6"; ws.auto_filter.ref=ws.dimensions
-    for col,w in zip("ABCDEFGHI",[6,14,30,22,14,34,14,20,18]): ws.column_dimensions[col].width=w
-    out=io.BytesIO(); wb.save(out); out.seek(0)
-    return send_file(out,mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",as_attachment=True,download_name="FIG_BRANDS_Share_Out_Schedule.xlsx")
 @app.route("/members")
 def members_page():
     body='''<h1>Members</h1><p id="memberCountLabel" style="color:#475467"></p><div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap"><input class="input" id="q" placeholder="Search by name, staff, project" oninput="fil()" style="flex:2;min-width:200px"><select class="input" id="projFilter" onchange="fil()" style="flex:1;min-width:160px"><option value="All Projects">All Projects</option></select></div><div id="list" style="margin-top:14px"></div><a class="btn2" href="/download/excel">Download Excel</a></div><script>let all=[];async function load(){let r=await fetch('/api/stats');let d=await r.json();document.getElementById('memberCountLabel').textContent=d.total_members+' members';let sel=document.getElementById('projFilter');sel.innerHTML='<option value="All Projects">All Projects ('+d.total_members+')</option>';(d.projects||[]).forEach(p=>{let o=document.createElement('option');o.value=p;o.textContent=p+' ('+(d.projects_breakdown[p]||0)+')';sel.appendChild(o)});let r2=await fetch('/api/members');let dd=await r2.json();all=dd.members;render(all)}function row(l,v){return '<div class="row"><span style="color:#667085">'+l+'</span><b>'+(v||'-')+'</b></div>'}function render(l){let h='';l.forEach(m=>{let kids=[m.kid1,m.kid2,m.kid3,m.kid4,m.kid5].filter(x=>x).join(', ')||'-';h+='<div class="card"><div style="display:flex;justify-content:space-between;gap:12px"><div><b style="font-size:17px">'+m.full_names+'</b><div style="color:#667085;font-size:13px">'+m.email+'</div></div><span>'+badge(m.project)+'</span></div>'+row('Staff Number',m.staff_no)+row('Date Joined',m.month_joined)+row('Father ID',m.father_id)+row('Mother ID',m.mother_id)+row('Guardian ID',m.guardian_id)+row('Spouse ID',m.spouse_id)+row('Kids Birth Certs',kids)+'<div style="margin-top:12px"><button class="btn2 gold" onclick="addF(\\''+m.full_names.replace(/'/g,'')+'\\')">+ Add Friend</button></div></div>'});document.getElementById('list').innerHTML=h||'No members found'}async function addF(to){let me=prompt('Your name to send friend request as:');if(!me)return;let r=await fetch('/api/friends/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from_name:me,to_name:to})});let j=await r.json();alert(j.message||j.error)}function fil(){let qq=document.getElementById('q').value.toLowerCase();let pf=document.getElementById('projFilter').value;render(all.filter(m=>(m.full_names+' '+m.staff_no+' '+m.project).toLowerCase().includes(qq)&&(pf=='All Projects'||m.project==pf)))}load();</script>'''
@@ -484,6 +475,22 @@ def admin_dashboard():
     if request.args.get("key")!=ADMIN_KEY: return redirect("/admin")
     body='''<h1>Admin Dashboard</h1><div class="card"><button class="btn" onclick="clearAll()" style="background:#B42318">Clear All Data</button><p id="clearMsg"></p></div><div class="card"><h2>Members</h2><a class="btn2" href="/download/excel">Download Excel</a><div id="tbl" style="margin-top:12px"></div></div><div class="card"><h2>Support Messages</h2><div id="supList">Loading...</div></div><script>async function clearAll(){if(!confirm('DELETE ALL MEMBERS + HISTORY?'))return;let r=await fetch('/api/clear-all?key='''+ADMIN_KEY+''',{method:'POST'});let j=await r.json();document.getElementById('clearMsg').textContent=j.message||j.error;load()}async function load(){let r=await fetch('/api/members_admin');let d=await r.json();let h='';d.members.forEach(m=>{h+='<div class="row"><span><b>'+m.staff_no+'</b> '+m.full_names+'<div style="color:#667085">'+m.email+'</div></span><span>'+m.project+' <button onclick="del('+m.id+')" style="border:1px solid #D0D5DD;background:#fff;border-radius:999px;padding:6px 10px;cursor:pointer">Delete</button></span></div>'});document.getElementById('tbl').innerHTML=h||'No members';let r2=await fetch('/api/support_list');let d2=await r2.json();document.getElementById('supList').innerHTML=d2.messages.map(m=>'<div><b>'+(m.name||'Guest')+'</b> '+m.msg+'</div>').join('')||'No messages'}async function del(id){if(!confirm('Delete this member?'))return;let r=await fetch('/api/members/'+id+'?key='''+ADMIN_KEY+''',{method:'DELETE'});let j=await r.json();if(!r.ok)alert(j.error);load()}load();</script>'''
     return shell("Admin Dashboard",body)
+@app.route("/download/shareout")
+def download_shareout():
+    shares,total_contrib,total_months,per_month_rate=calc_shares()
+    from openpyxl import Workbook
+    from openpyxl.styles import Font,PatternFill,Alignment
+    wb=Workbook(); ws=wb.active; ws.title="Share-Out"
+    ws.append(["F.I.G BRANDS WELFARE - SHARE-OUT SCHEDULE"]); ws.append(["Fair Rule: Joined before 2025 = Full 12 months same amount. Joined 2026 = Pro-rated to Nov: Jan 11, Feb 10, Mar 9, Apr 8, May 7, Jun 6, Jul 5, Aug 4, Sep 3, Oct 2, Nov 1"])
+    ws.append([f"BF: {BF:,} | Retained: {RESERVE:,} | To Share: {DISTRIBUTABLE:,} | Total Months: {total_months} | Value of One Month: {per_month_rate:,.2f} | Total Contributions: {total_contrib:,}"]); ws.append([])
+    ws.append(["#","Staff No","Full Names","Project","Date Joined","Basis","Months Counted","Contribution (Months x 300)","Share Payable"])
+    for c in ws[5]: c.font=Font(bold=True,color="FFFFFF"); c.fill=PatternFill("solid",fgColor="0A1F33"); c.alignment=Alignment(horizontal="center",vertical="center")
+    for i,x in enumerate(shares,1): ws.append([i,x["staff_no"],x["full_names"],x["project"],x["month_joined"],x["basis"],x["months"],x["contribution"],round(x["share"],2)])
+    ws.append([]); ws.append(["","","","","","","TOTAL",total_contrib,round(sum(x["share"] for x in shares),2)]); ws.append(["","","","","","","RETAINED","",RESERVE]); ws.append(["","","","","","","BF","",round(sum(x["share"] for x in shares),2)+RESERVE])
+    ws.freeze_panes="A6"; ws.auto_filter.ref=ws.dimensions
+    for col,w in zip("ABCDEFGHI",[6,14,30,22,14,34,14,20,18]): ws.column_dimensions[col].width=w
+    out=io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out,mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",as_attachment=True,download_name="FIG_BRANDS_Share_Out_Schedule.xlsx")
 @app.route("/download/excel")
 def download_excel():
     proj=request.args.get("project",""); c=get_db()
@@ -513,154 +520,137 @@ def api_stats():
             if k not in ordered: ordered[k]=v
         return jsonify({"total_members":total,"projects_total":len(merged),"projects":list(ordered.keys()),"projects_breakdown":ordered})
     finally: c.close()
-@app.route("/api/clear-all",methods=["POST"])
-def api_clear_all():
-    if request.args.get("key")!=ADMIN_KEY: return jsonify({"error":"Admin key required"}),401
-    c=get_db()
-    try:
-        c.execute("DELETE FROM users WHERE email != ?",(ADMIN_EMAIL,)); c.execute("DELETE FROM notifications"); c.execute("DELETE FROM support_msgs"); c.execute("DELETE FROM beneficiaries2"); c.execute("DELETE FROM fares2"); c.execute("DELETE FROM community"); c.execute("DELETE FROM friends"); c.commit()
-        return jsonify({"message":"All data cleared. Only admin remains."})
-    finally: c.close()
-@app.route("/api/repair",methods=["POST"])
-def api_repair():
-    if request.args.get("key")!=ADMIN_KEY: return jsonify({"error":"Admin key required"}),401
-    init_db()
-    return jsonify({"message":"v145 re-seeded / updated"})
-@app.route("/api/breakdown")
-def api_breakdown():
-    return jsonify({"periods":PERIODS,"monthly_individual":MONTHLY_INDIVIDUAL,"beneficiaries":BENEFICIARIES2,"beneficiaries_total":sum(x[5] for x in BENEFICIARIES2),"fares":FARES2,"fares_total":sum(x[3] for x in FARES2),"grand_total":sum(x.get("total",0) for x in PERIODS),"bf":BF,"transfer_total":0})
 @app.route("/api/shareout")
 def api_shareout():
     shares,total_contrib,total_months,per_month_rate=calc_shares()
-    return jsonify({"bf":BF,"reserve":RESERVE,"distributable":DISTRIBUTABLE,"total_contributions":total_contrib,"total_months":total_months,"per_month_rate":round(per_month_rate,2),"members":len(shares),"total_shares":round(sum(x["share"] for x in shares),2),"shares":shares,"rule":"Joined before 2025 = Full 12 months same amount. Joined 2026 = Pro-rated to Nov: Jan 11 Feb 10 Mar 9 Apr 8 May 7 Jun 6 Jul 5 Aug 4 Sep 3 Oct 2 Nov 1"})
-@app.route("/api/community",methods=["GET","POST"])
-def api_community():
-    c=get_db()
-    try:
-        if request.method=="POST":
-            d=request.get_json(silent=True) or {}
-            if not d.get("name"): return jsonify({"message":"Name required"}),400
-            if not d.get("msg") and not d.get("media"): return jsonify({"message":"Write a message or add a photo / video"}),400
-            media=(d.get("media") or "")[:9000000]
-            c.execute("INSERT INTO community (name,msg,created,media_type,media,likes) VALUES (?,?,datetime('now'),?,?,0)",(d.get("name","Guest"),d.get("msg",""),d.get("media_type",""),media)); c.commit()
-            return jsonify({"message":"Posted"})
-        rows=c.execute("SELECT * FROM community ORDER BY id DESC LIMIT 100").fetchall()
-        return jsonify({"messages":[dict(r) for r in rows]})
-    finally: c.close()
-@app.route("/api/community/<int:pid>/like",methods=["POST"])
-def api_like(pid):
-    c=get_db()
-    try:
-        c.execute("UPDATE community SET likes=COALESCE(likes,0)+1 WHERE id=?",(pid,)); c.commit()
-        row=c.execute("SELECT likes FROM community WHERE id=?",(pid,)).fetchone()
-        return jsonify({"message":"Liked","likes":row["likes"] if row else 0})
-    finally: c.close()
-@app.route("/api/friends",methods=["GET"])
-def api_friends():
-    me=(request.args.get("me") or "").strip()
-    c=get_db()
-    try:
-        if not me: return jsonify({"friends":[],"requests":[]})
-        rows=c.execute("SELECT * FROM friends WHERE status='accepted' AND (lower(from_name)=lower(?) OR lower(to_name)=lower(?)) ORDER BY id DESC",(me,me)).fetchall()
-        friends=[]
-        for r in rows:
-            friends.append(r["to_name"] if r["from_name"].lower()==me.lower() else r["from_name"])
-        req=c.execute("SELECT * FROM friends WHERE status='pending' AND lower(to_name)=lower(?) ORDER BY id DESC",(me,)).fetchall()
-        return jsonify({"friends":friends,"requests":[dict(x) for x in req]})
-    finally: c.close()
-@app.route("/api/friends/add",methods=["POST"])
-def api_friends_add():
-    d=request.get_json(silent=True) or {}
-    frm=(d.get("from_name") or "").strip(); to=(d.get("to_name") or "").strip()
-    if not frm or not to: return jsonify({"error":"Both names required"}),400
-    if frm.lower()==to.lower(): return jsonify({"error":"You cannot add yourself"}),400
-    c=get_db()
-    try:
-        ex=c.execute("SELECT id FROM friends WHERE (lower(from_name)=lower(?) AND lower(to_name)=lower(?)) OR (lower(from_name)=lower(?) AND lower(to_name)=lower(?))",(frm,to,to,frm)).fetchone()
-        if ex: return jsonify({"message":"Already friends or request sent"})
-        c.execute("INSERT INTO friends (from_name,to_name,status,created) VALUES (?,?,?,datetime('now'))",(frm,to,"pending")); c.commit()
-        return jsonify({"message":"Friend request sent to "+to})
-    finally: c.close()
-@app.route("/api/friends/accept",methods=["POST"])
-def api_friends_accept():
-    d=request.get_json(silent=True) or {}
-    c=get_db()
-    try:
-        c.execute("UPDATE friends SET status='accepted' WHERE id=?",(d.get("id"),)); c.commit()
-        return jsonify({"message":"Friend accepted"})
-    finally: c.close()
-@app.route("/api/notifications")
-def api_notifs():
-    c=get_db()
-    try:
-        rows=c.execute("SELECT * FROM notifications ORDER BY id DESC").fetchall(); notifs=[dict(r) for r in rows]; unread=sum(1 for n in notifs if not n.get("is_read"))
-        return jsonify({"notifications":notifs,"unread":unread,"total":len(notifs)})
-    finally: c.close()
-@app.route("/api/notifications/read",methods=["POST"])
-def api_notifs_read_all():
-    c=get_db()
-    try: c.execute("UPDATE notifications SET is_read=1"); c.commit(); return jsonify({"message":"All read","unread":0})
-    finally: c.close()
-@app.route("/api/notifications/<int:nid>/read",methods=["POST"])
-def api_notif_read_one(nid):
-    c=get_db()
-    try:
-        c.execute("UPDATE notifications SET is_read=1 WHERE id=?",(nid,)); c.commit(); row=c.execute("SELECT * FROM notifications WHERE id=?",(nid,)).fetchone()
-        return jsonify({"message":"Read","notification":dict(row) if row else None})
-    finally: c.close()
-@app.route("/api/support",methods=["POST"])
-def api_support():
-    d=request.get_json(silent=True) or {}; c=get_db()
-    try: c.execute("INSERT INTO support_msgs (name,msg,created) VALUES (?,?,datetime('now'))",(d.get("name","Guest"),d.get("msg",""))); c.commit(); return jsonify({"message":"Message sent. Support will reply soon."})
-    finally: c.close()
-@app.route("/api/support_list")
-def api_support_list():
-    c=get_db()
-    try:
-        rows=c.execute("SELECT * FROM support_msgs ORDER BY id DESC").fetchall(); return jsonify({"messages":[dict(r) for r in rows]})
-    finally: c.close()
+    return jsonify({"bf":BF,"reserve":RESERVE,"distributable":DISTRIBUTABLE,"total_contributions":total_contrib,"total_months":total_months,"per_month_rate":round(per_month_rate,2),"members":len(shares),"total_shares":round(sum(x["share"] for x in shares),2),"shares":shares})
 @app.route("/api/members")
 def api_members():
-    proj=request.args.get("project",""); c=get_db()
+    c=get_db()
     try:
-        q="SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY id DESC"; a=(ADMIN_EMAIL,)
-        if proj and proj!="All Projects": q="SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? AND project=? ORDER BY id DESC"; a=(ADMIN_EMAIL,norm_project(proj))
-        rows=c.execute(q,a).fetchall(); return jsonify({"members":[dict(r) for r in rows]})
+        rows=c.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5 FROM users WHERE email != ? ORDER BY full_names",(ADMIN_EMAIL,)).fetchall()
+        return jsonify({"members":[dict(r) for r in rows]})
     finally: c.close()
 @app.route("/api/members_admin")
 def api_members_admin():
     c=get_db()
     try:
-        rows=c.execute("SELECT id,staff_no,full_names,project,email,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo FROM users ORDER BY id DESC").fetchall(); return jsonify({"members":[dict(r) for r in rows]})
+        rows=c.execute("SELECT id,staff_no,full_names,project,email FROM users WHERE email != ? ORDER BY full_names",(ADMIN_EMAIL,)).fetchall()
+        return jsonify({"members":[dict(r) for r in rows]})
+    finally: c.close()
+@app.route("/api/register",methods=["POST"])
+def api_register():
+    d=request.get_json(force=True,silent=True) or {}
+    c=get_db()
+    try:
+        if not d.get("email") or not d.get("password") or not d.get("full_names"): return jsonify({"error":"Full Names, Email, Password required"}),400
+        if c.execute("SELECT id FROM users WHERE email=?",(d["email"],)).fetchone(): return jsonify({"error":"Email already exists"}),400
+        if c.execute("SELECT id FROM users WHERE staff_no=?",(d.get("staff_no",""),)).fetchone(): return jsonify({"error":"Staff Number already exists"}),400
+        c.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(clean(d.get("staff_no")),clean(d.get("full_names")),norm_project(d.get("project")),d.get("email"),generate_password_hash(d.get("password")),"fig_"+secrets.token_hex(12),clean(d.get("month_joined")),clean(d.get("father_id")),clean(d.get("mother_id")),clean(d.get("guardian_id")),clean(d.get("spouse_id")),clean(d.get("kid1")),clean(d.get("kid2")),clean(d.get("kid3")),clean(d.get("kid4")),clean(d.get("kid5"))))
+        c.commit(); return jsonify({"message":"Member registered successfully"})
     finally: c.close()
 @app.route("/api/admin/login",methods=["POST"])
 def api_admin_login():
-    d=request.get_json(silent=True) or {}; c=get_db()
-    try:
-        u=c.execute("SELECT password,api_key FROM users WHERE email=?",(d.get("email"),)).fetchone()
-        if not u or not check_password_hash(u["password"],d.get("password","")): return jsonify({"error":"Invalid"}),401
-        return jsonify({"key":u["api_key"]})
-    finally: c.close()
-@app.route("/api/register",methods=["POST","OPTIONS"])
-def api_register():
-    if request.method=="OPTIONS": return "",200
-    d=request.get_json(silent=True) or {}
+    d=request.get_json(force=True,silent=True) or {}
+    if d.get("email")==ADMIN_EMAIL and check_password_hash(generate_password_hash(ADMIN_PASS),d.get("password","")): pass
     c=get_db()
-    if not d.get("email") or not d.get("password"): c.close(); return jsonify({"error":"Email and password required"}),400
-    if c.execute("SELECT id FROM users WHERE email=?",(d.get("email",""),)).fetchone(): c.close(); return jsonify({"error":"Email exists"}),400
-    if c.execute("SELECT id FROM users WHERE lower(full_names)=lower(?)",(d.get("full_names",""),)).fetchone(): c.close(); return jsonify({"error":"Name exists"}),400
-    proj=norm_project(d.get("project","HQ"))
-    vals=(d.get("staff_no",""),d.get("full_names",""),proj,d.get("email",""),generate_password_hash(d.get("password","")),"fig_"+secrets.token_hex(12),d.get("month_joined",""),d.get("father_id",""),d.get("mother_id",""),d.get("guardian_id",""),d.get("spouse_id",""),d.get("kid1",""),d.get("kid2",""),d.get("kid3",""),d.get("kid4",""),d.get("kid5",""),d.get("photo",""))
-    c.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",vals)
-    c.execute("INSERT INTO notifications (title,msg,created,target,is_read) VALUES (?,?,?,?,?)",("New Member Registered",f"{d.get('full_names','')} joined {proj}","Just now","/members",0))
-    c.commit(); c.close(); return jsonify({"message":"Member created"}),201
-@app.route("/api/members/<int:member_id>",methods=["DELETE","OPTIONS"])
-def api_delete(member_id):
-    if request.method=="OPTIONS": return "",200
+    try:
+        u=c.execute("SELECT password FROM users WHERE email=?",(ADMIN_EMAIL,)).fetchone()
+        if u and check_password_hash(u["password"],d.get("password","")): return jsonify({"key":ADMIN_KEY,"message":"Login successful"})
+        return jsonify({"error":"Invalid email or password"}),401
+    finally: c.close()
+@app.route("/api/members/<int:mid>",methods=["DELETE"])
+def api_delete_member(mid):
     if request.args.get("key")!=ADMIN_KEY: return jsonify({"error":"Admin key required"}),401
     c=get_db()
-    u=c.execute("SELECT email FROM users WHERE id=?",(member_id,)).fetchone()
-    if not u or u["email"]==ADMIN_EMAIL: c.close(); return jsonify({"error":"Cannot delete Protected Admin"}),403
-    c.execute("DELETE FROM users WHERE id=?",(member_id,)); c.commit(); c.close(); return jsonify({"message":"Deleted"})
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT",10000)))
+    try:
+        u=c.execute("SELECT is_protected FROM users WHERE id=?",(mid,)).fetchone()
+        if not u: return jsonify({"error":"Member not found"}),404
+        if u["is_protected"]: return jsonify({"error":"Cannot delete admin"}),403
+        c.execute("DELETE FROM users WHERE id=?",(mid,)); c.commit(); return jsonify({"message":"Member deleted"})
+    finally: c.close()
+@app.route("/api/clear-all",methods=["POST"])
+def api_clear_all():
+    if request.args.get("key")!=ADMIN_KEY: return jsonify({"error":"Admin key required"}),401
+    c=get_db()
+    try:
+        c.execute("DELETE FROM users WHERE email != ?",(ADMIN_EMAIL,)); c.execute("DELETE FROM notifications"); c.execute("DELETE FROM support_msgs"); c.execute("DELETE FROM community"); c.execute("DELETE FROM friends"); c.commit()
+        return jsonify({"message":"All data cleared. Only admin remains."})
+    finally: c.close()
+@app.route("/api/notifications")
+def api_notifications():
+    c=get_db()
+    try:
+        rows=c.execute("SELECT id,title,msg,created FROM notifications ORDER BY id DESC LIMIT 20").fetchall()
+        return jsonify({"notifications":[dict(r) for r in rows]})
+    finally: c.close()
+@app.route("/api/notifications/read",methods=["POST"])
+def api_notifications_read():
+    c=get_db()
+    try: c.execute("UPDATE notifications SET is_read=1"); c.commit(); return jsonify({"message":"Marked read"})
+    finally: c.close()
+@app.route("/api/support",methods=["POST"])
+def api_support():
+    d=request.get_json(force=True,silent=True) or {}
+    c=get_db()
+    try:
+        c.execute("INSERT INTO support_msgs (name,msg,created) VALUES (?,?,datetime('now'))",(d.get("name",""),d.get("msg",""))); c.commit(); return jsonify({"message":"Message sent. We will reply on WhatsApp."})
+    finally: c.close()
+@app.route("/api/support_list")
+def api_support_list():
+    c=get_db()
+    try:
+        rows=c.execute("SELECT id,name,msg,created FROM support_msgs ORDER BY id DESC LIMIT 50").fetchall()
+        return jsonify({"messages":[dict(r) for r in rows]})
+    finally: c.close()
+@app.route("/api/community",methods=["GET","POST"])
+def api_community():
+    c=get_db()
+    try:
+        if request.method=="POST":
+            d=request.get_json(force=True,silent=True) or {}
+            c.execute("INSERT INTO community (name,msg,created,media_type,media,likes) VALUES (?,?,datetime('now'),?,?,0)",(d.get("name",""),d.get("msg",""),d.get("media_type",""),d.get("media",""))); c.commit(); return jsonify({"message":"Posted"})
+        rows=c.execute("SELECT id,name,msg,created,media_type,media,likes FROM community ORDER BY id DESC LIMIT 100").fetchall()
+        return jsonify({"messages":[dict(r) for r in rows]})
+    finally: c.close()
+@app.route("/api/community/<int:cid>/like",methods=["POST"])
+def api_community_like(cid):
+    c=get_db()
+    try: c.execute("UPDATE community SET likes=likes+1 WHERE id=?",(cid,)); c.commit(); return jsonify({"message":"Liked"})
+    finally: c.close()
+@app.route("/api/friends",methods=["GET"])
+def api_friends():
+    me=(request.args.get("me") or "").strip().lower()
+    c=get_db()
+    try:
+        reqs=c.execute("SELECT id,from_name,to_name FROM friends WHERE lower(to_name)=? AND status='pending'",(me,)).fetchall()
+        fr=c.execute("SELECT from_name,to_name FROM friends WHERE (lower(from_name)=? OR lower(to_name)=?) AND status='accepted'",(me,me)).fetchall()
+        friends=[]
+        for r in fr:
+            friends.append(r["to_name"] if r["from_name"].lower()==me else r["from_name"])
+        return jsonify({"requests":[dict(r) for r in reqs],"friends":friends})
+    finally: c.close()
+@app.route("/api/friends/add",methods=["POST"])
+def api_friends_add():
+    d=request.get_json(force=True,silent=True) or {}
+    frm=(d.get("from_name") or "").strip(); to=(d.get("to_name") or "").strip()
+    if not frm or not to: return jsonify({"error":"Names required"}),400
+    if frm.lower()==to.lower(): return jsonify({"error":"Cannot add yourself"}),400
+    c=get_db()
+    try:
+        ex=c.execute("SELECT id FROM friends WHERE (lower(from_name)=? AND lower(to_name)=?) OR (lower(from_name)=? AND lower(to_name)=?)",(frm.lower(),to.lower(),to.lower(),frm.lower())).fetchone()
+        if ex: return jsonify({"message":"Already friends / request sent"})
+        c.execute("INSERT INTO friends (from_name,to_name,status,created) VALUES (?,?, 'pending', datetime('now'))",(frm,to)); c.commit(); return jsonify({"message":"Friend request sent to "+to})
+    finally: c.close()
+@app.route("/api/friends/accept",methods=["POST"])
+def api_friends_accept():
+    d=request.get_json(force=True,silent=True) or {}
+    c=get_db()
+    try:
+        c.execute("UPDATE friends SET status='accepted' WHERE id=?",(d.get("id"),)); c.commit(); return jsonify({"message":"Friend accepted"})
+    finally: c.close()
+@app.route("/api/breakdown")
+def api_breakdown():
+    return jsonify({"periods":PERIODS,"beneficiaries":BENEFICIARIES2,"beneficiaries_total":sum(x[5] for x in BENEFICIARIES2),"fares":FARES2,"fares_total":sum(x[3] for x in FARES2),"bf":BF})
+if __name__=="__main__":
+    app.run(host="0.0.0.0",port=int(os.environ.get("PORT",5000)))
