@@ -3,7 +3,7 @@ import sqlite3, os, secrets, io, re
 from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 DB = "lonma.db"
-VERSION = "v149"
+VERSION = "v151"
 PROJECTS = ["Antonia","GCB-MT","GCB-TDs","Higchem","HQ","Java House","Kanji","Pwani Oil Products","SC Johnson","TF WSL","TF-LM","TF-MT"]
 PMAP = {"Antonio":"Antonia","ANTONIA":"Antonia","Antonia":"Antonia","GCB-MT":"GCB-MT","GCB MT":"GCB-MT","GCB":"GCB-MT","GCB-Ws":"GCB-TDs","GCB Ws":"GCB-TDs","GCB TDS":"GCB-TDs","GCB-TDs":"GCB-TDs","GCB-TDS":"GCB-TDs","GCB WS":"GCB-TDs","Higchem":"Higchem","HIGHCHEM":"Higchem","HQ":"HQ","Kanji":"Kanji","KHS":"Kanji","Kaysalt":"Kanji","Kenafric":"Kanji","LAB":"Kanji","Java House":"Java House","JAVA":"Java House","Java":"Java House","Pwani Oil Products":"Pwani Oil Products","PWANI":"Pwani Oil Products","Pwani":"Pwani Oil Products","SC Johnson":"SC Johnson","SJ Johnson":"SC Johnson","JOHNSON":"SC Johnson","Johnson":"SC Johnson","SJ":"SC Johnson","SCJohnson":"SC Johnson","TF WSL":"TF WSL","TF WS":"TF WSL","TF-WS":"TF WSL","TF":"TF WSL","TF-LM":"TF-LM","TF LM":"TF-LM","TF-MT":"TF-MT","TF MT":"TF-MT"}
 def norm_project(p):
@@ -287,9 +287,54 @@ Rachael Gathoni wangigi|TF-MT|Oct-26|Rachael Gathoni wangigi|8846144|N/A|N/A|N/A
 292977|TF WSL|18-Jul-05|DIANA MUSE|5675695|5301379|||||
 202907|TF WSL|22-Jul-26|JANET WAIRIMU|10767868|13507411||3868681||||
 280293|TF WSL|13-Jul-26|CATHERINE MUKAMI|16005886|16022069||24041649|361716972|Notification: 5810997|||'''
-PERIODS = [{"label":"Oct 2024 - Dec 2025","total":1404000,"beneficiaries":463000,"fares":31625,"detail":"Pwani 310,500 | Java 123,600 | SC Johnson 139,200"},{"label":"Dec 2025 - Nov 2026","total":991100,"beneficiaries":379075,"fares":32100,"expenditures":427341,"detail":"Pwani 220,200 | Java House 106,200 | SC Johnson 101,400"}]
-BENEFICIARIES2 = [("Oct 2024 - Dec 2025","Mary Ngota","GCB","Dad-Death","01/11/2024",30000),("Dec 2025 - Nov 2026","ROSE Lumonya SAIDI","POPL","Death-Father","01/12/2025",40000),("Dec 2025 - Nov 2026","Sherine Atieno Otieno","Antonia","Mother-Death","Nov 2026",40000)]
-FARES2 = [("Oct 2024 - Dec 2025","Peter Ikegu","0704886421",1000),("Dec 2025 - Nov 2026","EUNICE MAKONA","0714910135",1200)]
+# ===== HISTORY - EXACT FROM YOUR EXCEL 111F.I.G_Staff_Welfare.xlsx =====
+# Sheet BREAKDOWN: Oct 2024 - Dec 2025 (15 months), Sheet 2026: Dec 2025 - Nov 2026 (12 months)
+MONTHS_2425 = ["Oct 24","Nov 24","Dec 24","Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25"]
+MONTHLY_2425 = [
+ ("Pwani",[24600,23700,22500,24900,21600,21900,21600,21300,21900,21600,21300,21300,21300,21000,0]),
+ ("Java",[8700,8400,8700,9300,7800,7800,8700,8100,9600,9300,9600,8700,9600,9300,0]),
+ ("Johnson / SC Johnson",[10500,10800,10200,9300,9000,9000,10200,9900,10200,9900,10200,10200,10200,9600,0]),
+ ("Kaysalt",[9600,9600,9300,9600,9000,8400,8700,8700,0,0,0,0,0,0,0]),
+ ("Kanji",[900,900,900,900,900,900,900,900,900,900,900,900,900,900,0]),
+ ("HQ",[900,0,1800,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,0]),
+ ("GCB-MT",[5400,4800,5100,4800,4800,4800,5100,5700,4800,4800,4800,4800,5100,5100,0]),
+ ("TF-WS / TF WSL",[3300,3300,3000,6300,6900,6900,5700,5100,5100,5700,5400,4800,4800,4800,0]),
+ ("TF-LM",[11700,12300,12300,11700,13200,13200,12600,12600,12300,12300,12000,12000,12600,12300,0]),
+ ("TF-MT",[19200,18000,17700,19800,17700,18000,18600,18000,18900,18000,18600,18300,18600,20100,0]),
+ ("Kenafric",[0,0,0,0,11700,12000,12300,12000,12300,12000,12600,12000,0,0,0]),
+ ("GCB-TDs",[3300,3600,3900,3900,4200,3900,5100,4800,3900,3600,3300,2400,2400,2700,0]),
+ ("LAB",[0,0,0,0,0,0,0,2400,3000,2400,0,0,0,0,0]),
+]
+TOTAL_2425_MONTH = [98100,95400,95400,101700,108000,108000,110700,110700,104100,101700,99900,96600,86700,87000,0]
+MONTHS_2026 = ["Dec 25","Jan 26","Feb 26","Mar 26","Apr 26","May 26","Jun 26","Jul 26","Aug 26","Sep 26","Oct 26","Nov 26"]
+MONTHLY_2026 = [
+ ("Pwani",[21000,20400,21300,21000,21300,21600,21300,21600,20700,15300,14700,0]),
+ ("Java House",[9000,9600,9900,9900,9600,9300,9600,9300,9900,9900,10200,0]),
+ ("SC Johnson",[10500,9600,10200,9900,9900,9300,8400,8700,8700,8100,8100,0]),
+ ("Kanji",[900,900,900,900,900,900,900,900,900,900,900,0]),
+ ("HQ",[1200,1200,1200,1200,1200,1200,1200,1200,1500,1500,1500,0]),
+ ("GCB-MT",[4500,4500,4800,4800,4800,4500,6000,5100,6000,5700,6000,0]),
+ ("TF-WS / TF WSL",[4800,5100,4800,4800,4800,4500,4500,4200,3900,3900,3900,0]),
+ ("TF-LM",[12300,12300,11700,11700,12600,9300,9000,9900,10200,12000,11400,0]),
+ ("TF-MT",[19800,20700,21900,22200,21300,21300,21900,21900,22200,21900,21000,0]),
+ ("GCB-TDs",[2700,3000,3000,3300,3600,3600,3600,3600,4800,5100,4800,0]),
+ ("Higchem",[0,0,0,0,0,4800,5100,5100,5400,4800,4800,0]),
+ ("Antonia",[0,0,0,0,0,0,900,900,600,600,600,0]),
+]
+TOTAL_2026_MONTH = [86700,87300,89700,89700,90000,90300,92400,92400,94800,89700,87900,0]
+PERIODS = [{"label":"Oct 2024 - Dec 2025","total":1404000,"beneficiaries":463000,"fares":31625,"expenditures":494625,"detail":"From BREAKDOWN sheet. BF 909,375 | End Year 659,375 in Excel. Contributions 1,404,000."},{"label":"Dec 2025 - Nov 2026","total":991100,"beneficiaries":379075,"fares":32100,"expenditures":427341,"detail":"From 2026 sheet. Grand Total 1,240,900 in Excel (incl transfers). BF 813,559 | End Year 563,559 in Excel. Contributions 991,100."}]
+# FARES 2024-25 - FULL 25 rows - 30,000 + 1,625 transactions = 31,625
+FARES_2425 = [("Peter Ikegu","0704886421",1000),("George Ibuba","0113964865",1000),("Kevin Kipkurui","0704284388",1000),("Valary Chepkoech","0713053696",1500),("Mercy Njeri","0713881793",1500),("Margaret Wangari","0720331094",1000),("Mary Wangare","0796805933",1000),("Daniel Mayaka","0722620252",1000),("Unnamed","-",1000),("Unnamed","-",1000),("Unnamed","-",1000),("Rose","-",3000),("Jecinta Apondi","-",1000),("Mercy Onyango","-",1000),("Preskila Ondiek","-",1000),("Jane Wangari","-",1500),("Caroline Wachira","-",1500),("Joy","-",1500),("Berbciter","-",1500),("IRENE WAMUYU","719606834",1000),("ANN MULEMA","729218786",1000),("Gloria Luksenaka","796426074",1000),("MARY THIKA","719572174",1000),("JOSHUA IGUNA","792529926",1000),("JACKLINE KAMAU","724562145",1000)]
+# BENEFICIARIES 2024-25 - FULL 18 rows - 461,000 + 2,000 = 463,000
+BENEFICIARIES_2425 = [("Mary Ngota","GCB","Dad-Death","01/11/2024",30000),("Mariamu","GCB","Dad-Death","01/12/2024",30000),("Claire Osiako","Kaysalt","Dad-Death","2nd Dec 2024",30000),("Rachael Ndung'u","Pwani","Mum-Death","10th Dec 2024",30000),("Teresih Kariuki","TF","Dad-Death","17th Dec 2024",30000),("Hannah Ngaruiya","Pwani","Loss of earning","4th Dec 2024",9500),("Hannah Ngaruiya","Pwani","Loss of earning","2nd Jan 2025",9500),("Hannah Ngaruiya","Pwani","Loss of earning","2nd Feb 2025",9500),("Unnamed","SJ","Daughter-Death","-",30000),("Jecinta Nduta Karanja","TF","Loss of earning","-",9000),("Winnie","TF B","Dad-Death","-",30000),("Maureen Kiare","Kenafric","Dad-Death","July",30000),("Eugene Otieno","TF","Dad-Death","July",30000),("ANN WAMBUI MUCHEMI","Java","Loss of earning","Aug 2025",22000),("Mercy Mwikali","TF","Guardian","Aug 2025",30000),("ANN WAMBUI MUCHEMI","Java","Loss of earning","Aug 2025",11000),("ANNAH NTHAMBA MUSYOKI","Java","Dad-Death","Sep 2025",30000),("EUNICE WAIRIMU WANJIKU","SJ","Dad-Death","Oct 2025",30000),("JJJJ","-","Loss of earning","-",11500),("Nostar","TF","Loss of earning","-",19000)]
+# FARES 2026 - FULL - 30,000 + 2,100 = 32,100
+FARES_2026 = [("EUNICE MAKONA","0714910135",1200),("HELLEN ONYANGO","724570228",1200),("CAREN CHONGE","710427468",900),("ANTONY MWENDIA","-",1500),("GLADYS NYAGA","-",1500),("Marlon K. Ang'undu","-",1200),("Gladys Wambaire Kinuthia","-",1200),("Evapertual Wambui","-",1200),("Catheine Ogutu","-",1700),("Ebby Lomoi","-",1700),("Jackline Ayiga","-",1700),("Esther Marenya","-",1600),("George Odhiambo","-",1400),("Kiplimo","-",4200),("Maureen Njeri Kamunyu","-",1500),("Eunice Wairimu","-",2000),("Victoria Wangechi Mugwe","-",2000),("Unnamed","-",500),("Marlon K. Ang'undu","-",600),("Patrick Macharia Mugo","-",600),("Stepheny Keziah Wambui Mwangi","-",600)]
+# BENEFICIARIES 2026 - FULL 13 rows - 379,075 (377,775 + 1,300 transactions in Excel)
+BENEFICIARIES_2026 = [("ROSE Lumonya SAIDI","POPL","Death-Father","01/12/2025",40000),("Nostar","TF","Loss of earning","01/12/2025",19000),("SUSAN NDUNGU","TF","Death-Father","26/01/2026",40000),("Irene Wairimu","Java","Death-Guardian","01/05/2026",40000),("Mercy Mwende","GCB","Loss of earning","01/05/2026",11075),("Damarais Muyoka","TF","Death-Father","01/05/2026",40000),("Ruth Amollo Nyangun","-","Death-Father","01/06/2026",40000),("Sheila Okomo","TF","Loss of earning","May",9000),("Sheila Okomo","TF","Loss of earning","June",9000),("Unnamed","TF","Death-Father","-",40000),("Vivian Moraa","Java","Loss of earning","-",11000),("Hannah Wanjiku","TF","Death-Father","17th Aug",40000),("Sherine Atieno Otieno","Antonia","Mother-Death","Nov 2026",40000)]
+BENEFICIARIES2 = [(p,n,pr,r2,d,a) for (n,pr,r2,d,a) in BENEFICIARIES_2425 for p in ["Oct 2024 - Dec 2025"]][:5]
+# For backward compat, keep combined lists
+FARES2 = [("Oct 2024 - Dec 2025",n,ph,a) for n,ph,a in FARES_2425] + [("Dec 2025 - Nov 2026",n,ph,a) for n,ph,a in FARES_2026]
+HISTORY_MONTHLY = [("Oct 2024 - Dec 2025","Contributions","1,404,000"),("Oct 2024 - Dec 2025","Beneficiaries","463,000"),("Oct 2024 - Dec 2025","Fares","31,625"),("Oct 2024 - Dec 2025","Expenditures","494,625"),("Dec 2025 - Nov 2026","Contributions","991,100"),("Dec 2025 - Nov 2026","Beneficiaries","379,075"),("Dec 2025 - Nov 2026","Fares","32,100"),("Dec 2025 - Nov 2026","Expenditures","427,341"),("TOTAL","Balance Brought Forward to Share-Out (BF) - as agreed","855,759"),("TOTAL","Retained","250,000"),("TOTAL","Amount to Share Now","605,759")]
 SEED_DATA = [tuple((l.split('|')+['']*13)[:13]) for l in SEED_TXT.strip().splitlines()]
 def clean(v):
     if v is None: return ""
@@ -424,13 +469,42 @@ def terms_page():
     return shell("Terms",body)
 @app.route("/breakdown2")
 def breakdown2_page():
-    h="<h1>Full History</h1>"
-    for p in PERIODS: h+=f"<div class='card'><h3>{p['label']}</h3><div class='row'><span>Contributions</span><b>KES {p.get('total',0):,}</b></div><div class='row'><span>Beneficiaries</span><b>KES {p.get('beneficiaries',0):,}</b></div><div class='row'><span>Fares</span><b>KES {p.get('fares',0):,}</b></div><p>{p.get('detail','')}</p></div>"
-    h+="<div class='card'><h2>Beneficiaries</h2>"
-    for per,n,pr,r2,d,a in BENEFICIARIES2: h+=f"<div class='row'><span><b>{n}</b> {per} {pr} {r2} {d}</span><b>KES {a:,}</b></div>"
-    h+=f"<div class='row'><b>Total</b><b>KES {sum(x[5] for x in BENEFICIARIES2):,}</b></div></div><div class='card'><h2>Fares</h2>"
-    for per,n,ph,a in FARES2: h+=f"<div class='row'><span><b>{n}</b> {per} {ph}</span><b>KES {a:,}</b></div>"
-    h+=f"<div class='row'><b>Total</b><b>KES {sum(x[3] for x in FARES2):,}</b></div></div>"
+    h="<h1>Full History - Nothing Left Out</h1><p style='color:#475467'>Exact from your Excel 111F.I.G_Staff_Welfare.xlsx - BREAKDOWN + 2026 sheets. Scroll sideways on monthly tables.</p>"
+    h+="<div class='hero'><div style='font-size:11px;letter-spacing:.14em;color:#B9975B;font-weight:700'>BALANCE BROUGHT FORWARD</div><h1>KES 855,759</h1><p>605,759 to share + 250,000 retained = 855,759</p></div>"
+    h+="<div class='card'><h2>1. Period Summary - Both Periods (Excel Totals)</h2><table><tr><th>Period</th><th class='num'>Contributions</th><th class='num'>Beneficiaries</th><th class='num'>Fares</th><th class='num'>Expenditures</th></tr>"
+    for p in PERIODS: h+=f"<tr><td><b>{p['label']}</b><div style='font-size:12px;color:#667085'>{p['detail']}</div></td><td class='num'>KES {p['total']:,}</td><td class='num'>KES {p['beneficiaries']:,}</td><td class='num'>KES {p['fares']:,}</td><td class='num'>KES {p['expenditures']:,}</td></tr>"
+    h+="</table></div>"
+    # Monthly 2425
+    h+="<div class='card'><h2>2. Monthly Contributions Oct 2024 - Dec 2025 (BREAKDOWN sheet)</h2><div style='overflow:auto'><table><tr><th>Project</th>"
+    for m in MONTHS_2425: h+=f"<th class='num'>{m}</th>"
+    h+="<th class='num'>Total</th></tr>"
+    for name,vals in MONTHLY_2425: h+=f"<tr><td><b>{name}</b></td>"+ "".join(f"<td class='num'>{v:,}</td>" if v else "<td class='num'>-</td>" for v in vals) + f"<td class='num'><b>{sum(vals):,}</b></td></tr>"
+    h+="<tr><td><b>TOTAL</b></td>"+ "".join(f"<td class='num'><b>{v:,}</b></td>" for v in TOTAL_2425_MONTH) + f"<td class='num'><b>1,404,000</b></td></tr></table></div><p style='font-size:13px;color:#475467'>Includes Kaysalt (ended May 25), Kenafric (Feb-Sep 25), LAB (May-Jul 25) - these were missing before.</p></div>"
+    # Monthly 2026
+    h+="<div class='card'><h2>3. Monthly Contributions Dec 2025 - Nov 2026 (2026 sheet)</h2><div style='overflow:auto'><table><tr><th>Project</th>"
+    for m in MONTHS_2026: h+=f"<th class='num'>{m}</th>"
+    h+="<th class='num'>Total</th></tr>"
+    for name,vals in MONTHLY_2026: h+=f"<tr><td><b>{name}</b></td>"+ "".join(f"<td class='num'>{v:,}</td>" if v else "<td class='num'>-</td>" for v in vals) + f"<td class='num'><b>{sum(vals):,}</b></td></tr>"
+    h+="<tr><td><b>TOTAL</b></td>"+ "".join(f"<td class='num'><b>{v:,}</b></td>" for v in TOTAL_2026_MONTH) + f"<td class='num'><b>991,100</b></td></tr></table></div><p style='font-size:13px;color:#475467'>Includes Higchem (from Jun 26) and Antonia (from Jul 26) - these were missing before.</p></div>"
+    # Fares 2425
+    h+="<div class='card'><h2>4. Fares Oct 2024 - Dec 2025 - FULL (25 names)</h2><table><tr><th>Name</th><th>Phone</th><th class='num'>Amount</th></tr>"
+    for n,ph,a in FARES_2425: h+=f"<tr><td><b>{n}</b></td><td>{ph}</td><td class='num'>KES {a:,}</td></tr>"
+    h+="<tr><td colspan='2'>Fares subtotal</td><td class='num'>KES 30,000</td></tr><tr><td colspan='2'>Transactions</td><td class='num'>KES 1,625</td></tr><tr><td colspan='2'><b>TOTAL FARES</b></td><td class='num'><b>KES 31,625</b></td></tr></table></div>"
+    # Beneficiaries 2425
+    h+="<div class='card'><h2>5. Beneficiaries Oct 2024 - Dec 2025 - FULL (20 rows)</h2><table><tr><th>Name</th><th>Project</th><th>Reason / Date</th><th class='num'>Amount</th></tr>"
+    for n,pr,r2,d,a in BENEFICIARIES_2425: h+=f"<tr><td><b>{n}</b></td><td>{pr}</td><td>{r2} - {d}</td><td class='num'>KES {a:,}</td></tr>"
+    h+="<tr><td colspan='3'>Beneficiaries subtotal</td><td class='num'>KES 461,000</td></tr><tr><td colspan='3'>Transactions</td><td class='num'>KES 2,000</td></tr><tr><td colspan='3'><b>TOTAL BENEFICIARIES</b></td><td class='num'><b>KES 463,000</b></td></tr></table><p style='font-size:13px;color:#475467'>Expenditures this period (Excel): KES 494,625</p></div>"
+    # Fares 2026
+    h+="<div class='card'><h2>6. Fares Dec 2025 - Nov 2026 - FULL (21 names)</h2><table><tr><th>Name</th><th>Phone</th><th class='num'>Amount</th></tr>"
+    for n,ph,a in FARES_2026: h+=f"<tr><td><b>{n}</b></td><td>{ph}</td><td class='num'>KES {a:,}</td></tr>"
+    h+="<tr><td colspan='2'>Fares subtotal</td><td class='num'>KES 30,000</td></tr><tr><td colspan='2'>Transactions</td><td class='num'>KES 2,100</td></tr><tr><td colspan='2'><b>TOTAL FARES</b></td><td class='num'><b>KES 32,100</b></td></tr></table></div>"
+    # Beneficiaries 2026
+    h+="<div class='card'><h2>7. Beneficiaries Dec 2025 - Nov 2026 - FULL (13 rows)</h2><table><tr><th>Name</th><th>Project</th><th>Reason / Date</th><th class='num'>Amount</th></tr>"
+    for n,pr,r2,d,a in BENEFICIARIES_2026: h+=f"<tr><td><b>{n}</b></td><td>{pr}</td><td>{r2} - {d}</td><td class='num'>KES {a:,}</td></tr>"
+    h+="<tr><td colspan='3'>Beneficiaries subtotal</td><td class='num'>KES 377,775</td></tr><tr><td colspan='3'>Transactions</td><td class='num'>KES 1,300</td></tr><tr><td colspan='3'><b>TOTAL BENEFICIARIES</b></td><td class='num'><b>KES 379,075</b></td></tr></table><p style='font-size:13px;color:#475467'>Expenditures this period (Excel): KES 427,341</p></div>"
+    h+="<div class='card'><h2>8. Reconciliation to Share-Out</h2><table><tr><th>Item</th><th class='num'>Amount</th></tr>"
+    for per,det,amt in HISTORY_MONTHLY: h+=f"<tr><td>{per} - {det}</td><td class='num'><b>KES {amt}</b></td></tr>"
+    h+="</table><p>Excel also shows: 2024-25 BF 909,375 / End Year 659,375, and 2026 BF 813,559 / End Year 563,559, Grand Total 1,240,900 (incl transfers). Your agreed BF for sharing is 855,759.</p><a class='btn2' href='/shareout'>Go to Share-Out →</a></div>"
     return shell("History",h)
 @app.route("/shareout")
 def shareout_page():
@@ -468,7 +542,10 @@ def register_page():
     return shell("Register",body)
 @app.route("/admin")
 def admin_login_page():
-    body='''<h1>Admin Login</h1><div class="card"><label>Email</label><input class="input" id="email" value="admin@lonma.com"><div style="margin-top:14px"><label>Password</label><input class="input" id="pass" type="password" value="admin123"></div><button class="btn" onclick="login()" style="margin-top:18px">Login</button><p id="msg"></p></div><script>async function login(){let r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('pass').value})});let j=await r.json();if(r.ok)location.href='/admin/dashboard?key='+j.key;else document.getElementById('msg').textContent=j.error}</script>'''
+    body='''<h1>Admin Login</h1><div class="card"><label>Email</label><input class="input" id="email" value="admin@lonma.com"><div style="margin-top:14px"><label>Password</label><input class="input" id="pass" type="password" value="admin123"></div><button class="btn" onclick="login()"My dear, here is the **rest - paste this right after where it cut off** (at `async function login()` in Admin Login) - then Deploy. This completes v151, no repeat:
+
+```python
+">Login</button><p id=\"msg\"></p></div><script>async function login(){let r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('pass').value})});let j=await r.json();if(r.ok)location.href='/admin/dashboard?key='+j.key;else document.getElementById('msg').textContent=j.error}</script>'''
     return shell("Admin",body)
 @app.route("/admin/dashboard")
 def admin_dashboard():
@@ -506,6 +583,37 @@ def download_excel():
         ws.freeze_panes="A2"; ws.auto_filter.ref=ws.dimensions; out=io.BytesIO(); wb.save(out); out.seek(0)
         return send_file(out,mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",as_attachment=True,download_name="FIG_BRANDS_Members.xlsx")
     finally: c.close()
+@app.route("/download/history")
+def download_history():
+    from openpyxl import Workbook
+    from openpyxl.styles import Font,PatternFill,Alignment
+    wb=Workbook(); ws=wb.active; ws.title="History-FULL"
+    ws.append(["F.I.G BRANDS - FULL HISTORY - From 111F.I.G_Staff_Welfare.xlsx - NOTHING LEFT OUT"])
+    ws.append(["Period","Contributions","Beneficiaries","Fares","Expenditures"])
+    for p in PERIODS: ws.append([p["label"],p["total"],p["beneficiaries"],p["fares"],p["expenditures"]])
+    ws.append([]); ws.append(["MONTHLY Oct 2024 - Dec 2025"])
+    ws.append(["Project"]+MONTHS_2425+["Total"])
+    for n,v in MONTHLY_2425: ws.append([n]+v+[sum(v)])
+    ws.append(["TOTAL"]+TOTAL_2425_MONTH+[1404000])
+    ws.append([]); ws.append(["MONTHLY Dec 2025 - Nov 2026"])
+    ws.append(["Project"]+MONTHS_2026+["Total"])
+    for n,v in MONTHLY_2026: ws.append([n]+v+[sum(v)])
+    ws.append(["TOTAL"]+TOTAL_2026_MONTH+[991100])
+    ws.append([]); ws.append(["FARES 2024-25"]); ws.append(["Name","Phone","Amount"])
+    for n,ph,a in FARES_2425: ws.append([n,ph,a])
+    ws.append(["TOTAL","",31625])
+    ws.append([]); ws.append(["BENEFICIARIES 2024-25"]); ws.append(["Name","Project","Reason","Date","Amount"])
+    for n,pr,r2,d,a in BENEFICIARIES_2425: ws.append([n,pr,r2,d,a])
+    ws.append(["TOTAL","","","",463000])
+    ws.append([]); ws.append(["FARES 2026"]); ws.append(["Name","Phone","Amount"])
+    for n,ph,a in FARES_2026: ws.append([n,ph,a])
+    ws.append(["TOTAL","",32100])
+    ws.append([]); ws.append(["BENEFICIARIES 2026"]); ws.append(["Name","Project","Reason","Date","Amount"])
+    for n,pr,r2,d,a in BENEFICIARIES_2026: ws.append([n,pr,r2,d,a])
+    ws.append(["TOTAL","","","",379075])
+    for cell in ws[1]: cell.font=Font(bold=True)
+    out=io.BytesIO(); wb.save(out); out.seek(0)
+    return send_file(out,mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",as_attachment=True,download_name="FIG_BRANDS_Full_History.xlsx")
 @app.route("/api/stats")
 def api_stats():
     c=get_db()
@@ -650,6 +758,6 @@ def api_friends_accept():
     finally: c.close()
 @app.route("/api/breakdown")
 def api_breakdown():
-    return jsonify({"periods":PERIODS,"beneficiaries":BENEFICIARIES2,"beneficiaries_total":sum(x[5] for x in BENEFICIARIES2),"fares":FARES2,"fares_total":sum(x[3] for x in FARES2),"bf":BF})
+    return jsonify({"periods":PERIODS,"monthly_2425":MONTHLY_2425,"monthly_2026":MONTHLY_2026,"history_monthly":HISTORY_MONTHLY,"beneficiaries_2425":BENEFICIARIES_2425,"beneficiaries_2026":BENEFICIARIES_2026,"fares_2425":FARES_2425,"fares_2026":FARES_2026,"bf":BF})
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=int(os.environ.get("PORT",5000)))
