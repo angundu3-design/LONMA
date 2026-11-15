@@ -687,7 +687,9 @@ def download_excel():
         ws2=wb.create_sheet("Share-Out"); ws2.append(["Staff No","Full Names","Project","Date Joined","Basis","Months","Contribution","Share"])
         shares,_,_,_=calc_shares()
         for x in shares: ws2.append([x["staff_no"],x["full_names"],x["project"],x["month_joined"],x["basis"],x["months"],x["contribution"],x["share"]])
-        ws3=wb.create_sheet("Combined Expenses"); ws3.append(["Expense line","Period 1","Period 2","Combined"])
+        ws3.append(["Fares paid",30000,30000,60000])
+ws3.append(["Fares transactions",1625,2100,3725])
+ws3.append(["Fares total",31625,32100,63725])
         ws3.append(["Fares paid",30000,30000,60000]); ws3.append(["Fares transactions",1625,2100,3725]); ws3.append(["Fares total",31625,32100,63725]); ws3.append(["Beneficiaries paid",461000,379075,840075]); ws3.append(["Beneficiaries transactions",2000,1300,3300]); ws3.append(["Benefici```python
         ws3.append(["Beneficiaries paid",461000,379075,840075])
         ws3.append(["Beneficiaries transactions",2000,1300,3300])
