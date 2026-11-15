@@ -624,9 +624,9 @@ def api_register():
     if not d.get("email") or not d.get("password"): c.close(); return jsonify({"error":"Email and password required"}),400
     if c.execute("SELECT id FROM users WHERE email=?",(d.get("email",""),)).fetchone(): c.close(); return jsonify({"error":"Email exists"}),400
     if c.execute("SELECT id FROM users WHERE lower(full_names)=lower(?)",(d.get("full_names",""),)).fetchone(): c.close(); return jsonify({"error":"Name exists"}),400
-    proj=norm_project(d.get("project","HQ"))
-    vals=(d.get("staff_no",""),d.get("full_names",""),proj,d.get("email",""),generate_password_hash(d.get("password","")),"fig_"+secrets.token_hex(12),d.get("month_joined",""),d.get("father_id```python
-,d.get("mother_id",""),d.get("guardian_id",""),d.get("spouse_id",""),d.get("kid1",""),d.get("kid2",""),d.get("kid3",""),d.get("kid4",""),d.get("kid5",""),d.get("photo",""))
+    627      proj=norm_project(d.get("project","HQ"))
+628      vals=(d.get("staff_no",""),d.get("full_names",""),proj,d.get("email",""),generate_password_hash(d.get("password","")),"fig_"+secrets.token_hex(12),d.get("month_joined",""),d.get("father_id",""),d.get("mother_id",""),d.get("guardian_id",""),d.get("spouse_id",""),d.get("kid1",""),d.get("kid2",""),d.get("kid3",""),d.get("kid4",""),d.get("kid5",""),d.get("photo",""))
+629      c.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",vals)
     c.execute("INSERT INTO users (staff_no,full_names,project,email,password,api_key,month_joined,father_id,mother_id,guardian_id,spouse_id,kid1,kid2,kid3,kid4,kid5,photo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",vals)
     c.execute("INSERT INTO notifications (title,msg,created,target,is_read) VALUES (?,?,?,?,?)",("New Member Registered",f"{d.get('full_names','')} joined {proj}","Just now","/members",0))
     c.commit(); c.close(); return jsonify({"message":"Member created"}),201
