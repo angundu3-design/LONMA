@@ -3,7 +3,7 @@ import sqlite3, os, secrets, io, re
 from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 DB = "lonma.db"
-VERSION = "v142"
+VERSION = "v143"
 PROJECTS = ["Antonia","GCB-MT","GCB-TDs","Higchem","HQ","Java House","Kanji","Pwani Oil Products","SC Johnson","TF WSL","TF-LM","TF-MT"]
 PMAP = {"Antonio":"Antonia","ANTONIA":"Antonia","Antonia":"Antonia","GCB-MT":"GCB-MT","GCB MT":"GCB-MT","GCB":"GCB-MT","GCB-Ws":"GCB-TDs","GCB Ws":"GCB-TDs","GCB TDS":"GCB-TDs","GCB-TDs":"GCB-TDs","GCB-TDS":"GCB-TDs","GCB WS":"GCB-TDs","Higchem":"Higchem","HIGHCHEM":"Higchem","HQ":"HQ","Kanji":"Kanji","KHS":"Kanji","Kaysalt":"Kanji","Kenafric":"Kanji","LAB":"Kanji","Java House":"Java House","JAVA":"Java House","Java":"Java House","Pwani Oil Products":"Pwani Oil Products","PWANI":"Pwani Oil Products","Pwani":"Pwani Oil Products","SC Johnson":"SC Johnson","SJ Johnson":"SC Johnson","JOHNSON":"SC Johnson","Johnson":"SC Johnson","SJ":"SC Johnson","SCJohnson":"SC Johnson","TF WSL":"TF WSL","TF WS":"TF WSL","TF-WS":"TF WSL","TF":"TF WSL","TF-LM":"TF-LM","TF LM":"TF-LM","TF-MT":"TF-MT","TF MT":"TF-MT"}
 def norm_project(p):
@@ -22,6 +22,8 @@ MONTHLY_RATE = 300
 PERIOD_START = (2025, 12)
 PERIOD_END = (2026, 11)
 FULL_MONTHS = 12
+# YOUR EXACT TABLE - APPLIED TO ALL MEMBERS
+SHARE_TABLE_2026 = {1:11,2:10,3:9,4:8,5:7,6:6,7:5,8:4,9:3,10:2,11:1}
 SEED_TXT = '''202731|Pwani Oil Products|2025|Angela Nyaguthii Gathege|Philip Gathege|Elizabeth Wanjiru||||||
 202863|Pwani Oil Products|2025|Peter Olonde|6600561|0745115734||41572317|67272316||||
 202656|Pwani Oil Products|2025|Patrick Sifuna Wanjala||4396984||31939216|151468||||
@@ -285,18 +287,22 @@ def clean(v):
 def make_email(n, staff):
     p=[x for x in n.lower().replace(".","").split() if x.isalpha()]
     return f"{p[0]}.{p[-1]}@figbrands.co.ke" if len(p)>=2 else f"{p[0] if p else 'member'}.{staff}@figbrands.co.ke"
-MONTHS_MAP={"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,"jul":7,"aug":8,"sep":9,"sept":9,"oct":10,"nov":11,"dec":12,"january":1,"february":2,"march":3,"april":4,"june":6,"july":7,"august":8,"september":9,"october":10,"november":11,"december":12}
+MONTHS_MAP={"january":1,"february":2,"march":3,"april":4,"may":5,"june":6,"july":7,"august":8,"september":9,"october":10,"november":11,"december":12,"jan":1,"feb":2,"mar":3,"apr":4,"jun":6,"jul":7,"aug":8,"sep":9,"sept":9,"oct":10,"nov":11,"dec":12}
 def parse_join(s):
     if not s: return None
-    t=str(s).strip().lower().replace(","," ").replace("."," ").replace("_"," ").replace("/"," ").replace("-"," ")
-    t=re.sub(r"(st|nd|rd|th)\b"," ",t); t=re.sub(r"\s+"," ",t).strip()
+    t=str(s).strip().lower()
+    # ONLY strip st/nd/rd/th when it follows a digit - AUGUST must stay AUGUST
+    t=re.sub(r"(\d+)(st|nd|rd|th)\b",r"\1",t)
+    t=t.replace(","," ").replace("."," ").replace("_"," ").replace("/"," ").replace("-"," ")
+    t=re.sub(r"\s+"," ",t).strip()
     if not t: return None
     m=re.search(r"(\d{1,2})\s+(\d{1,2})\s+(\d{4})",t)
     if m:
         d,mo,y=int(m.group(1)),int(m.group(2)),int(m.group(3))
         if mo>12: d,mo=mo,d
         if 1<=mo<=12: return (y,mo)
-    for mon in MONTHS_MAP:
+    # Long month names first so september does not get misread
+    for mon in sorted(MONTHS_MAP,key=len,reverse=True):
         mm=re.search(r"\b"+mon+r"\b\s+(\d{1,2})\s+(\d{4})",t)
         if mm: return (int(mm.group(2)),MONTHS_MAP[mon])
         mm=re.search(r"(\d{1,2})\s+\b"+mon+r"\b\s+(\d{4})",t)
@@ -316,12 +322,10 @@ def share_basis(join_str):
     if y<2025: return (FULL_MONTHS,"Joined before 2025 - Full share")
     if y==2025: return (FULL_MONTHS,"Joined 2025 - Full share")
     if y==2026:
-        if m<1: return (FULL_MONTHS,"Joined 2026 - Full share")
-        if m>11: return (0,"Joined after Nov 2026 - No share this period")
-        mo=(PERIOD_END[0]-y)*12+(PERIOD_END[1]-m)+1
+        if m not in SHARE_TABLE_2026: return (0,"Joined after Nov 2026 - No share this period")
+        mo=SHARE_TABLE_2026[m]
         return (mo,f"Joined {m:02d}/2026 - Pro-rated {mo} months")
-    if y>2026: return (0,"Joined after Nov 2026 - No share this period")
-    return (FULL_MONTHS,"Full share")
+    return (0,"Joined after Nov 2026 - No share this period")
 def months_active(j): return share_basis(j)[0]
 def get_db():
     c=sqlite3.connect(DB,timeout=10,check_same_thread=False,isolation_level=None); c.row_factory=sqlite3.Row
@@ -520,7 +524,7 @@ def api_clear_all():
 def api_repair():
     if request.args.get("key")!=ADMIN_KEY: return jsonify({"error":"Admin key required"}),401
     init_db()
-    return jsonify({"message":"v142 re-seeded / updated"})
+    return jsonify({"message":"v143 re-seeded / updated"})
 @app.route("/api/breakdown")
 def api_breakdown():
     return jsonify({"periods":PERIODS,"monthly_individual":MONTHLY_INDIVIDUAL,"beneficiaries":BENEFICIARIES2,"beneficiaries_total":sum(x[5] for x in BENEFICIARIES2),"fares":FARES2,"fares_total":sum(x[3] for x in FARES2),"grand_total":sum(x.get("total",0) for x in PERIODS),"bf":BF,"transfer_total":0})
