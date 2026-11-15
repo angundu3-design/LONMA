@@ -608,8 +608,7 @@ def api_admin_login():
 def api_register():
     if request.method=="OPTIONS": return "",200
     d=request.get_json(silent=True)
-    if not d or not d.get("email") or not d.get("password"): return jsonify({"error```python
-        return jsonify({"error":"Email and password required"}),400
+       if not d or not d.get("email") or not d.get("password"): return jsonify({"error":"Email and password required"}),400
     c=get_db()
     try:
         if c.execute("SELECT id FROM users WHERE email=?",(d["email"],)).fetchone(): return jsonify({"error":"Email exists"}),400
