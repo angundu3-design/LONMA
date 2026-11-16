@@ -201,6 +201,114 @@ def terms():
 @app.route("/community", methods=["GET","POST"])
 def community():
     c = get_db()
+    # Add media columns if not exist
+    try:
+        c.execute("ALTER TABLE posts ADD COLUMN media_type TEXT DEFAULT 'text'")
+    except: pass
+    try:
+        c.execute("ALTER TABLE posts ADD COLUMN media_data TEXT DEFAULT ''")
+    except: pass
+    c.commit()
+
+    if request.method == "POST":
+        author = request.form.get("author","Member") or "Member"
+        text = request.form.get("text","")
+        tab = request.form.get("tab","text")
+        # Handle photo/video upload
+        media_data = ""
+        media_type = "text"
+        if "media" in request.files:
+            f = request.files["media"]
+            if f and f.filename != "":
+                import base64
+                data = base64.b64encode(f.read()).decode()
+                mime = f.mimetype or "image/jpeg"
+                media_data = f"data:{mime};base64,{data}"
+                media_type = "photo" if "image" in mime else "video"
+        if tab == "live":
+            media_type = "live"
+            text = "🔴 LIVE: " + text if text else "🔴 Went LIVE"
+        elif tab == "photo" and media_data:
+            media_type = "photo"
+        elif tab == "video" and media_data:
+            media_type = "video"
+        c.execute("INSERT INTO posts (author,text,media_type,media_data) VALUES (?,?,?,?)", (author, text, media_type, media_data))
+        c.commit()
+        c.close()
+        return redirect("/community")
+
+    tab_filter = request.args.get("tab","all")
+    if tab_filter == "all":
+        posts = c.execute("SELECT * FROM posts ORDER BY id DESC").fetchall()
+    else:
+        posts = c.execute("SELECT * FROM posts WHERE media_type=? ORDER BY id DESC", (tab_filter,)).fetchall()
+    c.close()
+
+    def render_post(p):
+        media = ""
+        if p["media_data"]:
+            if p["media_type"] == "photo":
+                media = f"<img src='{p['media_data']}' style='width:100%;border-radius:12px;margin-top:10px'>"
+            elif p["media_type"] == "video":
+                media = f"<video src='{p['media_data']}' controls style='width:100%;border-radius:12px;margin-top:10px'></video>"
+        badge = ""
+        if p["media_type"] == "live": badge = "<span style='background:#ef4444;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:800'>🔴 LIVE</span> "
+        if p["media_type"] == "photo": badge = "<span style='background:#0f2a44;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px'>📷 PHOTO</span> "
+        if p["media_type"] == "video": badge = "<span style='background:#7c3aed;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px'>🎥 VIDEO</span> "
+        return f"<div class='card'><div style='display:flex;gap:10px;align-items:center'><b>{p['author']}</b> {badge}</div><p style='margin-top:8px'>{p['text']}</p>{media}</div>"
+
+    items = "".join([render_post(p) for p in posts]) or "<div class='card'>No posts yet in this tab. Be the first!</div>"
+
+    return page("Community", f"""
+    <div class="page-title">Community</div><div class="sub">Connect with members</div>
+
+    <!-- TABS: Live / Photos / Videos -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto">
+      <a href="/community?tab=all" style="padding:10px 18px;border-radius:20px;font-weight:800;background:{'#0f2a44' if tab_filter=='all' else '#fff'};color:{'#fff' if tab_filter=='all' else '#0f2a44'};border:1px solid #e2e8f0;white-space:nowrap">All</a>
+      <a href="/community?tab=live" style="padding:10px 18px;border-radius:20px;font-weight:800;background:{'#ef4444' if tab_filter=='live' else '#fff'};color:{'#fff' if tab_filter=='live' else '#0f2a44'};border:1px solid #e2e8f0;white-space:nowrap">🔴 Live</a>
+      <a href="/community?tab=photo" style="padding:10px 18px;border-radius:20px;font-weight:800;background:{'#0f2a44' if tab_filter=='photo' else '#fff'};color:{'#fff' if tab_filter=='photo' else '#0f2a44'};border:1px solid #e2e8f0;white-space:nowrap">📷 Photos</a>
+      <a href="/community?tab=video" style="padding:10px 18px;border-radius:20px;font-weight:800;background:{'#7c3aed' if tab_filter=='video' else '#fff'};color:{'#fff' if tab_filter=='video' else '#0f2a44'};border:1px solid #e2e8f0;white-space:nowrap">🎥 Videos</a>
+    </div>
+
+    <!-- CREATE POST -->
+    <form method="post" enctype="multipart/form-data" class="card">
+      <input name="author" placeholder="Your name">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button type="button" onclick="setTab('text',this)" class="tab-btn" style="flex:1;padding:12px;border-radius:12px;border:2px solid #0f2a44;background:#0f2a44;color:#fff;font-weight:800">✍️ Post</button>
+        <button type="button" onclick="setTab('live',this)" class="tab-btn" style="flex:1;padding:12px;border-radius:12px;border:1px solid #e2e8f0;background:#fff;font-weight:800">🔴 Live</button>
+        <button type="button" onclick="setTab('photo',this)" class="tab-btn" style="flex:1;padding:12px;border-radius:12px;border:1px solid #e2e8f0;background:#fff;font-weight:800">📷 Photo</button>
+        <button type="button" onclick="setTab('video',this)" class="tab-btn" style="flex:1;padding:12px;border-radius:12px;border:1px solid #e2e8f0;background:#fff;font-weight:800">🎥 Video</button>
+      </div>
+      <input type="hidden" name="tab" id="postTab" value="text">
+      <textarea name="text" id="postText" placeholder="Share something..."></textarea>
+      <div id="mediaBox" style="display:none">
+        <input type="file" name="media" id="mediaInput" accept="image/*,video/*">
+        <p style="font-size:13px;color:#64748b">Choose a photo or video from your phone</p>
+      </div>
+      <div id="liveBox" style="display:none;background:#fef2f2;border:1px solid #fecaca;padding:12px;border-radius:12px;margin-bottom:12px">
+        <b>🔴 You are going LIVE</b><p style="font-size:13px;color:#64748b">Write a title above and tap Go Live. Members will see your LIVE post.</p>
+      </div>
+      <button class="btn" id="postBtn">Post</button>
+    </form>
+
+    <script>
+    function setTab(t, btn){{
+      document.getElementById('postTab').value = t;
+      document.getElementById('mediaBox').style.display = (t=='photo'||t=='video') ? 'block':'none';
+      document.getElementById('liveBox').style.display = (t=='live') ? 'block':'none';
+      document.getElementById('postText').placeholder = t=='live' ? 'Live title - e.g. Welfare Meeting Live...' : t=='photo' ? 'Add a caption for your photo...' : t=='video' ? 'Add a caption for your video...' : 'Share something...';
+      document.getElementById('postBtn').innerText = t=='live' ? '🔴 Go Live' : 'Post';
+      if(t=='photo') document.getElementById('mediaInput').setAttribute('accept','image/*');
+      if(t=='video') document.getElementById('mediaInput').setAttribute('accept','video/*');
+      document.querySelectorAll('.tab-btn').forEach(b=>{{b.style.background='#fff';b.style.color='#0f2a44';b.style.border='1px solid #e2e8f0'}});
+      btn.style.background='#0f2a44';btn.style.color='#fff';btn.style.border='2px solid #0f2a44';
+    }}
+    </script>
+
+    {items}
+    """)
+def community():
+    c = get_db()
     if request.method == "POST":
         c.execute("INSERT INTO posts (author,text) VALUES (?,?)", (request.form.get("author","Member"), request.form.get("text","")))
         c.commit()
