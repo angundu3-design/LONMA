@@ -773,3 +773,9 @@ def api_health():
 if __name__=="__main__":
     port=int(os.environ.get("PORT",5000))
     app.run(host="0.0.0.0",port=port,debug=False)
+    @app.route("/fix_ids")
+def fix_ids():
+    c = get_db()
+    c.execute("UPDATE users SET guardian_id='1951498', k1='6879175' WHERE lower(full_names) LIKE '%marlon%'")
+    c.commit()
+    return "FIXED Marlon Guardian 1951498 Kid 6879175"
