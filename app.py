@@ -425,6 +425,10 @@ def home():
 def terms():
     b="<h1>Terms and Policies</h1><div class=\"card\"><h2>Death Benefits</h2><table><tr><th>Beneficiary</th><th>Benefit</th></tr><tr><td>Member</td><td>KES 100,000</td></tr><tr><td>Spouse</td><td>KES 50,000</td></tr><tr><td>Child</td><td>KES 40,000</td></tr><tr><td>Parents</td><td>KES 40,000</td></tr></table><p>Spouse must be registered. Child: birth certificate required.</p></div><div class=\"card\"><h2>Loss of Earning</h2><p>50% of basic pay, max KES 20,000, after 10 days unable to work due to injury at work.</p></div><div class=\"card\"><h2>Contribution</h2><p>KES 300 monthly.</p></div><div class=\"card\"><h2>Year-End</h2><p>Minimum balance KES 250,000. Excess shared only among current active members. FIG Year-End 30 November. Audited accounts by 20 December.</p></div><div class=\"card\"><h2>Officials</h2><p>Marlon K. Angundu - Chairman - 0707 780 807<br>Mary Ngotah - GCB - 0719 203 286<br>Celestine Ouko - SC Johnson - 0725 543 224<br>Irene Wamuyu - Java - 0719 606 834<br>Jonathan Mutunga - Trufoods Last Mile - 0719 555 326</p></div>"
     return shell("Terms",b)
+@app.route("/history")
+def history():
+    return redirect("/breakdown2")
+
 @app.route("/breakdown2")
 def breakdown2():
     h="<h1>Full History</h1><div class=\"hero\"><div>BALANCE BROUGHT FORWARD - AGREED</div><h1>KES 855,759</h1><p>605,759 to share + 250,000 retained = 855,759</p></div>"
