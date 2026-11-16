@@ -176,7 +176,7 @@ def init_db():
             ("202701", "Pwani Oil", "Mar-25", "Everlyne mukoya Stephen", "NA", "N/A", "N/A", "23600368", "N/A", "671767", "395330", "N/A", "N/A"),
             ("202703", "Pwani Oil", "Mar-25", "Caren Nanjala Chonge", "NA", "5639451", "Later", "22086206", "364057", "6090663", "N/A", "N/A", "N/A"),
             ("202704", "Pwani Oil", "Mar-25", "Hellen Achieng Onyango", "711723882", "726994852", "N/A", "722618476", "N/A", "N/A", "N/A", "N/A", "N/A"),
-            ("202724", "Pwani Oil", "Mar-25", "BENTA ACHIENG MURUKA", "CHRISTOPHER MURUKA", "JANE MAGENGA", "N/A", "28687282", "1311214785", "21910561", "N/A", "-"),
+            ("202724", "Pwani Oil", "Mar-25", "BENTA ACHIENG MURUKA", "CHRISTOPHER MURUKA", "JANE MAGENGA", "N/A", "28687282", "1311214785", "21910561", "N/A", "-", "-"),
             ("202696", "Pwani Oil", "2015", "Lydiah Nyaanga Osengo", "1649626", "1637770", "-", "10020853", "160900879", "168706540/19", "-", "-", "-"),
             ("202693", "Pwani Oil", "May.2022", "Meggiling Abuga Nyakerario", "-", "8647005", "-", "-", "160900879", "-", "-", "-", "-"),
             ("202695", "Pwani Oil", "2022", "Gorrety Adhiambo Otieno", "9807667", "26810228", "-", "30257258", "2348625", "2350080", "3743676", "-", "-"),
@@ -196,6 +196,7 @@ def init_db():
             ("FIG005", "Last Mile Trufoods Ltd", "2026-01", "Jonathan Mutunga", "-", "-", "-", "-", "-", "-", "-", "-", "-"),
         ]
         for s in seed:
+            s = tuple(list(s) + ["-"] * (13 - len(s)))[:13]
             cur.execute("INSERT INTO users (staff_no, project, month_joined, full_names, father_id, mother_id, guardian_id, spouse_id, kid1, kid2, kid3, kid4, kid5, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'active member')", s)
         con.commit()
     con.close()
