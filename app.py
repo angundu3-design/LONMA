@@ -208,7 +208,20 @@ def parse_join(s):
     return None
 def parse_join(s):
     s = (s or "").upper()
-    months = {"JANUARY":1, "JAN":1, "FEBRUARY":2, "FEB":2, ... "DEC":12}
+       months = {
+        "JANUARY": 1, "JAN": 1,
+        "FEBRUARY": 2, "FEB": 2,
+        "MARCH": 3, "MAR": 3,
+        "APRIL": 4, "APR": 4,
+        "MAY": 5,
+        "JUNE": 6, "JUN": 6,
+        "JULY": 7, "JUL": 7,
+        "AUGUST": 8, "AUG": 8,
+        "SEPTEMBER": 9, "SEP": 9, "SEPT": 9,
+        "OCTOBER": 10, "OCT": 10,
+        "NOVEMBER": 11, "NOV": 11,
+        "DECEMBER": 12, "DEC": 12
+    }
     m = 1
     for name, num in months.items():
         if name in s:
