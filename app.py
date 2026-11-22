@@ -190,19 +190,25 @@ def clean(v):
 def make_email(n,staff):
  p=[x for x in n.lower().replace(".","").split() if x.isalpha()]
  return f"{p[0]}.{p[-1]}@figbrands.co.ke" if len(p)>=2 else f"{p[0] if p else 'member'}.{staff}@figbrands.co.ke"
+import re
 def parse_join(s):
- if not s: return None
- s=str(s).strip().lower();months={"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,"jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12,"january":1,"february":2,"march":3,"april":4,"june":6,"july":7,"august":8,"september":9,"october":10,"november":11,"december":12}
- m=re.search(r"(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})",s)
- if m:
-  d,mo,y=int(m.group(1)),int(m.group(2)),int(m.group(3))
-  if mo>12: d,mo=mo,d
-  return (y,mo)
- m=re.search(r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*(\d{4})",s)
- if m: return (int(m.group(2)),months[m.group(1)[:3]])
- m=re.search(r"(\d{4})",s)
- if m: return (int(m.group(1)),1)
- return None
+    s = (s or "").upper()
+    months = {"JANUARY":1,"JAN":1,"FEBRUARY":2,"FEB":2,"MARCH":3,"MAR":3,"APRIL":4,"APR":4,"MAY":5,"JUNE":6,"JUN":6,"JULY":7,"JUL":7,"AUGUST":8,"AUG":8,"SEPTEMBER":9,"SEP":9,"SEPT":9,"OCTOBER":10,"OCT":10,"NOVEMBER":11,"NOV":11,"DECEMBER":12,"DEC":12}
+    m = 1
+    for name, num in months.items():
+        if name in s:
+            m = num
+            break
+    y = 2026
+    f = re.search(r"20\d\d", s)
+    if f:
+        y = int(f.group(0))
+    return y, m
+
+def months_active(join_str):
+    y, m = parse_join(join_str)
+    now = datetime.now()
+    return max(1, (now.year - y) * 12 + (now.month - m) + 1)
 def months_active(j):
  sy,sm=PERIOD_START;ey,em=PERIOD_END;p=parse_join(j)
  if p and (p[0],p[1])>(sy,sm): sy,sm=p
