@@ -453,5 +453,12 @@ def download_excel():
     return send_file(out, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="FIG_Members.xlsx")
 @app.route("/health")
 def health(): return jsonify({"ok": True, "version": "v113-fixed"})
+@app.route("/fix_antonia")
+def fix_antonia():
+    con = get_db()
+    con.execute("UPDATE users SET month_joined='June 2026' WHERE project='Antonia'")
+    con.commit()
+    con.close()
+    return "FIXED - Antonia now June 2026"
 if __name__=="__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
