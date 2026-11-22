@@ -99,4 +99,4 @@ def init_db():
             ("N/A", "HQ", "2020", "PATRIC TITO", "TITO NZONGA", "FELISTERS TITO", "-", "FRIDAH KARIMI", "TIFFANY TITO", "BARAKA TITO", "-", "-", "-"),
             ("292930", "HQ", "11/082026", "EDDY NYANGORI", "JOHN NYANGORI", "HELLENE ACHIENG", "-", "N/A", "-", "-", "-", "-", "-"),
             ("Sherine Atieno", "Antonia", "Jun-26", "Sherine Atieno Otieno", "N/A", "23333405", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"),
-            ("280225", "Anton
+("280225", "Antonia", "Jun-26", "Stepheny Keziah Wambui Mwangi", "10452983", "10166506", "-", "34439485", "1463604", "2498854", "-", "-", "-"),
