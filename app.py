@@ -192,6 +192,27 @@ def make_email(n,staff):
  return f"{p[0]}.{p[-1]}@figbrands.co.ke" if len(p)>=2 else f"{p[0] if p else 'member'}.{staff}@figbrands.co.ke"
 import re
 def parse_join(s):
+    if not s: return None
+    s=str(s).strip().lower();months={"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,"jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
+    m=re.search(r"(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})",s)
+    if m:
+        d,mo,y=int(m.group(1)),int(m.group(2)),int(m.group(3))
+        if mo>12: d,mo=mo,d
+        return (y,mo)
+    m=re.search(r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*(\d{1,2})(?:st|nd|rd|th)?\s*(\d{4})",s)
+    if m: return (int(m.group(3)),months[m.group(1)[:3]])
+    m=re.search(r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*(\d{4})",s)
+    if m: return (int(m.group(2)),months[m.group(1)[:3]])
+    m=re.search(r"(\d{4})",s)
+    if m: return (int(m.group(1)),1)
+    return None
+
+def months_active(join_str):
+    p=parse_join(join_str)
+    if not p: return 1
+    y,m=p
+    now=datetime.now()
+    return max(1,(now.year-y)*12+(now.month-m)+1)
     s = (s or "").upper()
     months = {"JANUARY":1,"JAN":1,"FEBRUARY":2,"FEB":2,"MARCH":3,"MAR":3,"APRIL":4,"APR":4,"MAY":5,"JUNE":6,"JUN":6,"JULY":7,"JUL":7,"AUGUST":8,"AUG":8,"SEPTEMBER":9,"SEP":9,"SEPT":9,"OCTOBER":10,"OCT":10,"NOVEMBER":11,"NOV":11,"DECEMBER":12,"DEC":12}
     m = 1
