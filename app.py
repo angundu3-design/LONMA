@@ -208,17 +208,36 @@ def parse_join(s):
     return None
 def parse_join(s):
     s = (s or "").upper()
-       months = {
-        "JANUARY": 1, "JAN": 1,
-        "FEBRUARY": 2, "FEB": 2,
-        "MARCH": 3, "MAR": 3,
-        "APRIL": 4, "APR": 4,
-        "MAY": 5,
-        "JUNE": 6, "JUN": 6,
-        "JULY": 7, "JUL": 7,
-        "AUGUST": 8, "AUG": 8,
-        "SEPTEMBER": 9, "SEP": 9, "SEPT": 9,
-        "OCTOBER": 10, "OCT": 10,
+    m = 1
+    if "JAN" in s:
+        m = 1
+    elif "FEB" in s:
+        m = 2
+    elif "MAR" in s:
+        m = 3
+    elif "APR" in s:
+        m = 4
+    elif "MAY" in s:
+        m = 5
+    elif "JUN" in s:
+        m = 6
+    elif "JUL" in s:
+        m = 7
+    elif "AUG" in s:
+        m = 8
+    elif "SEP" in s:
+        m = 9
+    elif "OCT" in s:
+        m = 10
+    elif "NOV" in s:
+        m = 11
+    elif "DEC" in s:
+        m = 12
+    y = 2026
+    f = re.search(r"20\d\d", s)
+    if f:
+        y = int(f.group(0))
+    return y, m
         "NOVEMBER": 11, "NOV": 11,
         "DECEMBER": 12, "DEC": 12
     }
