@@ -265,12 +265,7 @@ def parse_join(s):
     f = re.search(r"20\d\d", s)
     if f:
         y = int(f.group(0))
-    return y, m
-        "NOVEMBER": 11, "NOV": 11,
-        "DECEMBER": 12, "DEC": 12
-    }
-    m = 1
-    
+    return y, m   
 def months_active(j):
  sy,sm=PERIOD_START;ey,em=PERIOD_END;p=parse_join(j)
  if p and (p[0],p[1])>(sy,sm): sy,sm=p
