@@ -178,7 +178,35 @@ PATRIC TITO|HQ|2020|PATRIC TITO|TITO NZONGA|FELISTERS TITO||FRIDAH KARIMI|TIFFAN
 280313|GCB-TDs|3RD AUG 2026|STEPHANIE WANJIRU|9280225|12712053|N/A||0371905680||||
 202618|GCB-TDs|1ST JULY 2023|JOACHIM BACHWA BACHWA|13606151|23557862||||||
 202621|GCB-TDs|5TH MARCH 2025|ANNFRIDAH MAKENA|N/A|13402020|N/A|||||||
-280346|GCB-TDs|8TH SEPT 2026|OBATIAH WEKESA MAKHANU|12848951|32350703|N/A|502370256||||||'''
+280346|GCB-TDs|8TH SEPT 2026|OBATIAH WEKESA MAKHANU|12848951|32350703|N/A|502370256||||||
+'''# Convert TF-MT list to SEED_TXT format
+# Paste your list into tfmt.txt first
+
+with open('tfmt.txt') as f:
+    lines = f.read().strip().splitlines()
+
+out = []
+for line in lines:
+    parts = [p.strip() for p in line.split('\t')]
+    # parts = [No, Code, Project, Date, Name, F1, F2, F3, F4, F5, F6, F7]
+    if len(parts) < 5:
+        continue
+    code = parts[1] if len(parts) > 1 else ''
+    project = parts[2] if len(parts) > 2 else 'TF-MT'
+    date = parts[3] if len(parts) > 3 else ''
+    name = parts[4] if len(parts) > 4 else ''
+    fields = parts[5:12]
+    # pad to 9 fields like your app expects
+    while len(fields) < 9:
+        fields.append('')
+    seed = f"{code}|{project}|{date}|{name}|" + "|".join(fields)
+    out.append(seed)
+
+with open('tfmt_seed.txt','w') as f:
+    f.write("\n".join(out))
+
+print(f"Done - {len(out)} lines ready in tfmt_seed.txt")
+print("Check for duplicate codes before pasting!")
 PERIODS=[{"label":"Oct 2024 - Dec 2025","total":1404000,"beneficiaries":463000,"fares":31625,"detail":"Pwani 310,500 | Java 123,600 | SC Johnson 139,200 | Kaysalt 72,900 | Kanji 12,600 | HQ 15,900 | GCB-MT 69,900 | TF-WS 71,100 | TF-LM 173,100 | TF-MT 259,500 | Kenafric 96,900 | GCB-TDs 51,000 | LAB 7,800"},{"label":"Dec 2025 - Nov 2026","total":991100,"beneficiaries":379075,"fares":32100,"detail":"Pwani 220,200 | Java House 106,200 | SC Johnson 101,400 | Kanji 9,900 | HQ 14,100 | GCB-MT 56,700 | TF-WS 49,200 | TF-LM 122,400 | TF-MT 236,100 | GCB-TDs 41,100 | Higchem 30,000 | Antonia 3,600"}]
 SEED_DATA=[tuple((l.split('|')+['']*13)[:13]) for l in SEED_TXT.strip().splitlines()]
 def clean(v):
