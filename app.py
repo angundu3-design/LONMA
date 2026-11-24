@@ -181,10 +181,6 @@ PATRIC TITO|HQ|2020|PATRIC TITO|TITO NZONGA|FELISTERS TITO||FRIDAH KARIMI|TIFFAN
 280346|GCB-TDs|8TH SEPT 2026|OBATIAH WEKESA MAKHANU|12848951|32350703|N/A|502370256||||||
 '''# Convert TF-MT list to SEED_TXT format
 # Paste your list into tfmt.txt first
-
-with open('tfmt.txt') as f:
-    lines = f.read().strip().splitlines()
-
 out = []
 for line in lines:
     parts = [p.strip() for p in line.split('\t')]
