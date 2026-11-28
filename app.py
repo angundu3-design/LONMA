@@ -252,6 +252,9 @@ Rachael Gathoni wangigi|TF-MT|Oct-26|Rachael Gathoni wangigi|8846144|N/A|N/A|N/A
 202888|TF-MT|2017|Jackline Kavere Ayiga|521394||23987409|5466522|111414657|111136627|112004194||
 202884|TF-MT|2024|Mercy Achieng Onyango|NA|NA|21999525|28376863|7206211|7206057||
 202889|TF-MT|2021|Naomi Jeruto Tanui|N/A|20153118|N/A|N/A|9596061||||
+202638|Kanji|2018|Teresia mueni kiama|N/A||N/A||||||||
+17100|Kanji|2018|doric atieno|N/A||N/A||||||||
+202637|Kanji|2018|Clarice achieng omayw|N/A||N/A||||||||
 '''# Convert TF-MT list to SEED_TXT format
 # Paste your list into tfmt.txt first
 lines = []
