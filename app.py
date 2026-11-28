@@ -608,6 +608,93 @@ def fix_antonia():
     con.execute("UPDATE users SET month_joined='June 2026' WHERE project='Antonia'")
     con.commit()
     con.close()
-    return "FIXED - Antonia now June 2026"
+ # --- FRIENDS SYSTEM - A) Request + Approval ---
+FRIEND_REQUESTS = []
+FRIENDS = {}
+
+def _member_name(code):
+    try:
+        c = get_db(); c.execute("SELECT full_names FROM users WHERE staff_no=?", (str(code),)); r = c.fetchone(); c.close()
+        return r[0] if r else str(code)
+    except Exception:
+        return str(code)
+
+@app.route("/friends")
+def friends_page():
+    return """
+    <!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>body{font-family:sans-serif;padding:15px;max-width:600px;margin:auto}input,button{padding:10px;margin:5px 0;width:100%;box-sizing:border-box}button{background:#1877f2;color:white;border:none;border-radius:8px}.card{border:1px solid #ddd;padding:12px;border-radius:10px;margin:10px 0}.small{color:#666;font-size:13px}</style></head>
+    <body><h2>👥 Friends</h2>
+    <p class='small'>Enter YOUR staff code once, it will be saved on this phone.</p>
+    <input id='mycode' placeholder='My Staff Code e.g. 202902'>
+    <button onclick='saveMe()'>Save My Code</button>
+    <hr><h3>Find Friends</h3>
+    <input id='search' placeholder='Search name or code...' oninput='doSearch()'>
+    <div id='results'></div>
+    <hr><h3>Friend Requests For Me</h3><div id='reqs'></div>
+    <hr><h3>My Friends</h3><div id='myfriends'></div>
+    <p><a href='/members'>← Back to Members</a></p>
+    <script>
+    let ME = localStorage.getItem('my_code')||'';
+    document.getElementById('mycode').value = ME;
+    function saveMe(){ ME=document.getElementById('mycode').value.trim(); localStorage.setItem('my_code',ME); alert('Saved! You are '+ME); loadAll(); }
+    async function doSearch(){
+      let q=document.getElementById('search').value;
+      if(q.length<2){document.getElementById('results').innerHTML='';return;}
+      let r=await fetch('/api/members'); let members=await r.json();
+      let arr = Array.isArray(members)?members:(members.members||members.data||[]);
+      let list=arr.filter(m=>{ let nm=(m.full_names||m.name||''); let cd=String(m.staff_no||m.code||''); return nm.toLowerCase().includes(q.toLowerCase()) || cd.includes(q); });
+      document.getElementById('results').innerHTML=list.slice(0,10).map(m=>{ let nm=m.full_names||m.name; let cd=m.staff_no||m.code; let br=m.project||m.branch||''; return `<div class='card'><b>${nm}</b><br><span class='small'>${cd} | ${br}</span><br><button onclick="sendReq('${cd}')">+ Add Friend</button></div>`}).join('')||'No match';
+    }
+    async function sendReq(to){ if(!ME){alert('Enter your code first!');return;} let r=await fetch('/api/friends/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from_code:ME,to_code:String(to)})}); let d=await r.json(); alert(d.message); }
+    async function respond(frm,action){ let r=await fetch('/api/friends/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from_code:frm,to_code:ME,action:action})}); let d=await r.json(); alert(d.message); loadAll(); }
+    async function loadAll(){
+      if(!ME) return;
+      let r1=await fetch('/api/friends/requests?code='+ME); let reqs=await r1.json();
+      document.getElementById('reqs').innerHTML=reqs.map(x=>`<div class='card'><b>${x.from_name}</b> (${x.from_code}) wants to be friends<br><button onclick="respond('${x.from_code}','accept')">Accept</button> <button onclick="respond('${x.from_code}','decline')" style='background:#888'>Decline</button></div>`).join('')||'No new requests';
+      let r2=await fetch('/api/friends?code='+ME); let fr=await r2.json();
+      document.getElementById('myfriends').innerHTML=fr.map(x=>`<div class='card'><b>${x.name}</b><br><span class='small'>${x.code}</span></div>`).join('')||'No friends yet';
+    }
+    loadAll();
+    </script></body></html>
+    """
+
+@app.route("/api/friends/request", methods=["POST"])
+def friend_request():
+    d = request.get_json(force=True) or {}
+    f, t = str(d.get("from_code")), str(d.get("to_code"))
+    if f == t: return {"message": "You cannot add yourself"}
+    if any(x["from"]==f and x["to"]==t and x["status"]=="pending" for x in FRIEND_REQUESTS):
+        return {"message": "Request already sent!"}
+    if t in FRIENDS.get(f, []): return {"message": "Already friends!"}
+    FRIEND_REQUESTS.append({"from": f, "to": t, "status": "pending"})
+    return {"message": "Friend request sent to " + t}
+
+@app.route("/api/friends/respond", methods=["POST"])
+def friend_respond():
+    d = request.get_json(force=True) or {}
+    f, t, act = str(d.get("from_code")), str(d.get("to_code")), d.get("action")
+    for x in FRIEND_REQUESTS:
+        if x["from"]==f and x["to"]==t and x["status"]=="pending":
+            x["status"] = "accepted" if act=="accept" else "declined"
+            if act=="accept":
+                FRIENDS.setdefault(f, []); FRIENDS.setdefault(t, [])
+                if t not in FRIENDS[f]: FRIENDS[f].append(t)
+                if f not in FRIENDS[t]: FRIENDS[t].append(f)
+                return {"message": "You are now friends!"}
+            return {"message": "Request declined"}
+    return {"message": "Request not found"}
+
+@app.route("/api/friends/requests")
+def friend_requests_list():
+    code = str(request.args.get("code",""))
+    return [{"from_code": x["from"], "from_name": _member_name(x["from"])} for x in FRIEND_REQUESTS if x["to"]==code and x["status"]=="pending"]
+
+@app.route("/api/friends")
+def friends_list():
+    code = str(request.args.get("code",""))
+    return [{"code": fc, "name": _member_name(fc)} for fc in FRIENDS.get(code, [])]
+   
+ return "FIXED - Antonia now June 2026"
 if __name__=="__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
