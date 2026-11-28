@@ -665,7 +665,7 @@ def friend_request():
     f, t = str(d.get("from_code")), str(d.get("to_code"))
     if f == t: return {"message": "You cannot add yourself"}
     if any(x["from"]==f and x["to"]==t and x["status"]=="pending" for x in FRIEND_REQUESTS):
-        return {"message": "Request already sent!"}
+    return {"message": "Request already sent!"}
     if t in FRIENDS.get(f, []): return {"message": "Already friends!"}
     FRIEND_REQUESTS.append({"from": f, "to": t, "status": "pending"})
     return {"message": "Friend request sent to " + t}
