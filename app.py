@@ -254,6 +254,7 @@ Rachael Gathoni wangigi|TF-MT|Oct-26|Rachael Gathoni wangigi|8846144|N/A|N/A|N/A
 202889|TF-MT|2021|Naomi Jeruto Tanui|N/A|20153118|N/A|N/A|9596061||||
 '''# Convert TF-MT list to SEED_TXT format
 # Paste your list into tfmt.txt first
+lines = []
 out = []
 for line in lines:
     parts = [p.strip() for p in line.split('\t')]
